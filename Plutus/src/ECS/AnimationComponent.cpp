@@ -49,16 +49,6 @@ namespace Plutus
         currentAni->animationSpeed = speed ? 1.0f / (speed / 16.66f) : 0.166f;
     }
 
-    void AnimationComponent::setFlipX(bool flip)
-    {
-        mImage->setFlipX(flip);
-    }
-
-    void AnimationComponent::setFipY(bool flip)
-    {
-        mImage->setFlipY(flip);
-    }
-
     void AnimationComponent::Serialize(Serializer &writer) const
     {
     }

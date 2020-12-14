@@ -98,10 +98,8 @@ namespace Plutus
 
 			if (renderable->getFlipX())
 			{
-				LOG_I("Ogirinal {0} {1} ", uv.x, uv.w);
 				uv.x = 1 - uv.x;
 				uv.z = 1 - uv.z;
-				LOG_I("{0} {1} ", uv.x, uv.w);
 			}
 
 			if (renderable->getFlipY())

@@ -44,12 +44,15 @@ void App::onInit()
     player.addComponent<Plutus::Transform2DComponent>(0.0f, 0.0f, 0.0f, 0.0f, 48.0f, 64.0f, 1.0f);
 
     player.addComponent<Plutus::ImageComponent>("player");
-    player.addComponent<Plutus::InputComponent>();
 
     auto &ac = player.addComponent<Plutus::AnimationComponent>("player");
+    player.addComponent<Plutus::InputComponent>();
 
-    ac.AddAnimation("standing-link", Plutus::Animation(12, 12, 50));
-    ac.PlayAnimation("standing-link", true);
+    ac.AddAnimation("standing", Plutus::Animation(13, 1, 100));
+    ac.AddAnimation("run", Plutus::Animation(12, 12, 100));
+    ac.AddAnimation("walk-up", Plutus::Animation(0, 11, 100));
+    ac.AddAnimation("walk-down", Plutus::Animation(72, 12, 100));
+    ac.PlayAnimation("standing");
 }
 
 void App::onUpdate(float dt)
