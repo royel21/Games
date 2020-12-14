@@ -20,11 +20,13 @@ App::~App()
 void App::onInit()
 {
     m_textLayer.init(&m_window, "./assets/fonts/Zoika.ttf", 28);
+
+    m_debugRender.init();
+
     m_EntityManager.init();
 
     m_camera.init(getWidth(), getHeight());
     m_camera.update();
-
     m_EntityManager.setCamera(&m_camera);
 
     Plutus::AssetManager::addTexture("BG0", "./assets/textures/Cocarico-zelda.png");
@@ -36,15 +38,15 @@ void App::onInit()
 
     m_EntityManager.addLayer("Layer1");
     m_EntityManager.setLayer("Layer1");
-    Plutus::AssetManager::addTileSet("link-png", 12, 24, 32, "./assets/textures/link.png");
+    Plutus::AssetManager::addTileSet("player", 12, 24, 32, "./assets/textures/link.png");
 
-    auto &player = m_EntityManager.AddEntity("link");
+    auto &player = m_EntityManager.AddEntity("player");
     player.addComponent<Plutus::Transform2DComponent>(0.0f, 0.0f, 0.0f, 0.0f, 48.0f, 64.0f, 1.0f);
 
-    player.addComponent<Plutus::ImageComponent>("link-png");
+    player.addComponent<Plutus::ImageComponent>("player");
     player.addComponent<Plutus::InputComponent>();
 
-    auto &ac = player.addComponent<Plutus::AnimationComponent>("link-png");
+    auto &ac = player.addComponent<Plutus::AnimationComponent>("player");
 
     ac.AddAnimation("standing-link", Plutus::Animation(12, 12, 50));
     ac.PlayAnimation("standing-link", true);
@@ -71,10 +73,29 @@ void App::onUpdate(float dt)
     //     LOG_I("A:{0} B:{1} Y:{2}", m_GamePad->isBtnDown(0, GAMEPAD_RIGHT), m_GamePad->isBtnDown(0, GAMEPAD_UP), m_GamePad->isBtnDown(0, GAMEPAD_DOWN));
     // }
 
-    // if (m_inputManager->onKeyDown(SDLK_LALT) && m_inputManager->onKeyPressed(SDLK_KP_ENTER))
-    // {
-    //     m_window.setFulScreen();
-    // }
+    if (m_inputManager->onKeyDown(SDLK_LALT) && (m_inputManager->onKeyPressed(SDLK_KP_ENTER) || m_inputManager->onKeyPressed(SDLK_RETURN)))
+    {
+        m_window.setFulScreen();
+    }
+    if (m_inputManager->onKeyDown(SDLK_LCTRL))
+    {
+        float scale = m_camera.getScale();
+
+        if (m_inputManager->getMouseWheel() > 0 && scale < 5)
+        {
+            m_camera.setScale(scale + 0.05);
+        }
+        else if (m_inputManager->getMouseWheel() < 0 && scale > 0.5)
+        {
+            m_camera.setScale(scale - 0.05);
+        }
+
+        if (m_inputManager->getMouseWheel() > 1 || m_inputManager->getMouseWheel() < 0)
+        {
+            LOG_I("Wheel: {0} {1}", m_inputManager->getMouseWheel(), scale);
+        }
+    }
+    m_camera.update();
     m_EntityManager.Update(dt);
 }
 
@@ -89,6 +110,8 @@ void App::onDraw()
 
     m_textLayer.setColor(1.0f, 0, 0, 0.8);
     m_textLayer.drawString("OpenGL 4.6", 5.0f, 5.0f, 1.0f);
+
+    m_debugRender.drawGrid(32, 32, m_camera);
 }
 
 void App::onResize(int width, int height)
@@ -98,6 +121,7 @@ void App::onResize(int width, int height)
 
 void App::onExit()
 {
+    m_debugRender.dispose();
     LOG_I("Exiting");
 }
 

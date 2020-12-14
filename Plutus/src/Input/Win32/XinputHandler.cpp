@@ -37,28 +37,8 @@ namespace Plutus
                 btnMap.LStickY = state.Gamepad.sThumbLY;
                 btnMap.RStickX = state.Gamepad.sThumbRX;
                 btnMap.RStickY = state.Gamepad.sThumbRY;
-                // LOG_I("{0:x} {1} {2} {3}", state.Gamepad.sThumbLX, state.Gamepad.sThumbLY, state.Gamepad.sThumbRX, state.Gamepad.sThumbRY);
                 gamepadList[i] = btnMap;
             }
         }
     }
-} // namespace Plutus
-
-/*
-    GP_UP       0001
-    GP_DOWN     0002
-    GP_LEFT     0004
-    GP_RIGHT    0008
-    GP_Start    0010
-    GP_Select   0020
-    GP_L3       0040
-    GP_R3       0080
-    GP_L1       0100
-    GP_R1       0200
-    GP_B       1000
-    GP_A       2000
-    GP_Y       4000
-    GP_X       8000
-    GP_R2       XXXX
-    GP_L2       XXXX
-*/
+} 

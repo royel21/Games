@@ -33,7 +33,8 @@ namespace Plutus
         void AddAnimation(const std::string id, const Animation &anin);
         void PlayAnimation(const std::string &animationName, bool loop = false);
         void setAnimationSpeed(int speed);
-
+        void setFlipX(bool flip);
+        void setFipY(bool flip);
         void Serialize(Serializer &writer) const override;
     };
 

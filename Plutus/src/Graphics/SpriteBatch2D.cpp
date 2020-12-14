@@ -5,6 +5,7 @@
 #include "ECS/Transform2DComponent.h"
 #include "ECS/Component.h"
 #include "SpriteBatch2D.h"
+#include "Log/Logger.h"
 
 namespace Plutus
 {
@@ -81,77 +82,54 @@ namespace Plutus
 
 		for (size_t cg = 0; cg < mRenderables.size(); cg++)
 		{
-			if (cg > 0 && mRenderables[cg]->getTexturedId() != mRenderables[cg - 1]->getTexturedId())
+			auto renderable = mRenderables[cg];
+			if (cg > 0 && renderable->getTexturedId() != mRenderables[cg - 1]->getTexturedId())
 			{
-				mRenderBatches.emplace_back(mIndexCount, 6, mRenderables[cg]->getTexturedId());
+				mRenderBatches.emplace_back(mIndexCount, 6, renderable->getTexturedId());
 			}
 			else
 			{
 				mRenderBatches.back().numVertices += 6;
 			}
+			const glm::vec2 &position = renderable->getPosition();
+			const glm::vec2 &size = renderable->getSize();
+			const ColorRGBA8 &c = renderable->getColor();
+			glm::vec4 uv = glm::vec4(renderable->getUV());
 
-			const glm::vec2 &position = mRenderables[cg]->getPosition();
-			const glm::vec2 &size = mRenderables[cg]->getSize();
-			const ColorRGBA8 &c = mRenderables[cg]->getColor();
-			const glm::vec4 &uv = mRenderables[cg]->getUV();
-			float angle = mRenderables[cg]->getAngle();
-			if (angle > 0)
+			if (renderable->getFlipX())
 			{
-				glm::vec2 halfDim(size.x / 2, size.y / 2);
-
-				glm::vec2 tl(-halfDim.x, halfDim.y);
-				glm::vec2 bl(-halfDim.x, -halfDim.y);
-				glm::vec2 br(halfDim.x, -halfDim.y);
-				glm::vec2 tr(halfDim.x, halfDim.y);
-
-				tl = rotatePoint(tl, angle) + halfDim;
-				bl = rotatePoint(bl, angle) + halfDim;
-				br = rotatePoint(br, angle) + halfDim;
-				tr = rotatePoint(tr, angle) + halfDim;
-				// Bottom Left corner
-				mBuffer->setPosition(position.x + bl.x, position.y + bl.y);
-				mBuffer->setUV(uv.x, uv.y);
-				mBuffer->color = c;
-				mBuffer++;
-				// Top Left corner
-				mBuffer->setPosition(position.x + tl.x, position.y + tl.y);
-				mBuffer->setUV(uv.x, uv.y + uv.w);
-				mBuffer->color = c;
-				mBuffer++;
-				// Top Right corner
-				mBuffer->setPosition(position.x + tr.x, position.y + tr.y);
-				mBuffer->setUV(uv.x + uv.z, uv.y + uv.w);
-				mBuffer->color = c;
-				mBuffer++;
-				// Bottom Right corner
-				mBuffer->setPosition(position.x + br.x, position.y + br.y);
-				mBuffer->setUV(uv.x + uv.z, uv.y);
-				mBuffer->color = c;
-				mBuffer++;
+				LOG_I("Ogirinal {0} {1} ", uv.x, uv.w);
+				uv.x = 1 - uv.x;
+				uv.z = 1 - uv.z;
+				LOG_I("{0} {1} ", uv.x, uv.w);
 			}
-			else
+
+			if (renderable->getFlipY())
 			{
-				// Bottom Left corner
-				mBuffer->setPosition(position.x, position.y);
-				mBuffer->setUV(uv.x, uv.w);
-				mBuffer->color = c;
-				mBuffer++;
-				// Top Left corner
-				mBuffer->setPosition(position.x, position.y + size.y);
-				mBuffer->setUV(uv.x, uv.y);
-				mBuffer->color = c;
-				mBuffer++;
-				// Top Right corner
-				mBuffer->setPosition(position.x + size.x, position.y + size.y);
-				mBuffer->setUV(uv.z, uv.y);
-				mBuffer->color = c;
-				mBuffer++;
-				// Bottom Right corner
-				mBuffer->setPosition(position.x + size.x, position.y);
-				mBuffer->setUV(uv.z, uv.w);
-				mBuffer->color = c;
-				mBuffer++;
+				uv.y = 1 - uv.y;
+				uv.w = 1 - uv.w;
 			}
+
+			// Bottom Left corner
+			mBuffer->setPosition(position.x, position.y);
+			mBuffer->setUV(uv.x, uv.w);
+			mBuffer->color = c;
+			mBuffer++;
+			// Top Left corner
+			mBuffer->setPosition(position.x, position.y + size.y);
+			mBuffer->setUV(uv.x, uv.y);
+			mBuffer->color = c;
+			mBuffer++;
+			// Top Right corner
+			mBuffer->setPosition(position.x + size.x, position.y + size.y);
+			mBuffer->setUV(uv.z, uv.y);
+			mBuffer->color = c;
+			mBuffer++;
+			// Bottom Right corner
+			mBuffer->setPosition(position.x + size.x, position.y);
+			mBuffer->setUV(uv.z, uv.w);
+			mBuffer->color = c;
+			mBuffer++;
 
 			mIndexCount += 6;
 		}

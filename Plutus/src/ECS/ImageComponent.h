@@ -21,6 +21,8 @@ namespace Plutus
         void Initialize() override;
         void Update(float deltaTime) override;
         void Serialize(Serializer &serializer) const override;
+        void setFlipX(bool f);
+        void setFlipY(bool f);
     };
 
 } // namespace Plutus

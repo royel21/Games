@@ -9,6 +9,14 @@ namespace Plutus
 
 	class InputManager
 	{
+	private:
+		glm::vec2 m_mouseCoords;
+		int m_mouseWheel = false;
+		static InputManager *manager;
+
+		std::unordered_map<unsigned int, bool> m_keyMap;
+		std::unordered_map<unsigned int, bool> m_prevKeyMap;
+
 	public:
 		static InputManager *getInstance();
 
@@ -24,17 +32,14 @@ namespace Plutus
 
 		bool onKeyPressed(unsigned int keyId);
 
+		void setMouseWheel(int dir) { m_mouseWheel = dir; }
+
+		int getMouseWheel() { return m_mouseWheel; }
+
 		glm::vec2 getMouseCoords() const { return m_mouseCoords; }
 
 	private:
 		InputManager();
-		static InputManager *manager;
-
-		std::unordered_map<unsigned int, bool> m_keyMap;
-
-		std::unordered_map<unsigned int, bool> m_prevKeyMap;
-
-		glm::vec2 m_mouseCoords;
 
 		bool wasKeyDown(unsigned int keyId);
 	};

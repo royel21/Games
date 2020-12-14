@@ -1,5 +1,5 @@
 #include "DebugRenderer.h"
-#include "Log/Logger.h"
+#include "Camera2D.h"
 
 const float PI = 3.14159265359f;
 
@@ -211,4 +211,47 @@ namespace Plutus
 			glDeleteBuffers(1, &m_vao);
 		m_shader.dispose();
 	}
+	void DebugRender::drawGrid(float gridWidth, float gridHeight, Camera2D camera)
+	{
+		ColorRGBA8 color;
+		color.a = 255;
+		glm::vec2 scaleScreen = camera.getScaleScreen();
+
+		glm::vec2 screenStart = camera.getPosition() - (scaleScreen / 2.0f);
+		glm::vec2 screenEnd = camera.getPosition() + (scaleScreen / 2.0f);
+		glm::vec2 lineStart;
+		glm::vec2 lineEnd;
+
+		int sizeX = static_cast<int>((scaleScreen.x) / gridWidth) + 2;
+		int sizeY = static_cast<int>((scaleScreen.y) / gridHeight) + 2;
+
+		float x = floor(screenStart.x / gridWidth);
+		float y = floor(screenStart.y / gridHeight);
+
+		glm::vec2 cPos(x * gridWidth, y * gridHeight);
+
+		for (int x = 0; x <= sizeX; x++)
+		{
+			lineStart.x = cPos.x + (x * gridWidth);
+			lineStart.y = cPos.y;
+
+			lineEnd.x = cPos.x + (x * gridWidth);
+			lineEnd.y = screenEnd.y;
+			drawLine(lineStart, lineEnd, color);
+		}
+
+		for (int y = 0; y <= sizeY; y++)
+		{
+			lineStart.x = cPos.x;
+			lineStart.y = cPos.y + (y * gridHeight);
+
+			lineEnd.x = screenEnd.x;
+			lineEnd.y = cPos.y + (y * gridHeight);
+			drawLine(lineStart, lineEnd, color);
+		}
+		end();
+
+		render(camera.getCameraMatrix(), 1.0f);
+	}
+
 } // namespace Plutus

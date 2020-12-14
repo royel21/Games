@@ -15,10 +15,11 @@ namespace Plutus
 		glm::vec4 mUVCoord;
 		ColorRGBA8 mColor;
 		GLuint mTid;
-		float m_angle;
+		bool flipX = false;
+		bool flipY = false;
 
 	public:
-		Renderable2D() : mPosition(0), mSize(0), mUVCoord(0, 0, 1, 1), mTid(0), m_angle(0)
+		Renderable2D() : mPosition(0), mSize(0), mUVCoord(0, 0, 1, 1), mTid(0)
 		{
 		}
 
@@ -28,7 +29,7 @@ namespace Plutus
 			const glm::vec4 &uvCoord,
 			const ColorRGBA8 &color,
 			uint32_t tid,
-			float angle = 0) : mPosition(position), mSize(size), mUVCoord(uvCoord), mColor(color), mTid(tid), m_angle(angle)
+			float angle = 0) : mPosition(position), mSize(size), mUVCoord(uvCoord), mColor(color), mTid(tid)
 		{
 		}
 
@@ -39,14 +40,14 @@ namespace Plutus
 		inline const ColorRGBA8 &getColor() { return mColor; }
 		inline const glm::vec4 &getUV() { return mUVCoord; }
 		inline GLuint getTexturedId() { return mTid; }
-		inline float getAngle() { return m_angle; }
+		inline bool getFlipX() { return flipX; }
+		inline bool getFlipY() { return flipY; }
 
 		void setPosition(const glm::vec2 &position) { mPosition = position; }
 		void setSize(const glm::vec2 &size) { mSize = size; }
 		void setColor(const ColorRGBA8 &color) { mColor = color; }
 		void setUV(const glm::vec4 &uvCoord) { mUVCoord = uvCoord; }
 		void setTexturedId(uint32_t tid) { mTid = tid; }
-		void setAngle(float angle) { m_angle = angle; }
 	};
 } // namespace Plutus
 #endif

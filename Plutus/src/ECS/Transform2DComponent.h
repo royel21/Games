@@ -1,9 +1,8 @@
 #ifndef _TRANSFORM2DCOMPONENT_H
 #define _TRANSFORM2DCOMPONENT_H
 
-#include "Component.h"
 #include <glm/glm.hpp>
-#include "Log/Logger.h"
+#include "Component.h"
 
 namespace Plutus
 {
@@ -21,7 +20,6 @@ namespace Plutus
 
 		void Update(float dt) override
 		{
-			LOG_I("{0} {1} {2}", velocity.x, velocity.y, dt);
 			position += velocity * dt;
 		}
 

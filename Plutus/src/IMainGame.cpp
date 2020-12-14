@@ -107,6 +107,10 @@ namespace Plutus
 			}
 			break;
 		}
+		case SDL_MOUSEWHEEL:
+		{
+			m_inputManager->setMouseWheel(event.wheel.y);
+		}
 		}
 	}
 

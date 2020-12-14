@@ -6,6 +6,7 @@
 #include "TextRender/TextLayer.h"
 #include "ECS/EntityManager.h"
 #include "Graphics/Camera2D.h"
+#include "Graphics/DebugRenderer.h"
 
 class App : public Plutus::IMainGame
 {
@@ -14,6 +15,7 @@ private:
     Plutus::TextLayer m_textLayer;
     Plutus::EntityManager m_EntityManager;
     Plutus::Camera2D m_camera;
+    Plutus::DebugRender m_debugRender;
 
 public:
     App(const char *windowName = "Default", int screenWidth = 1280, int screenHeight = 768);

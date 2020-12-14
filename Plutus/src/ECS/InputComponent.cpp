@@ -16,24 +16,28 @@ namespace Plutus
 
     void InputComponent::Update(float deltaTime)
     {
-        // LOG_I("STICK_Y: {0} STICK_X: {1} K_DOWN:{2}", m_gamepad->getLstickY(0), m_gamepad->getLstickX(0), m_input->onKeyDown(SDLK_DOWN));
-        if (m_input->onKeyDown(SDLK_UP) || m_gamepad->isBtnDown(0, GAMEPAD_UP) || m_gamepad->getLstickY(0) > 150)
+        if (m_input->onKeyDown(SDLK_UP) || m_gamepad->isBtnDown(0, GAMEPAD_UP) || (m_gamepad->isConnected(0) && m_gamepad->getLstickY(0) > 150))
         {
             m_transfComp->position.y += 5;
+            LOG_I("DOWN");
         }
-        if (m_input->onKeyDown(SDLK_DOWN) || m_gamepad->isBtnDown(0, GAMEPAD_DOWN) || m_gamepad->getLstickY(0) < 110)
+        if (m_input->onKeyDown(SDLK_DOWN) || m_gamepad->isBtnDown(0, GAMEPAD_DOWN) || (m_gamepad->isConnected(0) && m_gamepad->getLstickY(0) < 110))
         {
             m_transfComp->position.y -= 5;
+            LOG_I("UP");
         }
-        if (m_input->onKeyDown(SDLK_RIGHT) || m_gamepad->isBtnDown(0, GAMEPAD_RIGHT) || m_gamepad->getLstickX(0) > 150)
+        if (m_input->onKeyDown(SDLK_RIGHT) || m_gamepad->isBtnDown(0, GAMEPAD_RIGHT) || (m_gamepad->isConnected(0) && m_gamepad->getLstickX(0) > 150))
         {
             m_transfComp->position.x += 5;
+            LOG_I("RIGHT");
+            m_aninComp->setFlipX(false);
         }
-        if (m_input->onKeyDown(SDLK_LEFT) || m_gamepad->isBtnDown(0, GAMEPAD_LEFT) || m_gamepad->getLstickX(0) < 110)
+        if (m_input->onKeyDown(SDLK_LEFT) || m_gamepad->isBtnDown(0, GAMEPAD_LEFT) || (m_gamepad->isConnected(0) && m_gamepad->getLstickX(0) < 110))
         {
             m_transfComp->position.x -= 5;
+            LOG_I("LEFT");
+            m_aninComp->setFlipX(true);
         }
-        LOG_I("STICK_Y: {0} STICK_X: {1}", m_transfComp->position.y, m_transfComp->position.x);
     }
 
     void InputComponent::Serialize(Serializer &writer) const

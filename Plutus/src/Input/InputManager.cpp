@@ -21,6 +21,7 @@ namespace Plutus
 	// save the key state before register new key event
 	void InputManager::update()
 	{
+		m_mouseWheel = 0;
 		//Loop through keymap and copy it to prevKeyMap.
 		for (auto &key : m_keyMap)
 		{
