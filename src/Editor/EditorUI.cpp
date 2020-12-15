@@ -132,7 +132,7 @@ namespace Plutus
 					scale = sc / 100.0f;
 				}
 				ImGui::SameLine();
-				CustomComboBox("TileSheet", data, selected);
+				ImGui::ComboBox("TileSheet", data, selected);
 				ImGui::PopItemWidth();
 			}
 
@@ -256,7 +256,7 @@ namespace Plutus
 		ImGui::PushItemWidth(100);
 		static int selected = 0;
 		auto layers = m_EManager->getLayers();
-		if (CustomComboBox("Layers", layers, selected))
+		if (ImGui::ComboBox("Layers", layers, selected))
 		{
 			m_EManager->setLayer(layers[selected]->name);
 		}
@@ -302,25 +302,31 @@ namespace Plutus
 		static int selectedEntity = 0;
 		auto layers = m_EManager->getLayers();
 		auto *CurEntity = currentLayer->entities[0];
-		if (CustomComboBox("Entities", currentLayer->entities, selectedEntity))
+		if (ImGui::ComboBox("Entities", currentLayer->entities, selectedEntity))
 		{
 			CurEntity = currentLayer->entities[selectedEntity];
 		}
-		LOG_I("Entity: ", CurEntity->name);
 
 		ImGui::Separator();
 		ImGui::Text("Components");
 		ImGui::Separator();
 
 		static int selectedComp = 0;
-		// std::vector<std::string> components({"Animation", "Image", "Transform", "Input"});
-		// if (ImGui::ComboBox("Components", components, selectedComp))
+		std::vector<std::string> components({"Animation", "Image", "Transform", "Input"});
+		if (ImGui::ComboBox("Components", components, selectedComp))
+		{
+			LOG_I("selected {0}", components[selectedComp]);
+		}
+		// if (selectedComp == 0)
 		// {
-		// 	LOG_I("selected {0}", components[selectedComp]);
 		// }
-		const char *comps[] = {"Animation", "Image", "Transform", "Input"};
-		ImGui::Combo("Components", &selectedComp, comps, 4);
-		ImGui::PopItemWidth();
+
+		// if (selectedComp == 1)
+		// {
+		// }
+		// if (selectedComp == 2)
+		// {
+		// }
 		ImGui::End();
 	}
 

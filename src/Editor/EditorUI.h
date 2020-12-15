@@ -40,6 +40,7 @@ namespace Plutus
 		TileSheet m_texture;
 		Camera2D *m_camera = nullptr;
 		EntityManager *m_EManager = nullptr;
+		glm::vec2 lastCoords;
 		int m_mode = EDIT_PLACE;
 		bool m_moveCamera = false;
 
@@ -72,37 +73,10 @@ namespace Plutus
 
 		void EntityEditor();
 
-		template <typename T>
-		inline bool CustomComboBox(const char *label, const std::vector<T *> &data, int &selected)
-		{
-			ImGuiStyle &style = ImGui::GetStyle();
-			ImGui::SameLine(0, style.ItemInnerSpacing.x);
-			bool isSelected = false;
-
-			if (ImGui::BeginCombo("##Maps", data[selected]->name.c_str()))
-			{
-				int i = 0;
-				for (auto m : data)
-				{
-					bool is_selected = m->name.compare(data[selected]->name) == 0;
-					if (ImGui::Selectable(m->name.c_str(), is_selected))
-					{
-						isSelected = true;
-						selected = i;
-						if (is_selected)
-							ImGui::SetItemDefaultFocus();
-					}
-					i++;
-				}
-				ImGui::EndCombo();
-			}
-			ImGui::SameLine(0, style.ItemInnerSpacing.x);
-			ImGui::Text(label);
-
-			return isSelected;
-		}
-
 		bool isHover() { return ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered(); }
+
+		inline void setLastCoord(const glm::vec2 &coords) { lastCoords = coords; }
+		const glm::vec2 &getLastCoords() { return lastCoords; }
 
 	private:
 		EditorUI();
@@ -114,13 +88,37 @@ namespace Plutus
 
 namespace ImGui
 {
-	inline bool ComboBox(const char *label, const std::vector<std::string> &data, int &selected)
+	template <typename T>
+	inline bool ComboBox(const char *label, const std::vector<T *> &data, int &selected)
 	{
-		ImGuiStyle &style = ImGui::GetStyle();
-		ImGui::SameLine(0, style.ItemInnerSpacing.x);
 		bool isSelected = false;
 
-		if (ImGui::BeginCombo("##Maps", data[selected].c_str()))
+		if (ImGui::BeginCombo(label, data[selected]->name.c_str()))
+		{
+			int i = 0;
+			for (auto m : data)
+			{
+				bool is_selected = m->name.compare(data[selected]->name) == 0;
+				if (ImGui::Selectable(m->name.c_str(), is_selected))
+				{
+					isSelected = true;
+					selected = i;
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+				i++;
+			}
+			ImGui::EndCombo();
+		}
+
+		return isSelected;
+	}
+
+	inline bool ComboBox(const char *label, const std::vector<std::string> &data, int &selected)
+	{
+		bool isSelected = false;
+
+		if (ImGui::BeginCombo(label, data[selected].c_str()))
 		{
 			int i = 0;
 			for (auto m : data)
@@ -137,8 +135,6 @@ namespace ImGui
 			}
 			ImGui::EndCombo();
 		}
-		ImGui::SameLine(0, style.ItemInnerSpacing.x);
-		ImGui::Text(label);
 
 		return isSelected;
 	}

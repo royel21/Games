@@ -109,6 +109,19 @@ void App::onUpdate(float dt)
             LOG_I("Wheel: {0} {1}", m_inputManager->getMouseWheel(), scale);
         }
     }
+
+    if (m_inputManager->onKeyPressed(SDL_BUTTON_LEFT))
+    {
+        mDebugUI->setLastCoord(m_inputManager->getMouseCoords());
+    }
+
+    if (mDebugUI->moveCamera() && m_inputManager->onKeyDown(SDL_BUTTON_LEFT))
+    {
+        auto coords = m_inputManager->getMouseCoords();
+        auto result = coords - mDebugUI->getLastCoords();
+        LOG_I("diff: {0} {1}", coords.x, coords.y);
+    }
+
     m_camera.update();
     m_EntityManager.Update(dt);
 }

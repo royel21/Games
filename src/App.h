@@ -18,7 +18,7 @@ private:
     Plutus::Camera2D m_camera;
     Plutus::DebugRender m_debugRender;
     Plutus::EditorUI *mDebugUI = nullptr;
-
+    
 public:
     App(const char *windowName = "Default", int screenWidth = 1280, int screenHeight = 768);
     ~App();
