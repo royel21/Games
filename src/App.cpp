@@ -1,6 +1,7 @@
+#include "SDL.h"
+
 #include "App.h"
 #include "Log/Logger.h"
-#include "SDL.h"
 #include "Assets/AssetManager.h"
 #include "ECS/Transform2DComponent.h"
 #include "ECS/ImageComponent.h"
@@ -19,9 +20,12 @@ App::~App()
 
 void App::onInit()
 {
+    mDebugUI = Plutus::EditorUI::getInstance(&m_window, &m_camera, &m_EntityManager);
+
     m_textLayer.init(&m_window, "./assets/fonts/Zoika.ttf", 28);
 
-    m_debugRender.init();
+    m_debugRender.init(&m_window, &m_camera);
+    m_debugRender.setGridSize(32, 32);
 
     m_EntityManager.init();
 
@@ -39,6 +43,7 @@ void App::onInit()
     m_EntityManager.addLayer("Layer1");
     m_EntityManager.setLayer("Layer1");
     Plutus::AssetManager::addTileSet("player", 12, 24, 32, "./assets/textures/link.png");
+    Plutus::AssetManager::addTileSet("cave", 8, 32, 32, "./assets/textures/goblin_cave.png");
 
     auto &player = m_EntityManager.AddEntity("player");
     player.addComponent<Plutus::Transform2DComponent>(0.0f, 0.0f, 0.0f, 0.0f, 48.0f, 64.0f, 1.0f);
@@ -53,6 +58,9 @@ void App::onInit()
     ac.AddAnimation("walk-up", Plutus::Animation(0, 11, 100));
     ac.AddAnimation("walk-down", Plutus::Animation(72, 12, 100));
     ac.PlayAnimation("standing");
+
+    /*Debug Ui*/
+    mDebugUI->setTileSheet("cave");
 }
 
 void App::onUpdate(float dt)
@@ -75,6 +83,9 @@ void App::onUpdate(float dt)
     // {
     //     LOG_I("A:{0} B:{1} Y:{2}", m_GamePad->isBtnDown(0, GAMEPAD_RIGHT), m_GamePad->isBtnDown(0, GAMEPAD_UP), m_GamePad->isBtnDown(0, GAMEPAD_DOWN));
     // }
+
+    // auto mcoords = m_debugRender.getSquareCoords(m_inputManager->getMouseCoords());
+    // LOG_I("X:{0} Y:{1}", mcoords.x, mcoords.y);
 
     if (m_inputManager->onKeyDown(SDLK_LALT) && (m_inputManager->onKeyPressed(SDLK_KP_ENTER) || m_inputManager->onKeyPressed(SDLK_RETURN)))
     {
@@ -114,7 +125,8 @@ void App::onDraw()
     m_textLayer.setColor(1.0f, 0, 0, 0.8);
     m_textLayer.drawString("OpenGL 4.6", 5.0f, 5.0f, 1.0f);
 
-    m_debugRender.drawGrid(32, 32, m_camera);
+    m_debugRender.drawGrid();
+    mDebugUI->DrawUI();
 }
 
 void App::onResize(int width, int height)
@@ -130,4 +142,5 @@ void App::onExit()
 
 void App::onEvent(SDL_Event &event)
 {
+    mDebugUI->onEvent(event);
 }

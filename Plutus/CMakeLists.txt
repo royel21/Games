@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16.2)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options ("/DIMGUI_IMPL_OPENGL_LOADER_GLAD;/DP_DEBUG;")
+add_compile_options ("/DP_DEBUG;")
 
 project("Plutus" C CXX)
 
@@ -27,7 +27,7 @@ file(GLOB_RECURSE PLUTUS_INC
 
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
-include_directories(${LIBS_DIR})
+include_directories(${LIBS_DIR}/)
 include_directories(${LIBS_DIR}/rapidjson/include)
 include_directories(${LIBS_DIR}/freetype/include)
 include_directories(${LIBS_DIR}/glad/include)
