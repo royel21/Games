@@ -43,6 +43,8 @@ namespace Plutus
 
 		bool HasNoEntities();
 
+		inline Layer *getCurrentLayer() { return currentLayer; }
+
 		Entity &AddEntity(const std::string &entityName);
 
 		Entity *GetEntity(const std::string &id);

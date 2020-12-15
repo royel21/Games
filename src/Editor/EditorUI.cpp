@@ -65,6 +65,7 @@ namespace Plutus
 			LOG_I("POINT: {0} {1} {2}", points[0].x, points[0].y, points.size());
 
 		LayerControls();
+		EntityEditor();
 		endUI();
 	}
 
@@ -232,7 +233,8 @@ namespace Plutus
 		ImGui::Checkbox("Move Camera", &m_moveCamera);
 
 		ImGui::Separator();
-
+		ImGui::Text("Layers");
+		ImGui::Separator();
 		static bool showAddDialog = false;
 		static glm::vec2 pos;
 		if (ImGui::Button("Add"))
@@ -291,4 +293,35 @@ namespace Plutus
 			ImGui::CloseCurrentPopup();
 		return shouldClose;
 	}
+
+	void EditorUI::EntityEditor()
+	{
+		ImGui::Begin("Entity Editor");
+		auto currentLayer = m_EManager->getCurrentLayer();
+		ImGui::PushItemWidth(100);
+		static int selectedEntity = 0;
+		auto layers = m_EManager->getLayers();
+		auto *CurEntity = currentLayer->entities[0];
+		if (CustomComboBox("Entities", currentLayer->entities, selectedEntity))
+		{
+			CurEntity = currentLayer->entities[selectedEntity];
+		}
+		LOG_I("Entity: ", CurEntity->name);
+
+		ImGui::Separator();
+		ImGui::Text("Components");
+		ImGui::Separator();
+
+		static int selectedComp = 0;
+		// std::vector<std::string> components({"Animation", "Image", "Transform", "Input"});
+		// if (ImGui::ComboBox("Components", components, selectedComp))
+		// {
+		// 	LOG_I("selected {0}", components[selectedComp]);
+		// }
+		const char *comps[] = {"Animation", "Image", "Transform", "Input"};
+		ImGui::Combo("Components", &selectedComp, comps, 4);
+		ImGui::PopItemWidth();
+		ImGui::End();
+	}
+
 } // namespace Plutus

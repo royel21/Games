@@ -57,7 +57,7 @@ namespace Plutus
 		void destroy();
 
 		ImGuiIO *getIO() { return mImGui_IO; }
-
+		inline void showDemo() { ImGui::ShowDemoWindow(); }
 		void createTile();
 
 		void tileset();
@@ -69,6 +69,8 @@ namespace Plutus
 
 		inline bool moveCamera() { return m_moveCamera; }
 		void setTileSheet(const std::string textureId) { m_texture.texture = Plutus::AssetManager::getTexture(textureId); }
+
+		void EntityEditor();
 
 		template <typename T>
 		inline bool CustomComboBox(const char *label, const std::vector<T *> &data, int &selected)
@@ -109,3 +111,35 @@ namespace Plutus
 	};
 
 } // namespace Plutus
+
+namespace ImGui
+{
+	inline bool ComboBox(const char *label, const std::vector<std::string> &data, int &selected)
+	{
+		ImGuiStyle &style = ImGui::GetStyle();
+		ImGui::SameLine(0, style.ItemInnerSpacing.x);
+		bool isSelected = false;
+
+		if (ImGui::BeginCombo("##Maps", data[selected].c_str()))
+		{
+			int i = 0;
+			for (auto m : data)
+			{
+				bool is_selected = m.compare(data[selected]) == 0;
+				if (ImGui::Selectable(m.c_str(), is_selected))
+				{
+					isSelected = true;
+					selected = i;
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+				i++;
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::SameLine(0, style.ItemInnerSpacing.x);
+		ImGui::Text(label);
+
+		return isSelected;
+	}
+} // namespace ImGui
