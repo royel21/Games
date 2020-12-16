@@ -17,14 +17,15 @@ namespace Plutus
 	{
 	private:
 		bool isActive;
-		EntityManager& manager;
-		std::vector<Component*> components;
-		std::map<const std::type_info*, Component*> componentTypeMap;
+		EntityManager &manager;
+		std::vector<Component *> components;
+		std::map<const std::type_info *, Component *> componentTypeMap;
+
 	public:
 		std::string name;
 		std::string mLayerId;
-		Entity(EntityManager& manager, const std::string& layerId);
-		Entity(EntityManager& manager, const std::string& name, const std::string& layerId);
+		Entity(EntityManager &manager, const std::string &layerId);
+		Entity(EntityManager &manager, const std::string &name, const std::string &layerId);
 		~Entity();
 
 		void Update(float deltaTime);
@@ -32,9 +33,9 @@ namespace Plutus
 		inline bool IsActive() const { return isActive; }
 
 		template <typename T, typename... TArgs>
-		T& addComponent(TArgs&& ... args)
+		T &addComponent(TArgs &&... args)
 		{
-			T* newComponent(new T(std::forward<TArgs>(args)...));
+			T *newComponent(new T(std::forward<TArgs>(args)...));
 			newComponent->owner = this;
 
 			components.emplace_back(newComponent);
@@ -45,33 +46,33 @@ namespace Plutus
 			return *newComponent;
 		}
 
-		template <typename T, typename... TArgs>
-		T* GetComponent()
+		template <typename T>
+		T *GetComponent()
 		{
-			return static_cast<T*>(componentTypeMap[&typeid(T)]);
+			return static_cast<T *>(componentTypeMap[&typeid(T)]);
 		}
 
 		void Destroy();
 
-		void Serialize(Serializer& serializer) const
+		void Serialize(Serializer &serializer) const
 		{
 			auto writer = serializer.getWriter();
 			writer->StartObject();
 			writer->String("Name");
 			writer->String(name.c_str());
-				  
+
 			writer->String("Components");
 			writer->StartArray();
 
-			for (auto& comp : components)
+			for (auto &comp : components)
 			{
 				comp->Serialize(serializer);
 			}
-				
+
 			writer->EndArray();
 
 			writer->EndObject();
 		}
 	};
-}
+} // namespace Plutus
 #endif
