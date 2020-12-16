@@ -118,8 +118,14 @@ void App::onUpdate(float dt)
     if (mDebugUI->moveCamera() && m_inputManager->onKeyDown(SDL_BUTTON_LEFT))
     {
         auto coords = m_inputManager->getMouseCoords();
-        auto result = coords - mDebugUI->getLastCoords();
-        LOG_I("diff: {0} {1}", coords.x, coords.y);
+        auto last = mDebugUI->getLastCoords();
+        auto result = coords - last;
+
+        auto camPos = m_camera.getPosition();
+
+        glm::vec2 newPos(camPos.x - result.x, result.y + camPos.y);
+        m_camera.setPosition(newPos);
+        mDebugUI->setLastCoord(coords);
     }
 
     m_camera.update();

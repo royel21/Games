@@ -22,8 +22,8 @@ namespace Plutus
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-			onEvent(event);
 			sysEvents(event);
+			onEvent(event);
 		}
 	}
 
