@@ -74,7 +74,8 @@ namespace Plutus
 		void EntityEditor();
 
 		bool isHover() { return ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered(); }
-
+		void beginWindow();
+		void endWindow();
 		inline void setLastCoord(const glm::vec2 &coords) { lastCoords = coords; }
 		const glm::vec2 &getLastCoords() { return lastCoords; }
 
