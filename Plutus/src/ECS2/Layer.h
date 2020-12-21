@@ -5,19 +5,16 @@
 
 namespace Plutus
 {
-    class Entity;
-
     class Layer
     {
     public:
         Layer(const std::string &_name);
         void setName(const std::string &_name) { name = _name; }
-        Entity createEntity(const std::string &name);
+        void addEntity(entt::entity entId) { entities.push_back(entId); }
 
     private:
         std::string name;
-        entt::registry mRegistry;
-        friend class Entity;
+        std::vector<entt::entity> entities;
     };
 } // namespace Plutus
 
