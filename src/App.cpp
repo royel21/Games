@@ -15,38 +15,40 @@ App::App(const char *windowName, int screenWidth, int screenHeight) : IMainGame(
 
 App::~App()
 {
-    m_EntityManager.ClearData();
+    mEntManager->ClearData();
 }
 
 void App::onInit()
 {
-    mDebugUI = Plutus::EditorUI::getInstance(&m_window, &m_camera, &m_EntityManager);
+    mEntManager = Plutus::EntityManager::getInstance();
+    mDebugUI = Plutus::EditorUI::getInstance(&m_window, &m_camera);
 
     m_textLayer.init(&m_window, "./assets/fonts/Zoika.ttf", 28);
 
-    m_debugRender.init(&m_window, &m_camera);
-    m_debugRender.setGridSize(32, 32);
+    m_debugRender = Plutus::DebugRender::geInstances();
+    m_debugRender->init(&m_window, &m_camera);
+    m_debugRender->setGridSize(32, 32);
 
-    m_EntityManager.init();
+    mEntManager->init();
 
     m_camera.init(getWidth(), getHeight());
     m_camera.update();
-    m_EntityManager.setCamera(&m_camera);
+    mEntManager->setCamera(&m_camera);
 
     Plutus::AssetManager::addTexture("BG0", "./assets/textures/Cocarico-zelda.png");
 
-    auto &bg0 = m_EntityManager.AddEntity("bg0");
-
-    bg0.addComponent<Plutus::Transform2DComponent>((1280 / 2) * -1, (768 / 2) * -1, 0.0f, 0.0f, 1280, 768, 1.0f);
+    auto &bg0 = mEntManager->AddEntity("bg0");
+    auto origin = m_camera.convertScreenToWold(0, 0);
+    bg0.addComponent<Plutus::Transform2DComponent>(origin, 1280, 768);
     bg0.addComponent<Plutus::ImageComponent>("BG0");
 
-    m_EntityManager.addLayer("Layer1");
-    m_EntityManager.setLayer("Layer1");
+    mEntManager->addLayer("Layer1");
+    mEntManager->setLayer("Layer1");
     Plutus::AssetManager::addTileSet("player", 12, 24, 32, "./assets/textures/link.png");
     Plutus::AssetManager::addTileSet("cave", 8, 32, 32, "./assets/textures/goblin_cave.png");
 
-    auto &player = m_EntityManager.AddEntity("player");
-    player.addComponent<Plutus::Transform2DComponent>(0.0f, 0.0f, 0.0f, 0.0f, 48.0f, 64.0f, 1.0f);
+    auto &player = mEntManager->AddEntity("player");
+    player.addComponent<Plutus::Transform2DComponent>(origin, 48.0f, 64.0f);
 
     player.addComponent<Plutus::ImageComponent>("player");
 
@@ -65,32 +67,14 @@ void App::onInit()
 
 void App::onUpdate(float dt)
 {
-    // if (m_inputManager->onKeyPressed(SDL_BUTTON_LEFT))
-    // {
-    //     LOG_I("GamePad isConnected: {0}", m_GamePad->isConnected(0));
-    //     count++;
-    //     LOG_I("");
-    //     LOG_I("Clicked: {0}", count);
-    // }
-    // if (m_inputManager->onKeyDown(SDL_BUTTON_RIGHT) || m_inputManager->onKeyPressed(SDLK_a))
-    // {
-    //     count++;
-    //     LOG_I("");
-    //     LOG_I("Clicked: {0}", count);
-    // }
 
-    // if (m_GamePad->isBtnPress(0, GAMEPAD_RIGHT) || m_GamePad->isBtnPress(0, GAMEPAD_UP) || m_GamePad->isBtnPress(0, GAMEPAD_DOWN))
-    // {
-    //     LOG_I("A:{0} B:{1} Y:{2}", m_GamePad->isBtnDown(0, GAMEPAD_RIGHT), m_GamePad->isBtnDown(0, GAMEPAD_UP), m_GamePad->isBtnDown(0, GAMEPAD_DOWN));
-    // }
-
-    // auto mcoords = m_debugRender.getSquareCoords(m_inputManager->getMouseCoords());
-    // LOG_I("X:{0} Y:{1}", mcoords.x, mcoords.y);
-
+    m_camera.update();
+    // enter full sceen with ALT + ENTER
     if (m_inputManager->onKeyDown(SDLK_LALT) && (m_inputManager->onKeyPressed(SDLK_KP_ENTER) || m_inputManager->onKeyPressed(SDLK_RETURN)))
     {
         m_window.setFulScreen();
     }
+    //Scale using mouse wheel
     if (m_inputManager->onKeyDown(SDLK_LCTRL))
     {
         float scale = m_camera.getScale();
@@ -103,38 +87,38 @@ void App::onUpdate(float dt)
         {
             m_camera.setScale(scale - 0.05);
         }
-
-        if (m_inputManager->getMouseWheel() > 1 || m_inputManager->getMouseWheel() < 0)
-        {
-            LOG_I("Wheel: {0} {1}", m_inputManager->getMouseWheel(), scale);
-        }
     }
-
+    //Save the mouse last coords
     if (m_inputManager->onKeyPressed(SDL_BUTTON_LEFT))
     {
         mDebugUI->setLastCoord(m_inputManager->getMouseCoords());
     }
-
+    // move the camera
     if (mDebugUI->moveCamera() && m_inputManager->onKeyDown(SDL_BUTTON_LEFT))
     {
+        //get the mouseCoord;
         auto coords = m_inputManager->getMouseCoords();
+        // get mouse last coords
         auto last = mDebugUI->getLastCoords();
-        auto result = coords - last;
-
+        // get the camera scale factor
+        float scale = m_camera.getScale();
+        //calculate distance move with scale
+        auto result = (coords - last) / scale;
+        //get the camera position
         auto camPos = m_camera.getPosition();
 
         glm::vec2 newPos(camPos.x - result.x, result.y + camPos.y);
         m_camera.setPosition(newPos);
         mDebugUI->setLastCoord(coords);
     }
-
-    m_camera.update();
-    m_EntityManager.Update(dt);
+    mEntManager->Update(dt);
 }
 
 void App::onDraw()
 {
-    m_EntityManager.Render();
+    mDebugUI->bindFB();
+    mEntManager->Render();
+    m_debugRender->drawGrid();
 
     char text[20];
     snprintf(text, 20, "%.1f FPS", getFPS());
@@ -144,7 +128,8 @@ void App::onDraw()
     m_textLayer.setColor(1.0f, 0, 0, 0.8);
     m_textLayer.drawString("OpenGL 4.6", 5.0f, 5.0f, 1.0f);
 
-    m_debugRender.drawGrid();
+    mDebugUI->unBindFB();
+
     mDebugUI->DrawUI();
 }
 
@@ -155,7 +140,7 @@ void App::onResize(int width, int height)
 
 void App::onExit()
 {
-    m_debugRender.dispose();
+    m_debugRender->dispose();
     LOG_I("Exiting");
 }
 

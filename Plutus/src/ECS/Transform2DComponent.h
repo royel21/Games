@@ -14,8 +14,12 @@ namespace Plutus
 		glm::vec2 velocity;
 		glm::vec2 size;
 		float scale;
-		Transform2DComponent(float x, float y, float velX, float velY, float w, float h, float _scale);
+		Transform2DComponent(float x, float y, float velX, float velY, float w, float h, float _scale = 1);
+		Transform2DComponent(glm::vec2 pos, float velX, float velY, float w, float h, float _scale = 1);
 
+		Transform2DComponent(float x, float y, float w, float h, float _scale = 1);
+		Transform2DComponent(glm::vec2 pos, float w, float h, float _scale = 1);
+		
 		void Initialize() override {}
 
 		void Update(float dt) override

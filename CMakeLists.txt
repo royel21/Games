@@ -29,6 +29,7 @@ include_directories(${LIB_DIR}/rapidjson/include)
 include_directories(${LIB_DIR}/SDL/include)
 include_directories(${LIB_DIR}/freetype/include)
 include_directories(${LIB_DIR}/imgui)
+include_directories(${LIB_DIR}/Entt)
 
 set(SDL_DIR ${LIB_DIR}/SDL/lib/x86)
 

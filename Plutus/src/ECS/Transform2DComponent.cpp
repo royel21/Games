@@ -1,14 +1,26 @@
 #include "ECS/Transform2DComponent.h"
 #include "ECS/Serializer.h"
+#include "Log/Logger.h"
 
 namespace Plutus
 {
-	Transform2DComponent::Transform2DComponent(float x, float y, float velX, float velY, float w, float h, float _scale)
+	Transform2DComponent::Transform2DComponent(float x, float y, float vX, float vY, float w, float h, float _scale) : position(x, y), velocity(vX, vY), size(w, h), scale(_scale)
 	{
-		position = glm::vec2(x, y);
-		velocity = glm::vec2(velX, velY);
-		size = glm::vec2(w, h);
-		scale = _scale;
+	}
+
+	Transform2DComponent::Transform2DComponent(glm::vec2 pos, float vX, float vY, float w, float h, float _scale) : position(pos), velocity(vX, vY), size(w, h), scale(_scale)
+	{
+		LOG_I("{0} {1} {2} {3} {4}", pos.x, pos.y, w, h, _scale);
+	}
+
+	Transform2DComponent::Transform2DComponent(glm::vec2 pos, float w, float h, float _scale) : position(pos), velocity(0, 0), size(w, h), scale(_scale)
+	{
+		LOG_I("{0}", scale);
+	}
+
+	Transform2DComponent::Transform2DComponent(float x, float y, float w, float h, float _scale) : position(x, y), velocity(0, 0), size(w, h), scale(_scale)
+	{
+		LOG_I("{0}", scale);
 	}
 
 	void Transform2DComponent::Serialize(Serializer &serializer) const

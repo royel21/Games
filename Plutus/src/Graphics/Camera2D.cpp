@@ -23,6 +23,7 @@ namespace Plutus
 		m_screenHeight = screenHeight;
 		//this is for convert the opengl espace -1.0 - 1.0 to 0 - screenW and height
 		m_orthoMatrix = glm::ortho(0.0f, (float)m_screenWidth, 0.0f, (float)m_screenHeight, 1.0f, -1.0f);
+		m_needsMatrixUpdate = true;
 	}
 
 	void Camera2D::update()
@@ -48,8 +49,22 @@ namespace Plutus
 	glm::vec2 Camera2D::convertScreenToWold(glm::vec2 screenCoords)
 	{
 		//inver Y direction;
-		screenCoords.y = m_screenHeight - screenCoords.y;
+		// screenCoords.y = m_screenHeight - screenCoords.y;
+		//Make that 0 is the center
+		screenCoords -= glm::vec2(m_screenWidth >> 1, m_screenHeight >> 1);
 
+		//Scale the coordinates
+		screenCoords /= m_scale;
+
+		//Translate with the camera position
+		screenCoords += m_position;
+
+		return screenCoords;
+	}
+	glm::vec2 Camera2D::convertScreenToWoldInv(glm::vec2 screenCoords)
+	{
+		//inver Y direction;
+		screenCoords.y = m_screenHeight - screenCoords.y;
 		//Make that 0 is the center
 		screenCoords -= glm::vec2(m_screenWidth >> 1, m_screenHeight >> 1);
 

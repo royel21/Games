@@ -13,6 +13,8 @@
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
+#include "FrameBuffer.h"
+#include "Graphics/DebugRenderer.h"
 
 #define EDIT_PLACE 0
 #define EDIT_SELECT 1
@@ -39,104 +41,63 @@ namespace Plutus
 		GLTexture mTileTexture;
 		TileSheet m_texture;
 		Camera2D *m_camera = nullptr;
-		EntityManager *m_EManager = nullptr;
+		EntityManager *mEntManager = nullptr;
 		glm::vec2 lastCoords;
 		int m_mode = EDIT_PLACE;
 		bool m_moveCamera = false;
+		FrameBuffer mFb;
+		ImVec2 mViewportSize;
+		Plutus::DebugRender *mDebugRender = nullptr;
+
+		int mapToView(int x, int in_min, int in_max, int out_min, int out_max)
+		{
+			return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+		}
 
 	public:
 		std::vector<ImVec2> Selectedtiles;
 
 	public:
-		static EditorUI *getInstance(Plutus::Window *_window, Camera2D *cam, EntityManager *entityManager);
+		static EditorUI *getInstance(Plutus::Window *_window, Camera2D *cam);
 
 		~EditorUI();
-		void beginUI();
+
 		void DrawUI();
+		void beginUI();
 		void endUI();
-		void onEvent(SDL_Event &event);
 		void destroy();
+		//ImGui Panels
+		void createTile();
+		void drawTilesetEditor();
+		void CameraControl();
+		void tilesProps();
+		void EntityEditor();
+		void drawMainDockingWin();
+		//Bind Framebuffer
+		void bindFB();
+		void unBindFB();
+		//Un Bind Framebuffer
+		void onEvent(SDL_Event &event);
 
 		ImGuiIO *getIO() { return mImGui_IO; }
-		inline void showDemo() { ImGui::ShowDemoWindow(); }
-		void createTile();
 
-		void tileset();
-
-		void LayerControls();
-
-		void tilesProps();
-		bool LayerModal();
-
-		inline bool moveCamera() { return m_moveCamera; }
-		void setTileSheet(const std::string textureId) { m_texture.texture = Plutus::AssetManager::getTexture(textureId); }
-
-		void EntityEditor();
-
-		bool isHover() { return ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered(); }
-		void beginWindow();
-		void endWindow();
-		inline void setLastCoord(const glm::vec2 &coords) { lastCoords = coords; }
 		const glm::vec2 &getLastCoords() { return lastCoords; }
+
+		inline void setLastCoord(const glm::vec2 &coords) { lastCoords = coords; }
+		inline bool moveCamera() { return m_moveCamera; }
+
+		inline bool isHover() { return ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered(); }
+
+		inline void showDemo() { ImGui::ShowDemoWindow(); }
+		inline void setTileSheet(const std::string textureId)
+		{
+			m_texture.texture = Plutus::AssetManager::getTexture(textureId);
+		}
 
 	private:
 		EditorUI();
-
-		void Init(Plutus::Window *_window, Camera2D *cam, EntityManager *entityManager);
+		void viewPort();
+		void Init(Plutus::Window *_window, Camera2D *cam);
 	};
 
 } // namespace Plutus
-
-namespace ImGui
-{
-	template <typename T>
-	inline bool ComboBox(const char *label, const std::vector<T *> &data, int &selected)
-	{
-		bool isSelected = false;
-
-		if (ImGui::BeginCombo(label, data[selected]->name.c_str()))
-		{
-			int i = 0;
-			for (auto m : data)
-			{
-				bool is_selected = m->name.compare(data[selected]->name) == 0;
-				if (ImGui::Selectable(m->name.c_str(), is_selected))
-				{
-					isSelected = true;
-					selected = i;
-					if (is_selected)
-						ImGui::SetItemDefaultFocus();
-				}
-				i++;
-			}
-			ImGui::EndCombo();
-		}
-
-		return isSelected;
-	}
-
-	inline bool ComboBox(const char *label, const std::vector<std::string> &data, int &selected)
-	{
-		bool isSelected = false;
-
-		if (ImGui::BeginCombo(label, data[selected].c_str()))
-		{
-			int i = 0;
-			for (auto m : data)
-			{
-				bool is_selected = m.compare(data[selected]) == 0;
-				if (ImGui::Selectable(m.c_str(), is_selected))
-				{
-					isSelected = true;
-					selected = i;
-					if (is_selected)
-						ImGui::SetItemDefaultFocus();
-				}
-				i++;
-			}
-			ImGui::EndCombo();
-		}
-
-		return isSelected;
-	}
-} // namespace ImGui

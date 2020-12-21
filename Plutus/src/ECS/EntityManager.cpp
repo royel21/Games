@@ -17,6 +17,12 @@ namespace Plutus
 		currentLayer = &mLayers["Layer0"];
 	}
 
+	EntityManager *EntityManager::getInstance()
+	{
+		static EntityManager manager = EntityManager();
+		return &manager;
+	}
+
 	void EntityManager::init()
 	{
 

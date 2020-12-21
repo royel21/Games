@@ -21,7 +21,7 @@ namespace Plutus
 	class DebugRender
 	{
 	public:
-		DebugRender();
+		static DebugRender *geInstances();
 		~DebugRender();
 		void init(Window *win, Camera2D *_camera);
 		void drawLine(const glm::vec2 &a, const glm::vec2 &b, const ColorRGBA8 &color);
@@ -33,12 +33,16 @@ namespace Plutus
 		void dispose();
 
 		void setGridSize(int gridWidth, int gridHeight);
+		glm::vec2 getGridSize();
 
 		inline void resizeBuffer(unsigned int size) { m_vertexs.reserve(size); }
 
 		glm::vec2 getSquareCoords(glm::vec2 mousePos);
 
+		void setShouldDraw(bool shouldDraw) { isDraw = shouldDraw; }
+
 	private:
+		DebugRender();
 		Shader m_shader;
 		std::vector<DebugVertex> m_vertexs;
 		std::vector<GLuint> m_indices;
@@ -48,6 +52,7 @@ namespace Plutus
 		Window *m_win = nullptr;
 		int m_width = 0;
 		int m_height = 0;
+		bool isDraw = true;
 	};
 } // namespace Plutus
 

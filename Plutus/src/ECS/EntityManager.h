@@ -35,7 +35,8 @@ namespace Plutus
 		Camera2D *m_camera = nullptr;
 
 	public:
-		EntityManager();
+		static EntityManager *getInstance();
+
 		void init();
 		void Update(float dt);
 
@@ -74,6 +75,9 @@ namespace Plutus
 		bool hasTile(int x, int y);
 
 		void ClearData();
+
+	private:
+		EntityManager();
 	};
 } // namespace Plutus
 

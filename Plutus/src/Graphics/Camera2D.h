@@ -25,25 +25,41 @@ namespace Plutus
 		void init(int screenWidth, int screenHeight);
 
 		void update();
-		glm::vec2 convertScreenToWold(glm::vec2 screenCoords);
 		//Setters
 		void setPosition(const glm::vec2 &newPosition)
 		{
 			m_position = newPosition;
 			m_needsMatrixUpdate = true;
 		}
+
+		void setWindowSize(float w, float h)
+		{
+			m_screenWidth = w;
+			m_screenHeight = h;
+			m_needsMatrixUpdate = true;
+		}
+
+		void setWindowSize(const glm::vec2 &size) { setWindowSize(size.x, size.y); }
+
 		void setScale(float newScale)
 		{
 			m_scale = newScale;
 			m_needsMatrixUpdate = true;
 		}
-
+		glm::vec2 getViewPortSize() { return glm::vec2(m_screenWidth, m_screenHeight); }
 		//Getters
 		glm::vec2 getPosition() { return m_position; }
+
 		glm::mat4 getCameraMatrix() { return m_cameraMatrix; }
+
 		float getScale() { return m_scale; }
 
 		bool isBoxInView(const glm::vec2 position, const glm::vec2 dim);
+
+		glm::vec2 convertScreenToWoldInv(glm::vec2 screenCoords);
+		glm::vec2 convertScreenToWold(glm::vec2 screenCoords);
+
+		glm::vec2 Camera2D::convertScreenToWold(float x, float y) { return convertScreenToWold(glm::vec2(x, y)); };
 
 		const glm::vec2 &getScreenOrigin() { return screenOrigin; }
 		const glm::vec2 &getScreenEnd() { return screenEnd; }

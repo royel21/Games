@@ -23,7 +23,8 @@ file(GLOB_RECURSE PLUTUS_INC
 	${PROJECT_SOURCE_DIR}/src/*.hpp
 	${PROJECT_SOURCE_DIR}/libs/glad/include/*.h
 	${LIBS_DIR}/stb/stb_vorbis.h
-	${LIBS_DIR}/stb/stb_image.h)
+	${LIBS_DIR}/stb/stb_image.h
+	${LIBS_DIR}/Entt/entt.hpp)
 
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
@@ -34,5 +35,6 @@ include_directories(${LIBS_DIR}/glad/include)
 include_directories(${LIBS_DIR}/SDL/include)
 include_directories(${LIBS_DIR}/glm)
 include_directories(${LIBS_DIR}/stb)
+include_directories(${LIB_DIR}/Entt)
 
 add_library(Plutus STATIC ${PLUTUS_SRC} ${PLUTUS_INC})

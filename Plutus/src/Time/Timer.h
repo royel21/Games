@@ -28,7 +28,7 @@ namespace Plutus
     private:
         float lastTime, deltaTime;
     };
-    static T_Timer Timer = T_Timer::Ref();
+    static T_Timer &Timer = T_Timer::Ref();
 } // namespace Plutus
 
 #endif // __TIMER_H__
