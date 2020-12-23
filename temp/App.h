@@ -2,11 +2,22 @@
 #define _APP_H
 
 #include "Core/IMainGame.h"
-#include "ECS/Scene.h"
+#include "Texture/TextureManager.h"
+#include "TextRender/TextLayer.h"
+#include "ECS/EntityManager.h"
+#include "Graphics/Camera2D.h"
+#include "Graphics/DebugRenderer.h"
+#include "Editor/EditorUI.h"
+
 class App : public Plutus::IMainGame
 {
 private:
-    Plutus::Scene mScene;
+    int count = 0;
+    Plutus::TextLayer m_textLayer;
+    Plutus::EntityManager *mEntManager = nullptr;
+    Plutus::Camera2D m_camera;
+    Plutus::DebugRender *m_debugRender = nullptr;
+    Plutus::EditorUI *mDebugUI = nullptr;
 
 public:
     App(const char *windowName = "Default", int screenWidth = 1280, int screenHeight = 768);

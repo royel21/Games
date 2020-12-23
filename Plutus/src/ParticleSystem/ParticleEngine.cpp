@@ -26,7 +26,6 @@ namespace Plutus
 			sp->begin();
 			b->draw(sp);
 			sp->end();
-			sp->renderBatch();
 		}
 	}
 	void ParticleEngine::update(float deltaTime)

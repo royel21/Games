@@ -2,74 +2,56 @@
 #include <algorithm>
 #include <iostream>
 
-namespace Plutus {
-
-
-	Glyph::Glyph(
-		const glm::vec4& destRec,
-		const glm::vec4& uvRect,
-		const GLuint m_texture,
-		float m_depth,
-		const ColorRGBA8& color)
-	{
-		texture = m_texture;
-		depth = m_depth;
-
-		topLeft.color = color;
-		topLeft.setPosition(destRec.x, destRec.y + destRec.w);
-		topLeft.setUV(uvRect.x, uvRect.y + uvRect.w);
-
-		bottomLeft.color = color;
-		bottomLeft.setPosition(destRec.x, destRec.y);
-		bottomLeft.setUV(uvRect.x, uvRect.y);
-
-		bottomRight.color = color;
-		bottomRight.setPosition(destRec.x + destRec.z, destRec.y);
-		bottomRight.setUV(uvRect.x + uvRect.z, uvRect.y);
-
-		topRight.color = color;
-		topRight.setPosition(destRec.x + destRec.z, destRec.y + destRec.w);
-		topRight.setUV(uvRect.x + uvRect.z, uvRect.y + uvRect.w);
-	}
+namespace Plutus
+{
 
 	Glyph::Glyph(
-		const glm::vec4& destRec,
-		const glm::vec4& uvRect,
+		const glm::vec4 &destRec,
+		const glm::vec4 &uv,
 		const GLuint m_texture,
 		float m_depth,
-		const ColorRGBA8& color,
+		const ColorRGBA8 &color,
 		float angle)
 	{
-		glm::vec2 halfDim(destRec.z / 2, destRec.w / 2);
+		if (angle == 0)
+		{
+			topLeft.setPosition(destRec.x, destRec.y + destRec.w);
+			bottomLeft.setPosition(destRec.x, destRec.y);
+			bottomRight.setPosition(destRec.x + destRec.z, destRec.y);
+			topRight.setPosition(destRec.x + destRec.z, destRec.y + destRec.w);
+		}
+		else
+		{
+			glm::vec2 halfDim(destRec.z / 2, destRec.w / 2);
 
-		glm::vec2 tl(-halfDim.x, halfDim.y);
-		glm::vec2 bl(-halfDim.x, -halfDim.y);
-		glm::vec2 br(halfDim.x, -halfDim.y);
-		glm::vec2 tr(halfDim.x, halfDim.y);
+			glm::vec2 tl(-halfDim.x, halfDim.y);
+			glm::vec2 bl(-halfDim.x, -halfDim.y);
+			glm::vec2 br(halfDim.x, -halfDim.y);
+			glm::vec2 tr(halfDim.x, halfDim.y);
 
-		tl = rotatePoint(tl, angle) + halfDim;
-		bl = rotatePoint(bl, angle) + halfDim;
-		br = rotatePoint(br, angle) + halfDim;
-		tr = rotatePoint(tr, angle) + halfDim;
+			tl = rotatePoint(tl, angle) + halfDim;
+			bl = rotatePoint(bl, angle) + halfDim;
+			br = rotatePoint(br, angle) + halfDim;
+			tr = rotatePoint(tr, angle) + halfDim;
+
+			topLeft.setPosition(destRec.x + tl.x, destRec.y + tl.y);
+			bottomLeft.setPosition(destRec.x + bl.x, destRec.y + bl.y);
+			bottomRight.setPosition(destRec.x + br.x, destRec.y + br.y);
+			topRight.setPosition(destRec.x + tr.x, destRec.y + tr.y);
+		}
 
 		texture = m_texture;
 		depth = m_depth;
 
 		topLeft.color = color;
-		topLeft.setPosition(destRec.x + tl.x, destRec.y + tl.y);
-		topLeft.setUV(uvRect.x, uvRect.y + uvRect.w);
-
 		bottomLeft.color = color;
-		bottomLeft.setPosition(destRec.x + bl.x, destRec.y + bl.y);
-		bottomLeft.setUV(uvRect.x, uvRect.y);
-
 		bottomRight.color = color;
-		bottomRight.setPosition(destRec.x + br.x, destRec.y + br.y);
-		bottomRight.setUV(uvRect.x + uvRect.z, uvRect.y);
-
 		topRight.color = color;
-		topRight.setPosition(destRec.x + tr.x, destRec.y + tr.y);
-		topRight.setUV(uvRect.x + uvRect.z, uvRect.y + uvRect.w);
+
+		bottomLeft.setUV(uv.x, uv.w);
+		topLeft.setUV(uv.x, uv.y);
+		topRight.setUV(uv.z, uv.y);
+		bottomRight.setUV(uv.z, uv.w);
 	}
 
 	glm::vec2 Glyph::rotatePoint(glm::vec2 pos, float angle)
@@ -95,7 +77,33 @@ namespace Plutus {
 
 	void SpriteBatch::init()
 	{
-		createVertexArray();
+		//Create the Vertex Array Buffer
+		if (!m_vao)
+		{
+			glGenVertexArrays(1, &m_vao);
+		}
+		glBindVertexArray(m_vao);
+
+		//Create the Vertex Array Buffer
+		if (!m_vbo)
+		{
+			glGenBuffers(1, &m_vbo);
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
+		/* Tell OpenGL that we want to use vertexPosition and its location is 0*/
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, position));
+
+		/* Tell OpenGL that we want to use vertexUV and its location is 2*/
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, uv));
+
+		/* Tell OpenGL that we want to use vertexColor and its location is1*/
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void *)offsetof(Vertex, color));
+
+		glBindVertexArray(0);
 	}
 
 	void SpriteBatch::setActiveTexture(uint8_t slot = 0)
@@ -110,48 +118,9 @@ namespace Plutus {
 		m_glyphs.clear();
 	}
 
-	void SpriteBatch::end()
-	{
-		m_glyphPonters.resize(m_glyphs.size());
-		for (size_t i = 0; i < m_glyphs.size(); i++)
-		{
-			m_glyphPonters[i] = &m_glyphs[i];
-		}
-
-		sortGlyph();
-		createRenderBatches();
-	}
-
-	void SpriteBatch::draw(const glm::vec4& destRec, const glm::vec4& uvRect, const GLuint texture, float depth, const ColorRGBA8& color)
-	{
-		m_glyphs.emplace_back(destRec, uvRect, texture, depth, color);
-	}
-
-	void SpriteBatch::draw(const glm::vec4& destRec, const glm::vec4& uvRect, const GLuint texture, float depth, const ColorRGBA8& color, float angle)
+	void SpriteBatch::draw(const glm::vec4 &destRec, const glm::vec4 &uvRect, const ColorRGBA8 &color, const GLuint texture, float depth, float angle)
 	{
 		m_glyphs.emplace_back(destRec, uvRect, texture, depth, color, angle);
-	}
-
-	void SpriteBatch::draw(const glm::vec4& destRec, const glm::vec4& uvRect, const GLuint texture, float depth, const ColorRGBA8& color, const glm::vec2& dir)
-	{
-		const glm::vec2 right(1.0f, 0.0f);
-
-		float angle = acos(glm::dot(right, dir));
-		if (dir.y < 0.0f) angle = -angle;
-		m_glyphs.emplace_back(destRec, uvRect, texture, depth, color, angle);
-	}
-
-	void SpriteBatch::renderBatch()
-	{
-		glBindVertexArray(m_vao);
-		for (size_t i = 0; i < m_renderBatches.size(); i++)
-		{
-			glBindTexture(GL_TEXTURE_2D, m_renderBatches[i].texture);
-
-			glDrawArrays(GL_TRIANGLES, m_renderBatches[i].offset, m_renderBatches[i].numVertices);
-		}
-		glBindTexture(GL_TEXTURE_2D, 0);
-		glBindVertexArray(0);
 	}
 
 	void SpriteBatch::createRenderBatches()
@@ -159,37 +128,41 @@ namespace Plutus {
 		std::vector<Vertex> vertices;
 		vertices.resize(m_glyphs.size() * 6);
 
-		if (m_glyphs.empty()) return;
+		if (m_glyphs.empty())
+			return;
 
 		int offset = 0;
-		int cv = 0; //Current Vertex
+		int curVert = 0; //Current Vertex
 		//Create and add a new RenderBatch
 		m_renderBatches.emplace_back(offset, 6, m_glyphPonters[0]->texture);
 
-		vertices[cv++] = m_glyphPonters[0]->topLeft;
-		vertices[cv++] = m_glyphPonters[0]->bottomLeft;
-		vertices[cv++] = m_glyphPonters[0]->bottomRight;
-		vertices[cv++] = m_glyphPonters[0]->bottomRight;
-		vertices[cv++] = m_glyphPonters[0]->topRight;
-		vertices[cv++] = m_glyphPonters[0]->topLeft;
+		vertices[curVert++] = m_glyphPonters[0]->topLeft;
+		vertices[curVert++] = m_glyphPonters[0]->bottomLeft;
+		vertices[curVert++] = m_glyphPonters[0]->bottomRight;
+		vertices[curVert++] = m_glyphPonters[0]->bottomRight;
+		vertices[curVert++] = m_glyphPonters[0]->topRight;
+		vertices[curVert++] = m_glyphPonters[0]->topLeft;
 
 		offset += 6;
 
-		for (size_t cg = 1; cg < m_glyphPonters.size(); cg++) {
-			if (m_glyphPonters[cg]->texture != m_glyphPonters[cg - 1]->texture) {
+		for (size_t cg = 1; cg < m_glyphPonters.size(); cg++)
+		{
+			if (m_glyphPonters[cg]->texture != m_glyphPonters[cg - 1]->texture)
+			{
 
 				m_renderBatches.emplace_back(offset, 6, m_glyphPonters[cg]->texture);
 			}
-			else {
+			else
+			{
 				m_renderBatches.back().numVertices += 6;
 			}
 
-			vertices[cv++] = m_glyphPonters[cg]->topLeft;
-			vertices[cv++] = m_glyphPonters[cg]->bottomLeft;
-			vertices[cv++] = m_glyphPonters[cg]->bottomRight;
-			vertices[cv++] = m_glyphPonters[cg]->bottomRight;
-			vertices[cv++] = m_glyphPonters[cg]->topRight;
-			vertices[cv++] = m_glyphPonters[cg]->topLeft;
+			vertices[curVert++] = m_glyphPonters[cg]->topLeft;
+			vertices[curVert++] = m_glyphPonters[cg]->bottomLeft;
+			vertices[curVert++] = m_glyphPonters[cg]->bottomRight;
+			vertices[curVert++] = m_glyphPonters[cg]->bottomRight;
+			vertices[curVert++] = m_glyphPonters[cg]->topRight;
+			vertices[curVert++] = m_glyphPonters[cg]->topLeft;
 			offset += 6;
 		}
 
@@ -200,35 +173,6 @@ namespace Plutus {
 		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-
-	void SpriteBatch::createVertexArray()
-	{
-		//Create the Vertex Array Buffer
-		if (!m_vao) {
-			glGenVertexArrays(1, &m_vao);
-		}
-		glBindVertexArray(m_vao);
-
-		//Create the Vertex Array Buffer
-		if (!m_vbo) {
-			glGenBuffers(1, &m_vbo);
-		}
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-
-		/* Tell OpenGL that we want to use vertexPosition and its location is 0*/
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
-
-		/* Tell OpenGL that we want to use vertexUV and its location is 2*/
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
-
-		/* Tell OpenGL that we want to use vertexColor and its location is1*/
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-
-		glBindVertexArray(0);
 	}
 
 	void SpriteBatch::sortGlyph()
@@ -251,18 +195,42 @@ namespace Plutus {
 		}
 	}
 
-	bool SpriteBatch::compareFrontToBack(Glyph* a, Glyph* b)
+	void SpriteBatch::end()
+	{
+		m_glyphPonters.resize(m_glyphs.size());
+		for (size_t i = 0; i < m_glyphs.size(); i++)
+		{
+			m_glyphPonters[i] = &m_glyphs[i];
+		}
+
+		sortGlyph();
+		createRenderBatches();
+
+		glActiveTexture(GL_TEXTURE0);
+
+		glBindVertexArray(m_vao);
+		for (size_t i = 0; i < m_renderBatches.size(); i++)
+		{
+			glBindTexture(GL_TEXTURE_2D, m_renderBatches[i].texture);
+
+			glDrawArrays(GL_TRIANGLES, m_renderBatches[i].offset, m_renderBatches[i].numVertices);
+		}
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindVertexArray(0);
+	}
+
+	bool SpriteBatch::compareFrontToBack(Glyph *a, Glyph *b)
 	{
 		return (a->depth < b->depth);
 	}
 
-	bool SpriteBatch::compareBackToFront(Glyph* a, Glyph* b)
+	bool SpriteBatch::compareBackToFront(Glyph *a, Glyph *b)
 	{
 		return (a->depth > b->depth);
 	}
 
-	bool SpriteBatch::compareTexture(Glyph* a, Glyph* b)
+	bool SpriteBatch::compareTexture(Glyph *a, Glyph *b)
 	{
 		return (a->texture < b->texture);
 	}
-}
+} // namespace Plutus

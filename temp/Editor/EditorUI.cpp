@@ -2,7 +2,7 @@
 #include "Log/Logger.h"
 #include "Graphics/Camera2D.h"
 #include "ECS/EntityManager.h"
-#include "ECS/Transform2DComponent.h"
+#include "ECS/Components/Transform2DComponent.h"
 #include "ImGuiEx.h"
 #include "LayerEditor.h"
 

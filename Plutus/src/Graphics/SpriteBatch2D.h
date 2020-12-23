@@ -3,10 +3,7 @@
 
 #include <vector>
 
-#include "Renderable2D.h"
-
 #include "IndexBuffer.h"
-#include "Texture/Texture.h"
 #include "vertex.h"
 
 #define RENDERER_MAX_SPRITES 60000
@@ -21,7 +18,7 @@
 
 namespace Plutus
 {
-	class ImageComponent;
+	class SpriteComponent;
 
 	class RenderBatch2D
 	{
@@ -42,24 +39,23 @@ namespace Plutus
 		IndexBuffer *mIBO;
 		GLsizei mIndexCount;
 		Vertex *mBuffer;
-		std::vector<Renderable2D *> mRenderables;
+		std::vector<SpriteComponent *> mRenderables;
 		std::vector<RenderBatch2D> mRenderBatches;
+		std::vector<Vertex> vertices;
 
 	public:
 		SpriteBatch2D();
 		~SpriteBatch2D();
 		void init();
-		void begin();
+		void begin(uint32_t renderableCount);
 
-		void submit(Renderable2D *renderable);
+		void submit(SpriteComponent *renderable);
 		void end();
-
-		void flush();
 		void resizeBuffer(size_t size) { mRenderables.reserve(mRenderables.size() + size); }
 
 	private:
 		static glm::vec2 rotatePoint(glm::vec2 pos, float angle);
-		static bool compareTexture(Renderable2D *a, Renderable2D *b);
+		static bool compareTexture(SpriteComponent *a, SpriteComponent *b);
 	};
 
 } // namespace Plutus

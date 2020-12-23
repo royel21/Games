@@ -2,10 +2,9 @@
 #include <algorithm>
 #include <iostream>
 
-#include "ECS/Transform2DComponent.h"
-#include "ECS/Component.h"
 #include "SpriteBatch2D.h"
 #include "Log/Logger.h"
+#include "ECS/SpriteComponent.h"
 
 namespace Plutus
 {
@@ -18,6 +17,7 @@ namespace Plutus
 		mRenderBatches.clear();
 		mRenderables.clear();
 		glDeleteBuffers(1, &mVBO);
+		delete mIBO;
 	}
 
 	void SpriteBatch2D::init()
@@ -27,8 +27,6 @@ namespace Plutus
 
 		glGenBuffers(1, &mVBO);
 		glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-
-		glBufferData(GL_ARRAY_BUFFER, RENDERER_BUFFER_SIZE, NULL, GL_DYNAMIC_DRAW);
 		//Shader position
 		glEnableVertexAttribArray(SHADER_VERTEX_INDEX);
 		glVertexAttribPointer(SHADER_VERTEX_INDEX, 2, GL_FLOAT, GL_FALSE, RENDERER_VERTEX_SIZE, (const GLvoid *)NULL);
@@ -58,17 +56,18 @@ namespace Plutus
 		}
 
 		mIBO = new IndexBuffer(indices, RENDERER_INDICES_SIZE);
+		delete indices;
 	}
 
-	void SpriteBatch2D::begin()
+	void SpriteBatch2D::begin(uint32_t renderableCount)
 	{
 		mRenderBatches.clear();
 		mRenderables.clear();
+		mRenderables.reserve(renderableCount);
 		glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-		mBuffer = (Vertex *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	}
 
-	void SpriteBatch2D::submit(Renderable2D *renderable)
+	void SpriteBatch2D::submit(SpriteComponent *renderable)
 	{
 		mRenderables.push_back(renderable);
 	}
@@ -76,79 +75,62 @@ namespace Plutus
 	void SpriteBatch2D::end()
 	{
 		std::stable_sort(mRenderables.begin(), mRenderables.end(), compareTexture);
+		vertices.reserve(mRenderables.size() * 4);
 
 		if (mRenderables.size())
-			mRenderBatches.emplace_back(0, 0, mRenderables[0]->getTexturedId());
+			mRenderBatches.emplace_back(0, 0, mRenderables[0]->mTextureId);
 
 		for (size_t cg = 0; cg < mRenderables.size(); cg++)
 		{
 			auto renderable = mRenderables[cg];
-			if (cg > 0 && renderable->getTexturedId() != mRenderables[cg - 1]->getTexturedId())
+			if (cg > 0 && renderable->mTextureId != mRenderables[cg - 1]->mTextureId)
 			{
-				mRenderBatches.emplace_back(mIndexCount, 6, renderable->getTexturedId());
+				mRenderBatches.emplace_back(mIndexCount, 6, renderable->mTextureId);
 			}
 			else
 			{
 				mRenderBatches.back().numVertices += 6;
 			}
-			const glm::vec2 &position = renderable->getPosition();
-			const glm::vec2 &size = renderable->getSize();
-			const ColorRGBA8 &c = renderable->getColor();
-			glm::vec4 uv = glm::vec4(renderable->getUV());
+			const glm::vec2 &position = renderable->mPosition;
+			const glm::vec2 &size = renderable->mSize;
+			const ColorRGBA8 &c = renderable->mColor;
+			glm::vec4 uv = glm::vec4(renderable->mUVCoord);
 
-			if (renderable->getFlipX())
+			if (renderable->mFlipX)
 			{
 				uv.x = 1 - uv.x;
 				uv.z = 1 - uv.z;
 			}
 
-			if (renderable->getFlipY())
+			if (renderable->mFlipY)
 			{
 				uv.y = 1 - uv.y;
 				uv.w = 1 - uv.w;
 			}
-
-			// Bottom Left corner
-			mBuffer->setPosition(position.x, position.y);
-			mBuffer->setUV(uv.x, uv.w);
-			mBuffer->color = c;
-			mBuffer++;
-			// Top Left corner
-			mBuffer->setPosition(position.x, position.y + size.y);
-			mBuffer->setUV(uv.x, uv.y);
-			mBuffer->color = c;
-			mBuffer++;
-			// Top Right corner
-			mBuffer->setPosition(position.x + size.x, position.y + size.y);
-			mBuffer->setUV(uv.z, uv.y);
-			mBuffer->color = c;
-			mBuffer++;
-			// Bottom Right corner
-			mBuffer->setPosition(position.x + size.x, position.y);
-			mBuffer->setUV(uv.z, uv.w);
-			mBuffer->color = c;
-			mBuffer++;
+			vertices.emplace_back(position.x, position.y, uv.x, uv.w, c);
+			vertices.emplace_back(position.x, position.y + size.y, uv.x, uv.y, c);
+			vertices.emplace_back(position.x + size.x, position.y + size.y, uv.z, uv.y, c);
+			vertices.emplace_back(position.x + size.x, position.y, uv.z, uv.w, c);
 
 			mIndexCount += 6;
 		}
 
-		glUnmapBuffer(GL_ARRAY_BUFFER);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
 
-	void SpriteBatch2D::flush()
-	{
-		glBindVertexArray(mVAO);
 		mIBO->bind();
+		glBindVertexArray(mVAO);
 		for (size_t i = 0; i < mRenderBatches.size(); i++)
 		{
 			glBindTexture(GL_TEXTURE_2D, mRenderBatches[i].texture);
 			glDrawElements(GL_TRIANGLES, mRenderBatches[i].numVertices, GL_UNSIGNED_INT, (void *)(mRenderBatches[i].offset * sizeof(GLuint)));
 		}
 		glBindTexture(GL_TEXTURE_2D, 0);
-		mIBO->unbind();
 		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		mIBO->unbind();
 		mIndexCount = 0;
+		vertices.clear();
 	}
 
 	glm::vec2 SpriteBatch2D::rotatePoint(glm::vec2 pos, float angle)
@@ -160,8 +142,8 @@ namespace Plutus
 		return newV;
 	}
 
-	bool SpriteBatch2D::compareTexture(Renderable2D *a, Renderable2D *b)
+	bool SpriteBatch2D::compareTexture(SpriteComponent *a, SpriteComponent *b)
 	{
-		return (a->getTexturedId() < b->getTexturedId());
+		return (a->mTextureId < b->mTextureId);
 	}
 } // namespace Plutus

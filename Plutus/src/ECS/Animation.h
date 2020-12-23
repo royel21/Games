@@ -9,11 +9,11 @@ namespace Plutus
 	{
 		unsigned int startFrame;
 		unsigned int numFrames;
-		float animationSpeed;
-		Animation() : startFrame(0), numFrames(1), animationSpeed(0.166f) {}
+		float aninSpeed;
+		Animation() : startFrame(0), numFrames(1), aninSpeed(0.166f) {}
 
-		Animation(unsigned int _startFrame, unsigned int _numFrames, int _animationSpeed = 100)
-			: startFrame(_startFrame), numFrames(_numFrames), animationSpeed(1.0f / (_animationSpeed / 16.66f))
+		Animation(unsigned int _startFrame, unsigned int _numFrames, int _aninSpeed = 100)
+			: startFrame(_startFrame), numFrames(_numFrames), aninSpeed(1.0f / (_aninSpeed / 16.66f))
 		{
 		}
 	};

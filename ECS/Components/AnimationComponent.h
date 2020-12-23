@@ -5,7 +5,6 @@
 
 #include "Component.h"
 #include "Animation.h"
-#include "ImageComponent.h"
 
 namespace Plutus
 {
@@ -13,7 +12,6 @@ namespace Plutus
 
     class AnimationComponent : public Component
     {
-        ImageComponent *mImage;
         TileSet *mTileset;
 
         bool animationLoop = false;
@@ -26,8 +24,6 @@ namespace Plutus
 
     public:
         AnimationComponent(const std::string &tileSet);
-
-        void Initialize() override;
         void Update(float deltaTime) override;
 
         void AddAnimation(const std::string id, const Animation &anin);

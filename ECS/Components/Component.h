@@ -11,7 +11,7 @@ namespace Plutus
 	public:
 		Entity *owner;
 		virtual ~Component() {}
-		virtual void Initialize() = 0;
+		virtual void Initialize(){};
 		virtual void Update(float deltaTime) = 0;
 
 		virtual void Serialize(Serializer &writer) const = 0;

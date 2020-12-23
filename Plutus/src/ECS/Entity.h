@@ -1,78 +1,50 @@
-#ifndef _ENTITY_H
-#define _ENTITY_H
+#ifndef __ENTITY2_H__
+#define __ENTITY2_H__
 
-#include <map>
-#include <string>
-#include <vector>
-#include <typeinfo>
-#include "Component.h"
-#include "Serializer.h"
+#include <cstring>
+#include "entt.hpp"
+#include "Scene.h"
+#include <assert.h>
 
 namespace Plutus
 {
-	class Serializer;
-	class EntityManager;
+    class Entity
+    {
+    public:
+        Entity(entt::entity Entity, Scene *scence);
 
-	class Entity
-	{
-	private:
-		bool isActive;
-		EntityManager &manager;
-		std::vector<Component *> components;
-		std::map<const std::type_info *, Component *> componentTypeMap;
+        template <typename T>
+        bool hasComponent()
+        {
+            return mScene->mRegistry.has<T>(mEntityId);
+        }
 
-	public:
-		std::string name;
-		std::string mLayerId;
-		Entity(EntityManager &manager, const std::string &layerId);
-		Entity(EntityManager &manager, const std::string &name, const std::string &layerId);
-		~Entity();
+        template <typename T, typename... Args>
+        T &addComponent(Args &&... args)
+        {
+            assert(!hasComponent<T>() && "Entity already has component!");
+            return mScene->mRegistry.emplace<T>(mEntityId, std::forward<Args>(args)...);
+        }
 
-		void Update(float deltaTime);
+        template <typename T>
+        T &getComponent()
+        {
+            assert(hasComponent<T>() && "Entity does not has component!");
+            return mScene->mRegistry.get<T>(mEntityId);
+        }
 
-		inline bool IsActive() const { return isActive; }
+        template <typename T>
+        bool removeComponent()
+        {
+            assert(hasComponent<T>() && "Entity does not has component!");
+            return mScene->mRegistry.remove<T>(mEntityId);
+        }
 
-		template <typename T, typename... TArgs>
-		T &addComponent(TArgs &&... args)
-		{
-			T *newComponent(new T(std::forward<TArgs>(args)...));
-			newComponent->owner = this;
+        operator bool() const { return mEntityId != entt::null; }
 
-			components.emplace_back(newComponent);
-
-			componentTypeMap[&typeid(*newComponent)] = newComponent;
-
-			newComponent->Initialize();
-			return *newComponent;
-		}
-
-		template <typename T>
-		T *GetComponent()
-		{
-			return static_cast<T *>(componentTypeMap[&typeid(T)]);
-		}
-
-		void Destroy();
-
-		void Serialize(Serializer &serializer) const
-		{
-			auto writer = serializer.getWriter();
-			writer->StartObject();
-			writer->String("Name");
-			writer->String(name.c_str());
-
-			writer->String("Components");
-			writer->StartArray();
-
-			for (auto &comp : components)
-			{
-				comp->Serialize(serializer);
-			}
-
-			writer->EndArray();
-
-			writer->EndObject();
-		}
-	};
+    private:
+        entt::entity mEntityId{entt::null};
+        Scene *mScene;
+    };
 } // namespace Plutus
-#endif
+#endif // __ENTITY_H__

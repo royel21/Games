@@ -20,9 +20,10 @@ namespace Plutus
 		tilesets.clear();
 	}
 
-	void AssetManager::addTexture(const std::string &textureId, const std::string &texturePath)
+	GLTexture AssetManager::addTexture(const std::string &textureId, const std::string &texturePath)
 	{
 		textures.emplace(textureId, texturePath);
+		return TextureManager::getTexture(textures[textureId]);
 	}
 
 	void AssetManager::addTileSet(const std::string &name, int column, int width, int height, const std::string &texturePath)

@@ -51,6 +51,12 @@ namespace Plutus
         int getHeight() { return m_window.getScreenHeight(); }
         int getWidth() { return m_window.getScreenWidth(); }
 
+        //Set backgound color
+        void setBackgoundColor(float r, float g, float b, float a)
+        {
+            glClearColor(r, g, b, a);
+        }
+
     private:
         bool init();
         void sysEvents(SDL_Event &event);

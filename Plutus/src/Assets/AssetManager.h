@@ -46,7 +46,7 @@ namespace Plutus
 
 		static void clearData();
 
-		static void addTexture(const std::string &textureId, const std::string &texturePath);
+		static GLTexture addTexture(const std::string &textureId, const std::string &texturePath);
 
 		static void addTileSet(const std::string &id, int column, int width, int height, const std::string &texturePath);
 

@@ -10,13 +10,9 @@ namespace Plutus
         mTid = texture.id;
     }
 
-    void ImageComponent::Initialize()
-    {
-        transform = owner->GetComponent<Transform2DComponent>();
-    }
-
     void ImageComponent::Update(float deltaTime)
     {
+        auto transform = owner->GetComponent<Transform2DComponent>();
         mPosition = transform->position;
         mSize = transform->size;
     }

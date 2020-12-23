@@ -26,14 +26,7 @@ namespace Plutus
 			const glm::vec4 &uvRect,
 			const GLuint m_texture,
 			float m_depth,
-			const ColorRGBA8 &color);
-		Glyph(
-			const glm::vec4 &destRec,
-			const glm::vec4 &uvRect,
-			const GLuint m_texture,
-			float m_depth,
-			const ColorRGBA8 &color,
-			float angle);
+			const ColorRGBA8 &color, float angle = 0);
 
 		GLuint texture;
 		float depth;
@@ -83,31 +76,12 @@ namespace Plutus
 		void draw(
 			const glm::vec4 &destRec,
 			const glm::vec4 &uvRect,
-			const GLuint texture,
-			float depth,
-			const ColorRGBA8 &color);
-		//Draw with rotation
-		void draw(
-			const glm::vec4 &destRec,
-			const glm::vec4 &uvRect,
-			const GLuint texture,
-			float depth,
 			const ColorRGBA8 &color,
-			float angle);
-		//Draw with rotation and direction
-		void draw(
-			const glm::vec4 &destRec,
-			const glm::vec4 &uvRect,
 			const GLuint texture,
-			float depth,
-			const ColorRGBA8 &color,
-			const glm::vec2 &dir);
-
-		void renderBatch();
+			float depth = 0, float angle = 0);
 
 	private:
 		void createRenderBatches();
-		void createVertexArray();
 		void sortGlyph();
 
 		static bool compareFrontToBack(Glyph *a, Glyph *b);

@@ -1,34 +1,30 @@
 #include "AnimationComponent.h"
 #include "ECS/Serializer.h"
 #include "Log/Logger.h"
+#include "ImageComponent.h"
 
 namespace Plutus
 {
     AnimationComponent::AnimationComponent(const std::string &tileSet)
     {
-        mImage = nullptr;
         currentAni = nullptr;
         mTileset = AssetManager::getTileSet(tileSet);
     }
 
-    void AnimationComponent::Initialize()
-    {
-        mImage = owner->GetComponent<ImageComponent>();
-    }
-
     void AnimationComponent::Update(float deltaTime)
     {
+        auto imgConmp = owner->GetComponent<ImageComponent>();
         if (isAnimate)
         {
             animationTime += currentAni->animationSpeed * deltaTime;
 
             currentFrame = currentAni->startFrame + (int)animationTime % currentAni->numFrames;
 
-            mImage->setUV(mTileset->getUV(currentFrame));
+            imgConmp->setUV(mTileset->getUV(currentFrame));
         }
         else
         {
-            mImage->setUV(mTileset->getUV(currentAni->startFrame));
+            imgConmp->setUV(mTileset->getUV(currentAni->startFrame));
         }
     }
 

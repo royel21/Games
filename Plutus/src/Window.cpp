@@ -60,9 +60,6 @@ namespace Plutus
 		//Print the OpenGL Version
 		std::printf("*** OpenGL Version %s ***\n", glGetString(GL_VERSION));
 
-		//Set backgound color
-		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-
 		//Set VSYNC
 		SDL_GL_SetSwapInterval(0);
 

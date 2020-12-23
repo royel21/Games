@@ -15,11 +15,12 @@ namespace Plutus
 		glm::vec4 mUVCoord;
 		ColorRGBA8 mColor;
 		GLuint mTid;
-		bool flipX = false;
-		bool flipY = false;
+		bool mFlipX = false;
+		bool mFlipY = false;
+		float mRotation = 0.0f;
 
 	public:
-		Renderable2D() : mPosition(0), mSize(0), mUVCoord(0, 0, 1, 1), mTid(0)
+		Renderable2D() : mPosition(0), mSize(0), mUVCoord(0, 0, 1, 1), mTid(0), mRotation(0.0f)
 		{
 		}
 
@@ -29,20 +30,27 @@ namespace Plutus
 			const glm::vec4 &uvCoord,
 			const ColorRGBA8 &color,
 			uint32_t tid,
-			float angle = 0) : mPosition(position), mSize(size), mUVCoord(uvCoord), mColor(color), mTid(tid)
+			float angle = 0.0f)
+			: mPosition(position), mSize(size), mUVCoord(uvCoord), mColor(color), mTid(tid), mRotation(angle)
 		{
 		}
 
 		virtual ~Renderable2D() {}
 
-		inline const glm::vec2 &getPosition() { return mPosition; }
-		inline const glm::vec2 &getSize() { return mSize; }
-		inline const ColorRGBA8 &getColor() { return mColor; }
-		inline const glm::vec4 &getUV() { return mUVCoord; }
-		inline GLuint getTexturedId() { return mTid; }
-		inline bool getFlipX() { return flipX; }
-		inline bool getFlipY() { return flipY; }
+		const glm::vec2 &getPosition() { return mPosition; }
+		const glm::vec2 &getSize() { return mSize; }
+		const ColorRGBA8 &getColor() { return mColor; }
+		const glm::vec4 &getUV() { return mUVCoord; }
 
+		GLuint getTexturedId() { return mTid; }
+
+		bool getFlipX() { return mFlipX; }
+		bool getFlipY() { return mFlipY; }
+		bool getRotation() { return mRotation; }
+
+		void setFlipX(bool f) { mFlipX = f; };
+		void setFlipY(bool f) { mFlipY = f; };
+		void setRotation(float angle) { mRotation = angle; }
 		void setPosition(const glm::vec2 &position) { mPosition = position; }
 		void setSize(const glm::vec2 &size) { mSize = size; }
 		void setColor(const ColorRGBA8 &color) { mColor = color; }

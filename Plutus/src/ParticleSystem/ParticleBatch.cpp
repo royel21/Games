@@ -47,7 +47,7 @@ namespace Plutus
 			if (p.m_life > 0.0f)
 			{
 				glm::vec4 destRect(p.m_position.x, p.m_position.y, p.m_width, p.m_width);
-				sp->draw(destRect, uv, m_texture.id, 0.0f, p.m_color);
+				sp->draw(destRect, uv, p.m_color, m_texture.id);
 			}
 		}
 	}

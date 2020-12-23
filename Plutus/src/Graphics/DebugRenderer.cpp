@@ -202,7 +202,7 @@ namespace Plutus
 	{
 
 		m_shader.enable();
-		m_shader.setUniformMat4("P", projectionMatrix);
+		m_shader.setUniformMat4("camera", projectionMatrix);
 
 		glLineWidth(lineWidth);
 		glBindVertexArray(m_vao);

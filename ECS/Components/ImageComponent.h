@@ -1,7 +1,7 @@
 #ifndef __IMAGECOMPONENT_H__
 #define __IMAGECOMPONENT_H__
 
-#include "Entity.h"
+#include "ECS/Entity.h"
 #include "Graphics/Renderable2D.h"
 #include "Component.h"
 #include "Transform2DComponent.h"
@@ -18,11 +18,8 @@ namespace Plutus
 
     public:
         ImageComponent(const std::string &textureId);
-        void Initialize() override;
         void Update(float deltaTime) override;
         void Serialize(Serializer &serializer) const override;
-        void setFlipX(bool f);
-        void setFlipY(bool f);
     };
 
 } // namespace Plutus

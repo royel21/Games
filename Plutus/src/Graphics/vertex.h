@@ -44,6 +44,7 @@ namespace Plutus
 	struct Vertex
 	{
 		Vertex() : position(), uv() {}
+		Vertex(float x, float y, float uvX, float uvY, ColorRGBA8 c) : position(x, y), uv(uvX, uvY), color(c) {}
 		Position position;
 		UV uv;
 		ColorRGBA8 color;
