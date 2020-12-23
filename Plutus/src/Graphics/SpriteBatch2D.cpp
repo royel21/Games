@@ -5,6 +5,7 @@
 #include "SpriteBatch2D.h"
 #include "Log/Logger.h"
 #include "ECS/SpriteComponent.h"
+#include "SDL.h"
 
 namespace Plutus
 {
@@ -74,8 +75,10 @@ namespace Plutus
 
 	void SpriteBatch2D::end()
 	{
+		// uint32_t start = SDL_GetTicks();
 		std::stable_sort(mRenderables.begin(), mRenderables.end(), compareTexture);
 		vertices.reserve(mRenderables.size() * 4);
+		// LOG_I("time: {0}", SDL_GetTicks() - start);
 
 		if (mRenderables.size())
 			mRenderBatches.emplace_back(0, 0, mRenderables[0]->mTextureId);

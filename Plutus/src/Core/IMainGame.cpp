@@ -69,7 +69,7 @@ namespace Plutus
 			m_window.swapBuffer();
 
 			m_fps = limiter.end();
-			LOG_I("{0} {1}", m_fps, dt);
+			// LOG_I("{0} {1}", m_fps, dt);
 			lastTick = newTick;
 		}
 		onExit();

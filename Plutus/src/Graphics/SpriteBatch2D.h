@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "IndexBuffer.h"
+#include "Texture/Texture.h"
 #include "vertex.h"
 
 #define RENDERER_MAX_SPRITES 60000
@@ -51,6 +52,8 @@ namespace Plutus
 
 		void submit(SpriteComponent *renderable);
 		void end();
+
+		void flush();
 		void resizeBuffer(size_t size) { mRenderables.reserve(mRenderables.size() + size); }
 
 	private:
