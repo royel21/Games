@@ -21,6 +21,15 @@ void App::onInit()
     auto ent = mScene.createEntity("Test");
     ent.addComponent<Plutus::TransformComponent>(0.0f, 0.0f, m_window.getScreenWidth(), m_window.getScreenHeight());
     ent.addComponent<Plutus::SpriteComponent>(texture.id);
+    int halfX = m_window.getScreenWidth() / 2;
+    int halfY = m_window.getScreenHeight() / 2;
+
+    for (int i = 0; i < 2000; i++)
+    {
+        auto ent2 = mScene.createEntity("Test2");
+        ent2.addComponent<Plutus::TransformComponent>(halfX * -1.0f, halfY * -1.0f, 64, 64);
+        ent2.addComponent<Plutus::SpriteComponent>(texture.id);
+    }
 }
 
 void App::onUpdate(float dt)

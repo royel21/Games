@@ -2,6 +2,7 @@
 #include "IMainGame.h"
 #include "Time/Timing.h"
 #include "Assets/AssetManager.h"
+#include "Log/Logger.h"
 
 namespace Plutus
 {
@@ -41,17 +42,35 @@ namespace Plutus
 		while (m_isRunning)
 		{
 			limiter.begin();
+			auto newTick = SDL_GetTicks();
+			auto elapsed = newTick - lastTick;
+			float dt = 16.6667 / elapsed;
+
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			checkEvent();
-
+			// if (dt > 0)
+			// {
+			// 	int step = static_cast<int>(dt);
+			// 	while (step > 0)
+			// 	{
+			// 		onUpdate(1);
+			// 		step--;
+			// 	}
+			// }
+			// else
+			// {
 			onUpdate(1);
-
+			// }
+			// onUpdate(1);
+			// auto start = SDL_GetTicks();
 			onDraw();
-
+			// auto elapsed2 = SDL_GetTicks() - start;
 			m_window.swapBuffer();
 
 			m_fps = limiter.end();
+			LOG_I("{0} {1}", m_fps, dt);
+			lastTick = newTick;
 		}
 		onExit();
 		AssetManager::clearData();

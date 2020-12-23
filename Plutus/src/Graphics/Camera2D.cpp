@@ -1,5 +1,6 @@
 #include "Camera2D.h"
 #include "glm/gtc/matrix_transform.hpp"
+#include "Log/Logger.h"
 
 namespace Plutus
 {
@@ -39,10 +40,9 @@ namespace Plutus
 			glm::vec3 scale(m_scale, m_scale, 0.0f);
 			m_cameraMatrix = glm::scale(glm::mat4(1.0f), scale) * m_cameraMatrix;
 
-			m_needsMatrixUpdate = false;
-
 			screenOrigin = (translate / scale) * -1.0f;
 			screenEnd = translate / scale;
+			m_needsMatrixUpdate = false;
 		}
 	}
 	//Convert screen coordination to opengl coordination and return it

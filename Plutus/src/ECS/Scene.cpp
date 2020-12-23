@@ -55,31 +55,31 @@ namespace Plutus
 
         auto group = mRegistry.group<TransformComponent, SpriteComponent>();
 
-        renderer.begin(group.size());
-
-        for (auto entity : group)
-        {
-            auto &[trans, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
-
-            sprite.mPosition = trans.position;
-            sprite.mSize = trans.size;
-
-            renderer.submit(&sprite);
-        }
-
-        renderer.end();
-
-        // renderer2.begin();
+        // renderer.begin(group.size());
 
         // for (auto entity : group)
         // {
-        //     auto &[trans, text] = group.get<TransformComponent, SpriteComponent>(entity);
+        //     auto &[trans, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
 
-        //     auto pos = glm::vec4(trans.position.x, trans.position.y, trans.size.x, trans.size.y);
+        //     sprite.mPosition = trans.position;
+        //     sprite.mSize = trans.size;
 
-        //     renderer2.draw(pos, text.mUVCoord, text.mColor, text.mTextureId);
+        //     renderer.submit(&sprite);
         // }
-        // renderer2.end();
+
+        // renderer.end();
+
+        renderer2.begin();
+
+        for (auto entity : group)
+        {
+            auto &[trans, text] = group.get<TransformComponent, SpriteComponent>(entity);
+
+            auto pos = glm::vec4(trans.position.x, trans.position.y, trans.size.x, trans.size.y);
+
+            renderer2.draw(pos, text.mUVCoord, text.mColor, text.mTextureId);
+        }
+        renderer2.end();
 
         mShader.disable();
     }
