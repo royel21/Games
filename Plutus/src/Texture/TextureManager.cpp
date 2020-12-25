@@ -41,9 +41,6 @@ namespace Plutus
 		uint8_t *out;
 
 		int width, height, BPP;
-		//Flip image vertically
-		//stbi_set_flip_vertically_on_load(1);
-		//Load image from path
 		out = stbi_load(filePath.c_str(), &width, &height, &BPP, 4);
 
 		glGenTextures(1, &texture.id);

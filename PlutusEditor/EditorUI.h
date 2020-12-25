@@ -8,22 +8,18 @@
 #include "Window.h"
 #include "Input/InputManager.h"
 #include "Assets/AssetManager.h"
-#include "Texture/TileSheet.h"
 
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 #include "FrameBuffer.h"
 #include "Graphics/DebugRenderer.h"
-
-#define EDIT_PLACE 0
-#define EDIT_SELECT 1
-#define EDIT_REMOVE 2
+#include "Panels/EntityEditor.h"
 
 namespace Plutus
 {
 	class Camera2D;
-	class EntityManager;
+
 	class EditorUI
 	{
 		struct props
@@ -36,26 +32,25 @@ namespace Plutus
 	private:
 		static EditorUI *mInstance;
 		ImGuiIO *mImGui_IO = nullptr;
+
 		Window *mWindow = nullptr;
-		InputManager *mIManager = nullptr;
+		InputManager *mInputManager = nullptr;
 		GLTexture mTileTexture;
-		TileSheet m_texture;
-		Camera2D *m_camera = nullptr;
-		EntityManager *mEntManager = nullptr;
+		TileSet m_texture;
+		Camera2D *mCamera = nullptr;
 		glm::vec2 lastCoords;
-		int m_mode = EDIT_PLACE;
 		bool m_moveCamera = false;
 		FrameBuffer mFb;
 		ImVec2 mViewportSize;
-		Plutus::DebugRender *mDebugRender = nullptr;
-
-		int mapToView(int x, int in_min, int in_max, int out_min, int out_max)
-		{
-			return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-		}
+		DebugRender *mDebugRender = nullptr;
+		AssetManager *mAssetsMangager;
+		glm::vec4 mVPColor;
+		//Panels
+		EntityEditor mEntityEditor;
 
 	public:
-		std::vector<ImVec2> Selectedtiles;
+		std::vector<ImVec2>
+			Selectedtiles;
 
 	public:
 		static EditorUI *getInstance(Plutus::Window *_window, Camera2D *cam);
@@ -66,13 +61,6 @@ namespace Plutus
 		void beginUI();
 		void endUI();
 		void destroy();
-		//ImGui Panels
-		void createTile();
-		void drawTilesetEditor();
-		void CameraControl();
-		void tilesProps();
-		void EntityEditor();
-		void drawMainDockingWin();
 		//Bind Framebuffer
 		void bindFB();
 		void unBindFB();
@@ -80,23 +68,25 @@ namespace Plutus
 		void onEvent(SDL_Event &event);
 
 		ImGuiIO *getIO() { return mImGui_IO; }
-
 		const glm::vec2 &getLastCoords() { return lastCoords; }
 
 		inline void setLastCoord(const glm::vec2 &coords) { lastCoords = coords; }
 		inline bool moveCamera() { return m_moveCamera; }
-
 		inline bool isHover() { return ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered(); }
-
 		inline void showDemo() { ImGui::ShowDemoWindow(); }
 		inline void setTileSheet(const std::string textureId)
 		{
-			m_texture.texture = Plutus::AssetManager::getTexture(textureId);
+			m_texture = mAssetsMangager->getTexture(textureId);
 		}
+		void viewPortBGColor(float r, float b, float g, float a);
 
 	private:
 		EditorUI();
+		//ImGui Panels
+		void drawMainDockingWin();
 		void viewPort();
+		void viewPortControl();
+
 		void Init(Plutus::Window *_window, Camera2D *cam);
 	};
 

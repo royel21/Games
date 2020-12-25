@@ -12,6 +12,7 @@ namespace Plutus
 
 	struct GLTexture
 	{
+		GLTexture() : id(0), width(0), height(0) {}
 		uint32_t id;
 		int width;
 		int height;

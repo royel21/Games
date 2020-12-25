@@ -39,7 +39,7 @@ namespace Plutus
             assert(hasComponent<T>() && "Entity does not has component!");
             return mScene->mRegistry.remove<T>(mEntityId);
         }
-
+        entt::entity getEntityId() { return mEntityId; }
         operator bool() const { return mEntityId != entt::null; }
 
     private:

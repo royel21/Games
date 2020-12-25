@@ -5,6 +5,7 @@
 #include "SpriteBatch2D.h"
 #include "Log/Logger.h"
 #include "ECS/SpriteComponent.h"
+#include "ECS/Components.h"
 #include "SDL.h"
 
 namespace Plutus
@@ -148,5 +149,59 @@ namespace Plutus
 	bool SpriteBatch2D::compareTexture(SpriteComponent *a, SpriteComponent *b)
 	{
 		return (a->mTextureId < b->mTextureId);
+	}
+
+	void SpriteBatch2D::submit(TransformComponent *trans, SpriteComponent *sprite)
+	{
+		glm::vec4 uv = glm::vec4(sprite->mUVCoord);
+		GLuint textId = sprite->mTextureId;
+		if (sprite->mFlipX)
+		{
+			uv.x = 1 - uv.x;
+			uv.z = 1 - uv.z;
+		}
+
+		if (sprite->mFlipY)
+		{
+			uv.y = 1 - uv.y;
+			uv.w = 1 - uv.w;
+		}
+		vertices2[textId].emplace_back(trans->position.x, trans->position.y, uv.x, uv.w, sprite->mColor);
+		vertices2[textId].emplace_back(trans->position.x, trans->position.y + trans->size.y, uv.x, uv.y, sprite->mColor);
+		vertices2[textId].emplace_back(trans->position.x + trans->size.x, trans->position.y + trans->size.y, uv.z, uv.y, sprite->mColor);
+		vertices2[textId].emplace_back(trans->position.x + trans->size.x, trans->position.y, uv.z, uv.w, sprite->mColor);
+	}
+
+	void SpriteBatch2D::end2()
+	{
+		// uint32_t start = SDL_GetTicks();
+		// int i = 0;
+		// GLuint offset = 0;
+		// GLuint vertSize = 0;
+		// for (auto vers : vertices2)
+		// {
+		// 	vertSize += vers.second.size();
+		// 	mRenderBatches2[vers.first].texture = vers.first;
+		// 	mRenderBatches2[vers.first].offset = offset;
+		// 	mRenderBatches2[vers.first].numVertices = ((vers.second.size() / 4) * 6);
+		// 	offset = (i + 1) * mRenderBatches2[vers.first].numVertices;
+		// }
+
+		// glBufferData(GL_ARRAY_BUFFER, vertSize * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+		// glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
+
+		// mIBO->bind();
+		// glBindVertexArray(mVAO);
+		// for (size_t i = 0; i < mRenderBatches.size(); i++)
+		// {
+		// 	glBindTexture(GL_TEXTURE_2D, mRenderBatches[i].texture);
+		// 	glDrawElements(GL_TRIANGLES, mRenderBatches[i].numVertices, GL_UNSIGNED_INT, (void *)(mRenderBatches[i].offset * sizeof(GLuint)));
+		// }
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		mIBO->unbind();
+		mIndexCount = 0;
+		vertices2.clear();
 	}
 } // namespace Plutus

@@ -14,6 +14,7 @@ namespace Plutus
     Scene::Scene()
     {
         mLayers["Layer0"].name = "Layer0";
+        mCurrentLayer = &mLayers["Layer0"];
     };
 
     Scene::~Scene()
@@ -21,22 +22,35 @@ namespace Plutus
         mLayers.clear();
     }
 
-    void Scene::Init(int width, int height)
+    void Scene::Init(Camera2D *camera)
     {
         renderer.init();
         renderer2.init();
-        mCamera.init(width, height);
+        mCamera = camera;
         mShader.CreateProgWithShader(vertexShader2, fragShader2);
     }
 
     void Scene::update()
     {
-        mCamera.update();
+        // auto view = mRegistry.view<TransformComponent>();
+
+        // for (auto entity : view)
+        // {
+        //     // a component at a time ...
+        //     auto &trans = view.get<TransformComponent>(entity);
+        //     trans.position += 2;
+        //     if (trans.position.x > mCamera.getScaleScreen().x / 2)
+        //     {
+        //         trans.position.x = mCamera.getScaleScreen().x / 2 * -1;
+        //         trans.position.y = mCamera.getScaleScreen().y / 2 * -1;
+        //     }
+        // }
     }
 
     Entity Scene::createEntity(const std::string &name)
     {
         Entity ent = {mRegistry.create(), this};
+        mCurrentLayer->entities.push_back(ent.getEntityId());
         ent.addComponent<TagComponent>(name);
         return ent;
     }
@@ -52,24 +66,36 @@ namespace Plutus
         glClearDepth(1.0f);
         mShader.setUniform1i("hasTexture", 0);
         mShader.setUniform1i("mySampler", 0);
-        mShader.setUniformMat4("camera", mCamera.getCameraMatrix());
-
-        auto group = mRegistry.group<TransformComponent, SpriteComponent>();
-
-        uint32_t start = SDL_GetTicks();
-        renderer.begin(group.size());
-
-        for (auto entity : group)
+        mShader.setUniformMat4("camera", mCamera->getCameraMatrix());
+        // uint32_t start = SDL_GetTicks();
+        for (auto layer : mLayers)
         {
-            auto &[trans, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
-
-            sprite.mPosition = trans.position;
-            sprite.mSize = trans.size;
-
-            renderer.submit(&sprite);
+            renderer.begin(layer.second.entities.size());
+            for (auto ent : layer.second.entities)
+            {
+                auto trans = mRegistry.get<TransformComponent>(ent);
+                auto sprite = mRegistry.get<SpriteComponent>(ent);
+                sprite.mPosition = trans.position;
+                sprite.mSize = trans.size;
+                renderer.submit(&sprite);
+            }
+            renderer.end();
         }
-        renderer.end();
-        LOG_I("time: {0}", SDL_GetTicks() - start);
+        // LOG_I("time: {0}", SDL_GetTicks() - start);
+        // auto group = mRegistry.group<TransformComponent, SpriteComponent>();
+
+        // renderer.begin(group.size());
+
+        // uint32_t start = SDL_GetTicks();
+        // for (auto entity : group)
+        // {
+        //     auto &[trans, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
+        //     sprite.mPosition = trans.position;
+        //     sprite.mSize = trans.size;
+        //     renderer.submit(&sprite);
+        // }
+        // renderer.end();
+        // LOG_I("time: {0}", SDL_GetTicks() - start);
 
         // renderer2.begin();
 

@@ -15,11 +15,11 @@ namespace
 		out vec2 fragmentPosition;
 		out vec4 fragmentColor;
 
-		uniform mat4 P;
+		uniform mat4 camera;
 
 		void main() {
 			//Set the x,y position on the screen
-			gl_Position.xy = (P * vec4(vertexPosition, 0, 1.0)).xy;
+			gl_Position.xy = (camera * vec4(vertexPosition, 0, 1.0)).xy;
 			//the z position is zero since we are in 2D
 			gl_Position.z = 0.0;
     
@@ -54,7 +54,7 @@ namespace Plutus
 		return instance;
 	}
 
-	DebugRender::DebugRender() : m_vao(0), m_vbo(0), m_ibo(0)
+	DebugRender::DebugRender() : m_vao(0), m_vbo(0), m_ibo(0), mGridColor(0, 0, 0, 255)
 	{
 	}
 
@@ -198,11 +198,10 @@ namespace Plutus
 		m_indices.push_back(start);
 	}
 
-	void DebugRender::render(const glm::mat4 &projectionMatrix, float lineWidth)
+	void DebugRender::render(float lineWidth)
 	{
-
 		m_shader.enable();
-		m_shader.setUniformMat4("camera", projectionMatrix);
+		m_shader.setUniformMat4("camera", m_camera->getCameraMatrix());
 
 		glLineWidth(lineWidth);
 		glBindVertexArray(m_vao);
@@ -227,8 +226,6 @@ namespace Plutus
 	{
 		if (isDraw)
 		{
-			ColorRGBA8 color;
-			color.a = 255;
 			glm::vec2 scaleScreen = m_camera->getScaleScreen();
 
 			glm::vec2 screenStart = m_camera->getPosition() - (scaleScreen / 2.0f);
@@ -238,36 +235,36 @@ namespace Plutus
 
 			// LOG_I("SC: {0} SC:{1}", scaleScreen.x, scaleScreen.y);
 
-			int sizeX = static_cast<int>((scaleScreen.x) / m_width) + 2;
-			int sizeY = static_cast<int>((scaleScreen.y) / m_height) + 2;
+			int sizeX = static_cast<int>((scaleScreen.x) / mCellWidth) + 2;
+			int sizeY = static_cast<int>((scaleScreen.y) / mCellHeight) + 2;
 
-			float x = floor(screenStart.x / m_width);
-			float y = floor(screenStart.y / m_height);
+			float x = floor(screenStart.x / mCellWidth);
+			float y = floor(screenStart.y / mCellHeight);
 
-			glm::vec2 cPos(x * m_width, y * m_height);
+			glm::vec2 cPos(x * mCellWidth, y * mCellHeight);
 
 			for (int x = 0; x <= sizeX; x++)
 			{
-				lineStart.x = cPos.x + (x * m_width);
+				lineStart.x = cPos.x + (x * mCellWidth);
 				lineStart.y = cPos.y;
 
-				lineEnd.x = cPos.x + (x * m_width);
+				lineEnd.x = cPos.x + (x * mCellWidth);
 				lineEnd.y = screenEnd.y;
-				drawLine(lineStart, lineEnd, color);
+				drawLine(lineStart, lineEnd, mGridColor);
 			}
 
 			for (int y = 0; y <= sizeY; y++)
 			{
 				lineStart.x = cPos.x;
-				lineStart.y = cPos.y + (y * m_height);
+				lineStart.y = cPos.y + (y * mCellHeight);
 
 				lineEnd.x = screenEnd.x;
-				lineEnd.y = cPos.y + (y * m_height);
-				drawLine(lineStart, lineEnd, color);
+				lineEnd.y = cPos.y + (y * mCellHeight);
+				drawLine(lineStart, lineEnd, mGridColor);
 			}
 			end();
 
-			render(m_camera->getCameraMatrix(), 1.0f);
+			render(1.0f);
 		}
 	}
 
@@ -277,22 +274,12 @@ namespace Plutus
 		glm::vec2 center(m_win->getScreenWidth() / 2, m_win->getScreenHeight() / 2);
 		cmpos += center;
 
-		int x = (int)floor(cmpos.x / m_width);
-		int y = (int)floor(cmpos.y / m_height);
+		int x = (int)floor(cmpos.x / mCellWidth);
+		int y = (int)floor(cmpos.y / mCellHeight);
 
 		glm::vec2 coords(
-			(float)(x * m_width) - center.x,
-			(float)(y * m_height) - center.y);
+			(float)(x * mCellWidth) - center.x,
+			(float)(y * mCellHeight) - center.y);
 		return coords;
-	}
-
-	void DebugRender::setGridSize(int gridWidth, int gridHeight)
-	{
-		m_width = gridWidth;
-		m_height = gridHeight;
-	}
-	glm::vec2 DebugRender::getGridSize()
-	{
-		return glm::vec2(m_width, m_height);
 	}
 } // namespace Plutus

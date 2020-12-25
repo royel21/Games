@@ -6,6 +6,7 @@
 #include "IndexBuffer.h"
 #include "Texture/Texture.h"
 #include "vertex.h"
+#include <unordered_map>
 
 #define RENDERER_MAX_SPRITES 60000
 #define RENDERER_VERTEX_SIZE sizeof(Vertex)
@@ -20,6 +21,7 @@
 namespace Plutus
 {
 	class SpriteComponent;
+	class TransformComponent;
 
 	class RenderBatch2D
 	{
@@ -43,6 +45,8 @@ namespace Plutus
 		std::vector<SpriteComponent *> mRenderables;
 		std::vector<RenderBatch2D> mRenderBatches;
 		std::vector<Vertex> vertices;
+		std::unordered_map<GLuint, std::vector<Vertex>> vertices2;
+		std::unordered_map<GLuint, RenderBatch2D> mRenderBatches2;
 
 	public:
 		SpriteBatch2D();
@@ -51,7 +55,9 @@ namespace Plutus
 		void begin(uint32_t renderableCount);
 
 		void submit(SpriteComponent *renderable);
+		void submit(TransformComponent *trans, SpriteComponent *sprite);
 		void end();
+		void end2();
 
 		void flush();
 		void resizeBuffer(size_t size) { mRenderables.reserve(mRenderables.size() + size); }

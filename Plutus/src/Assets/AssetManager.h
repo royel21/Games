@@ -10,57 +10,70 @@
 
 namespace Plutus
 {
+	class Serializer;
 
 	struct TileSet
 	{
 		std::string name;
-		int column;
-		int width;
-		int height;
-		GLTexture texture;
-		std::vector<glm::vec4> coords;
-		TileSet(const std::string &_name, int _column, int _width, int _height, GLTexture tex) : name(_name), column(_column), width(_width), height(_height), texture(tex)
-		{
-			int size = column * int(texture.height / _height);
-			for (int i = 0; i < size; i++)
-			{
-				int y = i / column;
-				int x = i % column;
-				glm::vec4 UV;
-				UV.x = ((float)(x * width) / (float)texture.width);
-				UV.y = ((float)(y * height) / (float)texture.height);
-				UV.z = ((float)(x * width + width) / (float)texture.width);
-				UV.w = ((float)(y * height + height) / (float)texture.height);
+		int columns;
+		int tileWidth;
+		int tileHeight;
+		int texWidth;
+		int texHeight;
+		uint32_t texId;
+		std::string path;
+		std::vector<glm::vec4> uvs;
+		TileSet() : columns(0), tileWidth(0), tileHeight(0), texWidth(0), texHeight(0), texId(0) {}
 
-				coords.push_back(UV);
+		TileSet(const std::string &id, const std::string &p, int c, int w, int h, GLTexture tex) : name(id), path(p)
+		{
+			texId = tex.id;
+			texWidth = tex.width;
+			texHeight = tex.height;
+			tileWidth = w;
+			tileHeight = h;
+			columns = c;
+			if (w > 0)
+			{
+				int size = columns * int(texHeight / h);
+				for (int i = 0; i < size; i++)
+				{
+					int y = i / columns;
+					int x = i % columns;
+					glm::vec4 UV;
+					UV.x = ((float)(x * tileWidth) / (float)tex.width);
+					UV.y = ((float)(y * tileHeight) / (float)tex.height);
+					UV.z = ((float)(x * tileWidth + tileWidth) / (float)tex.width);
+					UV.w = ((float)(y * tileHeight + tileHeight) / (float)tex.height);
+
+					uvs.push_back(UV);
+				}
 			}
 		}
 
-		const glm::vec4 getUV(int texcoord) { return coords[texcoord]; }
+		const glm::vec4 getUV(int texcoord) { return uvs[texcoord]; }
 	};
-
+	//Manage all the texture of the game
 	class AssetManager
 	{
 	public:
+		static AssetManager *getInstance();
 		~AssetManager();
 
-		static void clearData();
+		const TileSet &addTexture(const std::string &id, const std::string &path);
+		const TileSet &addTexture(const std::string &id, const std::string &path, int c, int w, int h);
 
-		static GLTexture addTexture(const std::string &textureId, const std::string &texturePath);
+		TileSet &getTexture(const std::string &id);
+		std::map<std::string, TileSet> &getTilesets() { return tilesets; };
 
-		static void addTileSet(const std::string &id, int column, int width, int height, const std::string &texturePath);
-
-		static TileSet *getTileSet(const std::string &id);
-
-		static GLTexture getTexture(const std::string &textureId);
-
-		static void setTextureFilter(GLuint filter, bool min) { TextureManager::setTextureFilter(filter, min); }
-
-		static std::vector<TileSet *> &getTilesets() { return tilesets; };
+		void setTextureFilter(GLuint filter, bool min) { TextureManager::setTextureFilter(filter, min); }
+		void Serialize(Serializer &serializer);
+		void clearData();
 
 	private:
-		static std::map<std::string, std::string> textures;
-		static std::vector<TileSet *> tilesets;
+		AssetManager();
+
+		std::map<std::string, TileSet> tilesets;
 	};
 } // namespace Plutus
 

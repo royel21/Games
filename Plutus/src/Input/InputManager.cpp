@@ -3,7 +3,6 @@
 
 namespace Plutus
 {
-	InputManager *InputManager::manager;
 
 	InputManager::InputManager() : m_mouseCoords(0, 0), m_keyMap(0)
 	{
@@ -11,11 +10,8 @@ namespace Plutus
 
 	InputManager *InputManager::getInstance()
 	{
-		if (!manager)
-		{
-			manager = new InputManager();
-		}
-		return manager;
+		static InputManager instance;
+		return &instance;
 	}
 
 	// save the key state before register new key event

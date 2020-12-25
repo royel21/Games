@@ -24,7 +24,7 @@ namespace Plutus
     public:
         Scene();
         ~Scene();
-        void Init(int width, int height);
+        void Init(Camera2D *camera);
         void update();
         Entity createEntity(const std::string &name);
 
@@ -36,12 +36,12 @@ namespace Plutus
 
     private:
         std::unordered_map<std::string, Layer2> mLayers;
-        Layer2 *currentLayer;
+        Layer2 *mCurrentLayer;
         entt::registry mRegistry;
         SpriteBatch2D renderer;
         SpriteBatch renderer2;
         Shader mShader;
-        Camera2D mCamera;
+        Camera2D *mCamera;
 
         friend class Entity;
     };

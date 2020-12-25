@@ -3,7 +3,7 @@
 #include "Log/Logger.h"
 namespace Plutus
 {
-	FpsLimiter::FpsLimiter() : m_maxFPS(60), m_startTick(0), m_fps(60), m_frameTime(0)
+	FpsLimiter::FpsLimiter() : mMaxFPS(60), mStartTick(0), mFps(60), mFrameTime(0)
 	{
 	}
 	void FpsLimiter::init(float maxFPS)
@@ -12,35 +12,35 @@ namespace Plutus
 	}
 	void FpsLimiter::setMaxFPS(float maxFPS)
 	{
-		m_maxFPS = 1000 / maxFPS;
+		mMaxFPS = 1000 / maxFPS;
 	}
 	void FpsLimiter::begin()
 	{
-		m_startTick = SDL_GetTicks();
+		mStartTick = SDL_GetTicks();
 	}
 	float FpsLimiter::end()
 	{
-		float frameTicks = (float)(SDL_GetTicks() - m_startTick);
+		float frameTicks = (float)(SDL_GetTicks() - mStartTick);
 		// LOG_I("{0} {1}", m_maxFPS, frameTicks);
-		if (m_maxFPS > frameTicks)
+		if (mMaxFPS > frameTicks)
 		{
 			// LOG_I("{0}", m_maxFPS - (float)(SDL_GetTicks() - m_startTick));
-			while (m_maxFPS - (float)(SDL_GetTicks() - m_startTick) > 0)
+			while (mMaxFPS - (float)(SDL_GetTicks() - mStartTick) > 0)
 				;
 		}
 		// Get samples for calculate fps
-		if (currentSample > FRAMESAMPLES)
+		if (mCurrentSample > FRAMESAMPLES)
 		{
-			m_fps = 1000.0f / (acumulator / FRAMESAMPLES - 1);
-			acumulator = 0;
-			currentSample = 0;
+			mFps = 1000.0f / (mAcumulator / FRAMESAMPLES - 1);
+			mAcumulator = 0;
+			mCurrentSample = 0;
 		}
 		else
 		{
-			acumulator += (float)(SDL_GetTicks() - m_startTick);
-			currentSample++;
+			mAcumulator += (float)(SDL_GetTicks() - mStartTick);
+			mCurrentSample++;
 		}
 
-		return m_fps;
+		return frameTicks;
 	}
 } // namespace Plutus

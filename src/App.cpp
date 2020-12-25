@@ -1,11 +1,13 @@
 
 #include "App.h"
 #include "ECS/Entity.h"
-#include "ECS/Components.h"
-#include "ECS/SpriteComponent.h"
 #include <cstdlib>
 #include <ctime>
 #include <Log/Logger.h>
+
+#include "ECS/Components.h"
+#include "ECS/SpriteComponent.h"
+#include "Assets/AssetManager.h"
 
 App::App(const char *windowName, int screenWidth, int screenHeight) : IMainGame(windowName, screenWidth, screenHeight)
 {
@@ -17,37 +19,45 @@ App::~App()
 
 void App::onInit()
 {
-    setBackgoundColor(0.33f, 0.33f, 0.33f, 1.0f);
-    auto texture = Plutus::AssetManager::addTexture("BG0", "./assets/textures/Cocarico-zelda.png");
+    mCamera.init(getWidth(), getHeight());
+    mCamera.update();
+    mEditor = Plutus::EditorUI::getInstance(&m_window, &mCamera);
 
-    mScene.Init(m_window.getScreenWidth(), m_window.getScreenHeight());
-    // auto ent = mScene.createEntity("Test");
-    // ent.addComponent<Plutus::TransformComponent>(0.0f, 0.0f, m_window.getScreenWidth(), m_window.getScreenHeight());
-    // ent.addComponent<Plutus::SpriteComponent>(texture.id);
-    int halfX = m_window.getScreenWidth() / 2;
-    int halfY = m_window.getScreenHeight() / 2;
-    std::srand(std::time(nullptr)); // use current time as seed for random generator
+    mTextLayer.init(&m_window, "./assets/fonts/Zoika.ttf", 28);
 
-    for (int i = 0; i < 10000; i++)
-    {
-        auto ent2 = mScene.createEntity("Test2");
-        float x = 1 + std::rand() / ((RAND_MAX + 1u) / 640);
-        float y = 1 + std::rand() / ((RAND_MAX + 1u) / 534);
-        ent2.addComponent<Plutus::TransformComponent>(x, y, 64, 64);
-        ent2.addComponent<Plutus::SpriteComponent>(texture.id);
+    mScene.Init(&mCamera);
+    auto pos = mCamera.convertScreenToWold(0, 0);
 
-        // LOG_I("time: {0} {1}", x, y);
-    }
+    auto amanager = Plutus::AssetManager::getInstance();
+    //"player", 12, 24, 32, "./assets/textures/link.png"
+    amanager->addTexture("player", "./assets/textures/link.png", 12, 24, 32);
+    auto bg1 = amanager->addTexture("bg1", "./assets/textures/forest-zelda.png");
+
+    auto ent = mScene.createEntity("bg1");
+    ent.addComponent<Plutus::TransformComponent>(pos.x, pos.y, 1280, 768);
+    ent.addComponent<Plutus::SpriteComponent>(bg1.texId);
 }
 
 void App::onUpdate(float dt)
 {
     mScene.update();
+    mCamera.update();
 }
 
 void App::onDraw()
 {
+    mEditor->bindFB();
     mScene.draw();
+    char text[20];
+    snprintf(text, 20, "%.1f FPS", getFPS());
+    mTextLayer.setColor(1.0f, 1.0f, 1.0f);
+    mTextLayer.drawString(text, m_screenWidth - 50, m_screenHeight - 25.0f, 1.0f);
+
+    mTextLayer.setColor(1.0f, 0, 0, 0.8);
+    mTextLayer.drawString("OpenGL 4.6", 5.0f, 5.0f, 1.0f);
+
+    mEditor->unBindFB();
+    mEditor->DrawUI();
 }
 
 void App::onResize(int width, int height)

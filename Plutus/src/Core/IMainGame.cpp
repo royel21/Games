@@ -49,31 +49,15 @@ namespace Plutus
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			checkEvent();
-			// if (dt > 0)
-			// {
-			// 	int step = static_cast<int>(dt);
-			// 	while (step > 0)
-			// 	{
-			// 		onUpdate(1);
-			// 		step--;
-			// 	}
-			// }
-			// else
-			// {
-			onUpdate(1);
-			// }
-			// onUpdate(1);
-			// auto start = SDL_GetTicks();
+			onUpdate(dt);
 			onDraw();
-			// auto elapsed2 = SDL_GetTicks() - start;
 			m_window.swapBuffer();
-
-			m_fps = limiter.end();
-			// LOG_I("{0} {1}", m_fps, dt);
+			limiter.end();
+			m_fps = limiter.getFPS();
 			lastTick = newTick;
 		}
 		onExit();
-		AssetManager::clearData();
+		AssetManager::getInstance()->clearData();
 	}
 
 	void IMainGame::sysEvents(SDL_Event &event)

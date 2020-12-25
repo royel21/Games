@@ -1,50 +1,71 @@
 #include "AssetManager.h"
 #include <algorithm>
+#include <sstream>
+#include "Serialize/Serialize.h"
 
 namespace Plutus
 {
-	std::map<std::string, std::string> AssetManager::textures;
-	std::vector<TileSet *> AssetManager::tilesets;
+	AssetManager::AssetManager()
+	{
+	}
+	AssetManager *AssetManager::getInstance()
+	{
+		static AssetManager instance;
+		return &instance;
+	}
 
 	AssetManager::~AssetManager()
 	{
+		TextureManager::destroyTextures();
 	}
 
 	void AssetManager::clearData()
 	{
-		TextureManager::destroyTextures();
-		for (auto &ts : tilesets)
-		{
-			delete ts;
-		}
 		tilesets.clear();
+		TextureManager::destroyTextures();
 	}
 
-	GLTexture AssetManager::addTexture(const std::string &textureId, const std::string &texturePath)
+	const TileSet &AssetManager::addTexture(const std::string &id, const std::string &path)
 	{
-		textures.emplace(textureId, texturePath);
-		return TextureManager::getTexture(textures[textureId]);
+		return addTexture(id, path, 0, 0, 0);
 	}
 
-	void AssetManager::addTileSet(const std::string &name, int column, int width, int height, const std::string &texturePath)
+	const TileSet &AssetManager::addTexture(const std::string &id, const std::string &path, int c, int w, int h)
 	{
-		addTexture(name, texturePath);
-		tilesets.push_back(new TileSet(name, column, width, height, getTexture(name)));
+
+		GLTexture tex = TextureManager::getTexture(path);
+		tilesets[id] = TileSet(id, path, c, w, h, tex);
+		return tilesets[id];
 	}
 
-	TileSet *AssetManager::getTileSet(const std::string &id)
+	TileSet &AssetManager::getTexture(const std::string &id)
 	{
-		for (auto ts : tilesets)
+		return tilesets[id];
+	}
+
+	void AssetManager::Serialize(Serializer &serializer)
+	{
+		auto writer = serializer.getWriter();
+		writer->StartArray();
+		for (auto tile : tilesets)
 		{
-			if (id.compare(ts->name) == 0)
-				return ts;
-		}
-		return nullptr;
-	}
+			std::cout << tile.first << " " << tile.second.name << std::endl;
+			writer->StartObject();
 
-	GLTexture AssetManager::getTexture(const std::string &textureId)
-	{
-		return TextureManager::getTexture(textures[textureId]);
+			writer->String("id");
+			writer->String(tile.first.c_str());
+			writer->String("path");
+			writer->String(tile.second.path.c_str());
+			writer->String("columns");
+			writer->Int(tile.second.columns);
+			writer->String("width");
+			writer->Int(tile.second.tileWidth);
+			writer->String("height");
+			writer->Int(tile.second.tileHeight);
+
+			writer->EndObject();
+		}
+		writer->EndArray();
 	}
 
 } // namespace Plutus

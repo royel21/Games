@@ -21,6 +21,7 @@ file(GLOB_RECURSE HEADER_FILES
 	${CMAKE_SOURCE_DIR}/src/*.hpp,
 	${LIB_DIR}/imgui/*.h)
 
+include_directories(${CMAKE_SOURCE_DIR}/PlutusEditor)
 include_directories(${CMAKE_SOURCE_DIR}/Plutus/src)
 include_directories(${LIB_DIR}/glad/include)
 include_directories(${LIB_DIR}/glm)
@@ -40,6 +41,7 @@ set(FREETYPE ${LIB_DIR}/freetype/lib/freetype32.lib)
 find_package(OpenGL REQUIRED)
 
 add_subdirectory(Plutus)
+add_subdirectory(PlutusEditor)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${HEADER_FILES})
 
@@ -47,4 +49,4 @@ message("${CMAKE_CXX_COMPILER_ID}")
 
 target_include_directories(Plutus PUBLIC ${LIB_DIR}/spdlog/include)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${SDL} ${FREETYPE} Plutus opengl32)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${SDL} ${FREETYPE} PlutusEditor Plutus opengl32)

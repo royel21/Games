@@ -27,13 +27,18 @@ namespace Plutus
 		void drawLine(const glm::vec2 &a, const glm::vec2 &b, const ColorRGBA8 &color);
 		void drawBox(const glm::vec4 &destRect, const ColorRGBA8 &color, float angle);
 		void drawCircle(const glm::vec2 &center, const ColorRGBA8 &color, float radius);
-		void render(const glm::mat4 &projectionMatrix, float lineWidth);
+		void render(float lineWidth);
 		void drawGrid();
 		void end();
 		void dispose();
+		//Grid Cell Size w = Width, h = Height
+		void setCellSize(int w, int h)
+		{
+			mCellWidth = w;
+			mCellHeight = h;
+		};
 
-		void setGridSize(int gridWidth, int gridHeight);
-		glm::vec2 getGridSize();
+		glm::vec2 getCellSize() { return glm::vec2(mCellWidth, mCellHeight); };
 
 		inline void resizeBuffer(unsigned int size) { m_vertexs.reserve(size); }
 
@@ -41,8 +46,15 @@ namespace Plutus
 
 		void setShouldDraw(bool shouldDraw) { isDraw = shouldDraw; }
 
+		void setColor(ColorRGBA8 color) { mGridColor = color; }
+
 	private:
 		DebugRender();
+
+		int mCellWidth = 32;
+		int mCellHeight = 32;
+		bool isDraw = true;
+
 		Shader m_shader;
 		std::vector<DebugVertex> m_vertexs;
 		std::vector<GLuint> m_indices;
@@ -50,9 +62,7 @@ namespace Plutus
 		uint32_t m_numElements = 0;
 		Camera2D *m_camera = nullptr;
 		Window *m_win = nullptr;
-		int m_width = 0;
-		int m_height = 0;
-		bool isDraw = true;
+		ColorRGBA8 mGridColor;
 	};
 } // namespace Plutus
 

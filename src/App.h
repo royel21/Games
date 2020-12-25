@@ -1,12 +1,19 @@
 #ifndef _APP_H
 #define _APP_H
 
+#include "TextRender/TextLayer.h"
 #include "Core/IMainGame.h"
+#include "Graphics/Camera2D.h"
 #include "ECS/Scene.h"
+#include "EditorUI.h"
+
 class App : public Plutus::IMainGame
 {
 private:
     Plutus::Scene mScene;
+    Plutus::TextLayer mTextLayer;
+    Plutus::EditorUI *mEditor;
+    Plutus::Camera2D mCamera;
 
 public:
     App(const char *windowName = "Default", int screenWidth = 1280, int screenHeight = 768);

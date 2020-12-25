@@ -12,25 +12,25 @@ namespace Plutus
 		void init(float maxFPS);
 
 		void setMaxFPS(float maxFPS);
-
+		float getFPS() { return mFps; };
 		void begin();
 		//return the fps
 		float end();
 
 	private:
-		float m_maxFPS;
-		unsigned int m_startTick;
+		float mMaxFPS;
+		unsigned int mStartTick;
 
-		float m_fps = 0;
-		float m_frameTime;
-		float acumulator;
-		float frameCounter = 0;
+		float mFps = 0;
+		float mFrameTime;
+		float mAcumulator;
+		float mFrameCounter = 0;
 		const int FRAMESAMPLES = 30;
-		int currentSample = 0;
+		int mCurrentSample = 0;
 
 		///New Timer
 	};
 
-}
+} // namespace Plutus
 
 #endif

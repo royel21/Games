@@ -12,8 +12,6 @@ namespace Plutus
 	private:
 		glm::vec2 m_mouseCoords;
 		int m_mouseWheel = false;
-		static InputManager *manager;
-
 		std::unordered_map<unsigned int, bool> m_keyMap;
 		std::unordered_map<unsigned int, bool> m_prevKeyMap;
 
@@ -40,7 +38,6 @@ namespace Plutus
 
 	private:
 		InputManager();
-
 		bool wasKeyDown(unsigned int keyId);
 	};
 } // namespace Plutus
