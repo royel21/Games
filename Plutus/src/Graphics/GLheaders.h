@@ -2,6 +2,10 @@
 #define _GLHEADERS_H
 
 #ifdef _WIN32
+extern "C"
+{
+#include <windows.h>
+}
 #include <glad/glad.h>
 
 #elif __ANDROID__

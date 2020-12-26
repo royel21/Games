@@ -14,6 +14,7 @@ namespace Plutus
 		int m_mouseWheel = false;
 		std::unordered_map<unsigned int, bool> m_keyMap;
 		std::unordered_map<unsigned int, bool> m_prevKeyMap;
+		bool mouseMove = false;
 
 	public:
 		static InputManager *getInstance();
@@ -31,6 +32,8 @@ namespace Plutus
 		bool onKeyPressed(unsigned int keyId);
 
 		void setMouseWheel(int dir) { m_mouseWheel = dir; }
+		void setMouseMove(bool move) { mouseMove = move; }
+		bool getMouseIsMoving() { return mouseMove; }
 
 		int getMouseWheel() { return m_mouseWheel; }
 

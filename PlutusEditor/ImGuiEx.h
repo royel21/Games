@@ -1,9 +1,10 @@
 #pragma once
 #include <vector>
+#include <unordered_map>
 #include "imgui.h"
 #include "iostream"
-#include <map>
 #include "entt.hpp"
+#include "ECS/EntityManager.h"
 
 namespace ImGui
 {
@@ -57,9 +58,8 @@ namespace ImGui
 
         return isSelected;
     }
-
     template <typename T>
-    inline bool ComboBox(const char *label, const std::map<std::string, T> &data, std::string &selected)
+    inline bool ComboBox(const char *label, const std::unordered_map<std::string, T> &data, std::string &selected)
     {
         bool isSelected = false;
 
@@ -82,24 +82,43 @@ namespace ImGui
         return isSelected;
     }
 
-    bool ListBox(const std::string &label, std::vector<entt::entity> data, entt::entity &selected)
+    inline bool ListBox(const char *label, std::vector<Plutus::Entity *> data, Plutus::Entity *selected)
     {
         bool isSelected = false;
-        if (ImGui::ListBoxHeader("List", data.size()))
+        if (ImGui::ListBoxHeader(label, data.size()))
         {
-            for (size_t i = 0; i < data.size(); i++)
+            for (auto ent : data)
             {
-                
-                bool is_selected = data[i] == selected;
-                
-                if (ImGui::Selectable(m.first.c_str(), is_selected))
+                bool is_selected = ent->name.compare(selected->name) == 0;
+
+                if (ImGui::Selectable(ent->name.c_str(), is_selected))
                 {
                     isSelected = true;
-                    selected = m.first;
+                    selected = ent;
                 }
                 if (isSelected)
                     ImGui::SetItemDefaultFocus();
             }
+            ImGui::ListBoxFooter();
         }
+        return isSelected;
+    }
+
+    inline bool Entities(const char *label, std::vector<Plutus::Entity *> entities, int &selected)
+    {
+        bool isSelected = false;
+        for (int i = 0; i < entities.size(); i++)
+        {
+            bool is_selected = i == selected;
+
+            if (ImGui::Selectable(entities[i]->name.c_str(), is_selected))
+            {
+                isSelected = true;
+                selected = i;
+            }
+            if (isSelected)
+                ImGui::SetItemDefaultFocus();
+        }
+        return isSelected;
     }
 } // namespace ImGui

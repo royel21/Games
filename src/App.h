@@ -4,15 +4,15 @@
 #include "TextRender/TextLayer.h"
 #include "Core/IMainGame.h"
 #include "Graphics/Camera2D.h"
-#include "ECS/Scene.h"
+#include "ECS/EntityManager.h"
 #include "EditorUI.h"
 
 class App : public Plutus::IMainGame
 {
 private:
-    Plutus::Scene mScene;
+    Plutus::EntityManager *mEntManager = nullptr;
     Plutus::TextLayer mTextLayer;
-    Plutus::EditorUI *mEditor;
+    Plutus::EditorUI *mEditor = nullptr;
     Plutus::Camera2D mCamera;
 
 public:

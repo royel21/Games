@@ -7,9 +7,7 @@ namespace Plutus
     typedef unsigned short u16;
     typedef unsigned int u32;
     typedef unsigned long ulong;
-
-    //Get file extenxion
-    std::string getExtension(const std::string &fileName)
+    inline std::string getExtension(const std::string &fileName)
     {
         auto pos = fileName.find_last_of(".");
         if (pos != std::string::npos)
@@ -18,4 +16,6 @@ namespace Plutus
         }
         return "";
     }
+    //Get file extenxion
+
 } // namespace Plutus

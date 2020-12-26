@@ -18,6 +18,7 @@ namespace Plutus
 	void InputManager::update()
 	{
 		m_mouseWheel = 0;
+		mouseMove = false;
 		//Loop through keymap and copy it to prevKeyMap.
 		for (auto &key : m_keyMap)
 		{

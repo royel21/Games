@@ -1,12 +1,13 @@
 
+#include "SpriteBatch2D.h"
+
+#include "SDL.h"
 #include <algorithm>
 #include <iostream>
 
-#include "SpriteBatch2D.h"
 #include "Log/Logger.h"
-#include "ECS/SpriteComponent.h"
-#include "ECS/Components.h"
-#include "SDL.h"
+#include "ECS/Components/Transform.h"
+#include "ECS/Components/Sprite.h"
 
 namespace Plutus
 {
@@ -69,7 +70,7 @@ namespace Plutus
 		glBindBuffer(GL_ARRAY_BUFFER, mVBO);
 	}
 
-	void SpriteBatch2D::submit(SpriteComponent *renderable)
+	void SpriteBatch2D::submit(Sprite *renderable)
 	{
 		mRenderables.push_back(renderable);
 	}
@@ -78,18 +79,18 @@ namespace Plutus
 	{
 		// uint32_t start = SDL_GetTicks();
 		std::stable_sort(mRenderables.begin(), mRenderables.end(), compareTexture);
-		vertices.reserve(mRenderables.size() * 4);
+		// vertices.reserve(mRenderables.size() * 4);
 		// LOG_I("time: {0}", SDL_GetTicks() - start);
 
 		if (mRenderables.size())
-			mRenderBatches.emplace_back(0, 0, mRenderables[0]->mTextureId);
+			mRenderBatches.emplace_back(0, 0, mRenderables[0]->mTexId);
 
 		for (size_t cg = 0; cg < mRenderables.size(); cg++)
 		{
 			auto renderable = mRenderables[cg];
-			if (cg > 0 && renderable->mTextureId != mRenderables[cg - 1]->mTextureId)
+			if (cg > 0 && renderable->mTexId != mRenderables[cg - 1]->mTexId)
 			{
-				mRenderBatches.emplace_back(mIndexCount, 6, renderable->mTextureId);
+				mRenderBatches.emplace_back(mIndexCount, 6, renderable->mTexId);
 			}
 			else
 			{
@@ -146,15 +147,15 @@ namespace Plutus
 		return newV;
 	}
 
-	bool SpriteBatch2D::compareTexture(SpriteComponent *a, SpriteComponent *b)
+	bool SpriteBatch2D::compareTexture(Sprite *a, Sprite *b)
 	{
-		return (a->mTextureId < b->mTextureId);
+		return (a->mTexId < b->mTexId);
 	}
 
-	void SpriteBatch2D::submit(TransformComponent *trans, SpriteComponent *sprite)
+	void SpriteBatch2D::submit(Transform *trans, Sprite *sprite)
 	{
 		glm::vec4 uv = glm::vec4(sprite->mUVCoord);
-		GLuint textId = sprite->mTextureId;
+		GLuint textId = sprite->mTexId;
 		if (sprite->mFlipX)
 		{
 			uv.x = 1 - uv.x;
@@ -175,28 +176,28 @@ namespace Plutus
 	void SpriteBatch2D::end2()
 	{
 		// uint32_t start = SDL_GetTicks();
-		// int i = 0;
-		// GLuint offset = 0;
-		// GLuint vertSize = 0;
-		// for (auto vers : vertices2)
-		// {
-		// 	vertSize += vers.second.size();
-		// 	mRenderBatches2[vers.first].texture = vers.first;
-		// 	mRenderBatches2[vers.first].offset = offset;
-		// 	mRenderBatches2[vers.first].numVertices = ((vers.second.size() / 4) * 6);
-		// 	offset = (i + 1) * mRenderBatches2[vers.first].numVertices;
-		// }
+		int i = 0;
+		GLuint offset = 0;
+		GLuint vertSize = 0;
+		for (auto vers : vertices2)
+		{
+			vertSize += vers.second.size();
+			mRenderBatches2[vers.first].texture = vers.first;
+			mRenderBatches2[vers.first].offset = offset;
+			mRenderBatches2[vers.first].numVertices = ((vers.second.size() / 4) * 6);
+			offset = (i + 1) * mRenderBatches2[vers.first].numVertices;
+		}
 
-		// glBufferData(GL_ARRAY_BUFFER, vertSize * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
-		// glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
+		glBufferData(GL_ARRAY_BUFFER, vertSize * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
 
-		// mIBO->bind();
-		// glBindVertexArray(mVAO);
-		// for (size_t i = 0; i < mRenderBatches.size(); i++)
-		// {
-		// 	glBindTexture(GL_TEXTURE_2D, mRenderBatches[i].texture);
-		// 	glDrawElements(GL_TRIANGLES, mRenderBatches[i].numVertices, GL_UNSIGNED_INT, (void *)(mRenderBatches[i].offset * sizeof(GLuint)));
-		// }
+		mIBO->bind();
+		glBindVertexArray(mVAO);
+		for (size_t i = 0; i < mRenderBatches.size(); i++)
+		{
+			glBindTexture(GL_TEXTURE_2D, mRenderBatches[i].texture);
+			glDrawElements(GL_TRIANGLES, mRenderBatches[i].numVertices, GL_UNSIGNED_INT, (void *)(mRenderBatches[i].offset * sizeof(GLuint)));
+		}
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);

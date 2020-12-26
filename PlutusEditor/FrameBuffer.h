@@ -12,12 +12,14 @@ public:
     void init(float width, float height, bool reset = false);
     void bind();
     void unBind();
-    void resize(float w, float y)
+
+    void resize(float w, float h)
     {
         isDirty = true;
-        mSize = glm::vec2(w, y);
+        mSize = glm::vec2(w, h);
     }
 
+    glm::vec2 getSize() { return mSize; }
     void setDirty() { isDirty = true; };
 
     uint32 getTextureId() const

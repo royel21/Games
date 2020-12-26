@@ -20,12 +20,13 @@
 
 namespace Plutus
 {
-	class SpriteComponent;
-	class TransformComponent;
+	class Sprite;
+	class Transform;
 
 	class RenderBatch2D
 	{
 	public:
+		RenderBatch2D() = default;
 		RenderBatch2D(GLuint Offset, GLuint NumVertices, GLuint Texture) : offset(Offset), numVertices(NumVertices), texture(Texture)
 		{
 		}
@@ -42,7 +43,7 @@ namespace Plutus
 		IndexBuffer *mIBO;
 		GLsizei mIndexCount;
 		Vertex *mBuffer;
-		std::vector<SpriteComponent *> mRenderables;
+		std::vector<Sprite *> mRenderables;
 		std::vector<RenderBatch2D> mRenderBatches;
 		std::vector<Vertex> vertices;
 		std::unordered_map<GLuint, std::vector<Vertex>> vertices2;
@@ -54,8 +55,8 @@ namespace Plutus
 		void init();
 		void begin(uint32_t renderableCount);
 
-		void submit(SpriteComponent *renderable);
-		void submit(TransformComponent *trans, SpriteComponent *sprite);
+		void submit(Sprite *renderable);
+		void submit(Transform *trans, Sprite *sprite);
 		void end();
 		void end2();
 
@@ -64,7 +65,7 @@ namespace Plutus
 
 	private:
 		static glm::vec2 rotatePoint(glm::vec2 pos, float angle);
-		static bool compareTexture(SpriteComponent *a, SpriteComponent *b);
+		static bool compareTexture(Sprite *a, Sprite *b);
 	};
 
 } // namespace Plutus

@@ -1,12 +1,23 @@
 #include "EditorUI.h"
-#include "Log/Logger.h"
-#include "Graphics/Camera2D.h"
 #include "ImGuiEx.h"
+#include "IconsFontAwesome5.h"
+
+#include "Window.h"
+#include "Graphics/DebugRenderer.h"
+#include "Graphics/Camera2D.h"
+#include "Serialize/Serialize.h"
+#include "Input/InputManager.h"
+#include "Log/Logger.h"
+#include "ECS/EntityManager.h"
+
 #include "LayerEditor.h"
 
 #define mapIn(x, min_in, max_in, min_out, max_out) (x - min_in) * (max_out - min_out) / (max_in - min_in) + min_out
 
 #define CHECKLIMIT(val, min, max) val<min ? min : val> max ? max : val
+#define MAX_SCALE 1000
+#define MIN_SCALE 10
+#define SCALE_STEP 5
 
 namespace Plutus
 {
@@ -31,22 +42,22 @@ namespace Plutus
 		}
 	}
 
-	EditorUI *EditorUI::getInstance(Window *_window, Camera2D *cam)
+	EditorUI *EditorUI::getInstance()
 	{
 		if (!mInstance)
 		{
 			mInstance = new EditorUI();
-			mInstance->Init(_window, cam);
 		}
 
 		return mInstance;
 	}
 
-	void EditorUI::Init(Window *win, Camera2D *cam)
+	void EditorUI::Init(Window *win, Camera2D *cam, EntityManager *emanager)
 	{
-		mFb.init(300, 300);
+		mFb.resize(cam->getScaleScreen().x, cam->getScaleScreen().y);
 		mCamera = cam;
 		mWindow = win;
+		mEntManager = emanager;
 
 		mAssetsMangager = AssetManager::getInstance();
 
@@ -61,9 +72,22 @@ namespace Plutus
 		ImGui_ImplOpenGL3_Init("#version 130");
 
 		ImGui::CaptureMouseFromApp();
-		mImGui_IO->FontDefault = mImGui_IO->Fonts->AddFontFromFileTTF("assets/fonts/OpenSans/OpenSans-Regular.ttf", 18.0f);
+		// mImGui_IO->FontDefault =
 		mDebugRender = Plutus::DebugRender::geInstances();
 		mDebugRender->init(win, cam);
+		mEntityEditor.init(mEntManager);
+
+		//Settup font
+
+		// merge in icons from Font Awesome
+		static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+		ImFontConfig icons_config;
+		icons_config.MergeMode = true;
+		icons_config.PixelSnapH = true;
+		mImGui_IO->Fonts->AddFontFromFileTTF("assets/fonts/OpenSans/OpenSans-Regular.ttf", 18.0f);
+		mImGui_IO->Fonts->AddFontFromFileTTF("assets/fonts/fa-solid-900.ttf", 16.0f, &icons_config, icons_ranges);
+		// use FONT_ICON_FILE_NAME_FAR if you want regular instead of solid
+		mImGui_IO->Fonts->AddFontDefault();
 	}
 
 	void EditorUI::beginUI()
@@ -102,17 +126,20 @@ namespace Plutus
 
 	void EditorUI::viewPort()
 	{
+		auto vsize = mFb.getSize();
+
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		static bool open = true;
+		ImGui::;
 		ImGui::Begin("Viewport", &open, flags);
 		auto size = ImGui::GetContentRegionAvail();
 
-		if (size.x != mViewportSize.x || size.y != mViewportSize.y)
-		{
-			mViewportSize = size;
-			mFb.resize(mViewportSize.x, mViewportSize.y);
-		}
+		// if (size.x != mViewportSize.x || size.y != mViewportSize.y)
+		// {
+		// 	mViewportSize = size;
+		// 	mFb.resize(mViewportSize.x, mViewportSize.y);
+		// }
 
 		ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
 
@@ -127,8 +154,43 @@ namespace Plutus
 		pos.y = mapIn(yPos, 0, static_cast<int>(size.y), 0, cvPortSize.y);
 
 		auto sqrPos = mDebugRender->getSquareCoords(pos);
+		ImGui::Image(reinterpret_cast<void *>(mFb.getTextureId()), ImVec2(vsize.x, vsize.y), ImVec2(0, 1), ImVec2(1, 0));
+		if (ImGui::IsWindowHovered())
+		{
+			if (mMoveCam || mInputManager->onKeyDown(SDLK_LCTRL))
+			{
+				if (mInputManager->onKeyPressed(SDLK_r))
+				{
+					mCamera->setPosition(0, 0);
+				}
+				if (mInputManager->onKeyPressed(SDLK_z))
+				{
+					mCamera->setScale(1);
+				}
+				// move the camera
+				if (mInputManager->onKeyPressed(SDL_BUTTON_LEFT))
+				{
+					lastCoords = mInputManager->getMouseCoords();
+				}
+				// move the camera
+				if (mInputManager->onKeyDown(SDLK_LCTRL) && mInputManager->onKeyDown(SDL_BUTTON_LEFT))
+				{
+					//get the mouseCoord;
+					auto coords = mInputManager->getMouseCoords();
+					// get mouse last coords
+					// get the camera scale factor
+					float scale = mCamera->getScale();
+					//calculate distance move with scale
+					auto result = (coords - lastCoords) / scale;
+					//get the camera position
+					auto camPos = mCamera->getPosition();
 
-		ImGui::Image(reinterpret_cast<void *>(mFb.getTextureId()), size, ImVec2(0, 1), ImVec2(1, 0));
+					glm::vec2 newPos(camPos.x - result.x, result.y + camPos.y);
+					mCamera->setPosition(newPos);
+					lastCoords = coords;
+				}
+			}
+		}
 		ImGui::End();
 		ImGui::PopStyleVar(1);
 	}
@@ -138,26 +200,69 @@ namespace Plutus
 		ImGui_ImplSDL2_ProcessEvent(&event);
 	}
 
+	void EditorUI::Serialize(Serializer &serializer)
+	{
+	}
+
+	bool ZoomViewPort(int *value, int step, int min, int max)
+	{
+		bool zoom = false;
+		float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+		ImGui::Text("Zoom");
+		ImGui::SameLine();
+		ImGui::PushItemWidth(60);
+		if (ImGui::DragInt("##zoom-vp", value, step, min, max))
+		{
+			zoom = true;
+		}
+		ImGui::PopItemWidth();
+		ImGui::SameLine(0.0f, spacing);
+		int tVal = *value;
+		ImGui::PushButtonRepeat(true);
+		if (ImGui::Button(ICON_FA_SEARCH_PLUS " ##zoom-vp"))
+		{
+			tVal += step;
+			zoom = true;
+		}
+		ImGui::SameLine(0.0f, spacing);
+		if (ImGui::Button(ICON_FA_SEARCH_MINUS " ##zoom-vp"))
+		{
+			tVal -= step;
+			zoom = true;
+		}
+		ImGui::SameLine(0.0f, spacing);
+		if (ImGui::Button("Reset ##zoom-vp"))
+		{
+			tVal = 100;
+			zoom = true;
+		}
+		ImGui::PopButtonRepeat();
+		*value = CHECKLIMIT(tVal, min, max);
+		return zoom;
+	}
+
 	void EditorUI::viewPortControl()
 	{
 		ImGui::Begin("ViewPort");
-		static bool moveCamera = false;
+
 		if (ImGui::CollapsingHeader("Camera Controls"))
 		{
-			float scale = mCamera->getScale();
-			if (ImGui::InputFloat("Zoom", &scale, 0.05f, 0.1f, 2))
+			int zoom = static_cast<int>(round(mCamera->getScale() * 100));
+			if (ZoomViewPort(&zoom, SCALE_STEP, MIN_SCALE, MAX_SCALE))
 			{
-				scale = CHECKLIMIT(scale, 0.4, 6);
-				mCamera->setScale(scale);
+				mCamera->setScale(zoom / 100.0f);
 			}
-			if (ImGui::Button("Go to center"))
+
+			ImGui::Checkbox("Move Camera", &mMoveCam);
+			ImGui::SameLine();
+
+			if (ImGui::Button("Reset ##cam"))
 			{
 				mCamera->setPosition(glm::vec2(0, 0));
 			}
-			ImGui::Checkbox("Move Camera", &moveCamera);
 
 			static float bg[] = {mVPColor.x, mVPColor.y, mVPColor.z, mVPColor.w};
-			if (ImGui::ColorEdit4("ViewPort BG", bg, ImGuiColorEditFlags_AlphaBar))
+			if (ImGui::ColorEdit4("VP BG", bg, ImGuiColorEditFlags_AlphaBar))
 			{
 				mVPColor = glm::vec4(bg[0], bg[1], bg[2], bg[3]);
 			}
@@ -170,63 +275,45 @@ namespace Plutus
 			{
 				mDebugRender->setShouldDraw(showGrid);
 			}
-			auto cellSize = mDebugRender->getCellSize();
 
-			static int cellWidth = cellSize.x;
-			if (ImGui::InputInt("Width", &cellWidth, 2))
+			auto cellc = mDebugRender->getCellCount();
+			int cellCount[] = {cellc.x, cellc.y};
+			if (ImGui::DragInt2("Count XY", cellCount))
 			{
-				cellWidth = CHECKLIMIT(cellWidth, 0, 200);
+				cellc.x = CHECKLIMIT(cellCount[0], 0, 200);
+				cellc.y = CHECKLIMIT(cellCount[1], 0, 200);
+				mDebugRender->setCellCount(cellc.x, cellc.y);
 			}
-			static int cellHeight = cellSize.y;
-			if (ImGui::InputInt("Height", &cellHeight, 2))
+
+			auto cellS = mDebugRender->getCellSize();
+			int cellSize[] = {cellS.x, cellS.y};
+			if (ImGui::DragInt2("Cell Size", cellSize))
 			{
-				cellHeight = CHECKLIMIT(cellHeight, 0, 200);
+				cellS.x = CHECKLIMIT(cellSize[0], 0, 200);
+				cellS.y = CHECKLIMIT(cellSize[1], 0, 200);
 			}
+			mDebugRender->setCellSize(cellS.x, cellS.y);
+
 			static float color[] = {0, 0, 0, 1.0f};
 			if (ImGui::ColorEdit3("Grid Color", color))
 			{
 				LOG_I("{0} {1} {2} {3}", color[0] * 255, color[1] * 255, color[1] * 255, 1);
 				mDebugRender->setColor(ColorRGBA8(color[0] * 255, color[1] * 255, color[1] * 255, 255));
 			}
-			mDebugRender->setCellSize(cellWidth, cellHeight);
 		}
+
+		mEntityEditor.drawEntity();
 		ImGui::End();
-
-		if (moveCamera)
-		{
-			if (mInputManager->onKeyPressed(SDL_BUTTON_LEFT))
-			{
-				setLastCoord(mInputManager->getMouseCoords());
-			}
-			// move the camera
-			if (mInputManager->onKeyDown(SDL_BUTTON_LEFT))
-			{
-				//get the mouseCoord;
-				auto coords = mInputManager->getMouseCoords();
-				// get mouse last coords
-				auto last = getLastCoords();
-				// get the camera scale factor
-				float scale = mCamera->getScale();
-				//calculate distance move with scale
-				auto result = (coords - last) / scale;
-				//get the camera position
-				auto camPos = mCamera->getPosition();
-
-				glm::vec2 newPos(camPos.x - result.x, result.y + camPos.y);
-				mCamera->setPosition(newPos);
-				setLastCoord(coords);
-			}
-		}
 		//Control the camera with CTRL + MOUSE WHEEL
 		if (mInputManager->onKeyDown(SDLK_LCTRL))
 		{
 			float scale = mCamera->getScale();
 
-			if (mInputManager->getMouseWheel() > 0 && scale < 5)
+			if (mInputManager->getMouseWheel() > 0 && scale < 10.0f)
 			{
 				mCamera->setScale(scale + 0.05);
 			}
-			else if (mInputManager->getMouseWheel() < 0 && scale > 0.5)
+			else if (mInputManager->getMouseWheel() < 0 && scale > 0.1f)
 			{
 				mCamera->setScale(scale - 0.05);
 			}
@@ -272,29 +359,22 @@ namespace Plutus
 			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
-		else
-		{
-			// ShowDockingDisabledMessage();
-		}
 
 		if (ImGui::BeginMenuBar())
 		{
-			if (ImGui::BeginMenu("Docking"))
+			if (ImGui::BeginMenu("Files"))
 			{
 				// Disabling fullscreen would allow the window to be moved to the front of other windows,
 				// which we can't undo at the moment without finer window depth/z control.
 				//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
 
-				if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
-					dockspace_flags ^= ImGuiDockNodeFlags_NoSplit;
-				if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0))
-					dockspace_flags ^= ImGuiDockNodeFlags_NoResize;
-				if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0))
-					dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode;
-				if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0))
-					dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode;
-				if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0))
-					dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar;
+				if (ImGui::MenuItem("Open", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
+				{
+				}
+				if (ImGui::MenuItem("Save", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
+				{
+					saveScene();
+				}
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenuBar();
@@ -316,144 +396,24 @@ namespace Plutus
 		mFb.unBind();
 	}
 
+	void EditorUI::resizeFB(int w, int h)
+	{
+		auto fbSize = mFb.getSize();
+		if (fbSize.x == w && fbSize.y != h)
+		{
+			mFb.resize(w, h);
+		}
+	}
+	void EditorUI::resizeFB(glm::vec2 size)
+	{
+		resizeFB(size.x, size.y);
+	}
+
+	void EditorUI::saveScene()
+	{
+		Plutus::Serializer sr;
+		mEntManager->serialize(sr);
+		std::cout << sr.sb.GetString() << std::endl;
+	}
+
 } // namespace Plutus
-
-// void EditorUI::drawTilesetEditor()
-// {
-// 	auto assetManager = Plutus::AssetManager::getInstance();
-// 	auto data = assetManager->getTilesets();
-// 	ImGuiStyle &style = ImGui::GetStyle();
-// 	int oldSize = style.WindowMinSize.x;
-// 	style.WindowMinSize.x = 300;
-// 	ImGui::Begin("TileSets Window");
-
-// 	if (data.size() == 0)
-// 	{
-// 		ImGui::End();
-// 	}
-// 	ImDrawList *draw_list = ImGui::GetWindowDrawList();
-// 	static int selected = 0;
-// 	static bool mDown;
-
-// 	{
-
-// 		ImGui::RadioButton("Place", &m_mode, EDIT_PLACE);
-// 		ImGui::SameLine();
-// 		ImGui::RadioButton("Select", &m_mode, EDIT_SELECT);
-// 		ImGui::SameLine();
-// 		ImGui::RadioButton("Remove", &m_mode, EDIT_REMOVE);
-
-// 		mTileTexture = AssetManager::getTexture(data[selected]);
-
-// 		static int sc = 100;
-// 		static float scale = 1.0f;
-// 		ImGui::PushItemWidth(100);
-// 		{
-// 			if (ImGui::InputInt("Scale", &sc, 5))
-// 			{
-// 				sc = sc > 25 ? sc : 25;
-// 				scale = sc / 100.0f;
-// 			}
-// 			ImGui::SameLine();
-// 			ImGui::ComboBox("TileSheet", data, selected);
-// 			ImGui::PopItemWidth();
-// 		}
-
-// 		ImGui::Separator();
-
-// 		ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
-
-// 		ImVec2 cv_destStart(canvas_pos.x, canvas_pos.y);
-// 		ImVec2 cv_destEnd(canvas_pos.x + mTileTexture.width * scale, canvas_pos.y + mTileTexture.height * scale);
-
-// 		auto color = IM_COL32(255, 255, 255, 100);
-// 		//background
-// 		draw_list->AddRectFilledMultiColor(canvas_pos, cv_destEnd, IM_COL32(50, 50, 50, 255), IM_COL32(50, 50, 60, 255), IM_COL32(60, 60, 70, 255), IM_COL32(50, 50, 60, 255));
-
-// 		ImGui::InvisibleButton("inv", ImVec2(mTileTexture.width * scale, mTileTexture.height * scale));
-// 		draw_list->AddImage((void *)mTileTexture.id, canvas_pos, cv_destEnd);
-// 		draw_list->AddRect(canvas_pos, cv_destEnd, color);
-
-// 		float tileWidth = data[selected]->width * scale;
-// 		float tileHeight = data[selected]->height * scale;
-
-// 		float textureHeight = mTileTexture.height * scale;
-// 		float textureWidth = mTileTexture.width * scale;
-// 		int columns = static_cast<int>(textureWidth / tileWidth);
-
-// 		for (float y = 0; y < textureHeight; y += tileHeight)
-// 		{
-// 			draw_list->AddLine(ImVec2(canvas_pos.x, canvas_pos.y + y),
-// 							   ImVec2(cv_destEnd.x, canvas_pos.y + y), color, 1.0f);
-// 		}
-
-// 		for (float x = 0; x < textureWidth; x += tileWidth)
-// 		{
-// 			draw_list->AddLine(ImVec2(canvas_pos.x + x, canvas_pos.y),
-// 							   ImVec2(canvas_pos.x + x, cv_destEnd.y), color, 1.0f);
-// 		}
-// 		//Rect
-// 		static bool mDown = false;
-// 		if (ImGui::IsItemHovered())
-// 		{
-// 			ImVec2 mpos_in_canvas = ImVec2(ImGui::GetIO().MousePos.x - canvas_pos.x, ImGui::GetIO().MousePos.y - canvas_pos.y);
-
-// 			float x = floor(mpos_in_canvas.x / tileWidth);
-// 			float y = floor(mpos_in_canvas.y / tileHeight);
-// 			ImVec2 start(x * tileWidth + canvas_pos.x, y * tileHeight + canvas_pos.y);
-// 			ImVec2 end(start.x + tileWidth, start.y + tileHeight);
-
-// 			draw_list->AddRect(start, end, IM_COL32(255, 0, 0, 255));
-
-// 			if (mInputManager->onKeyPressed(SDL_BUTTON_LEFT))
-// 			{
-// 				mDown = true;
-// 				Selectedtiles.clear();
-// 			}
-
-// 			if (!mInputManager->onKeyDown(SDL_BUTTON_LEFT))
-// 			{
-// 				mDown = false;
-// 			}
-
-// 			if (mDown)
-// 			{
-// 				ImVec2 vec(x, y);
-
-// 				auto found = std::find_if(Selectedtiles.begin(), Selectedtiles.end(),
-// 										  [vec](const ImVec2 &m) -> bool { return m.x == vec.x && m.y == vec.y; });
-// 				if (found == Selectedtiles.end())
-// 				{
-// 					Selectedtiles.push_back(vec);
-// 					// LOG_I("X:{0}, Y:{1} {2} textCoord: {3}", x, y, columns, x + y * columns);
-// 				}
-// 			}
-// 		}
-
-// 		for (int i = 0; i < Selectedtiles.size(); i++)
-// 		{
-// 			ImVec2 start(Selectedtiles[i].x * tileWidth + cv_destStart.x, Selectedtiles[i].y * tileHeight + cv_destStart.y);
-// 			ImVec2 end(start.x + tileWidth, start.y + tileHeight);
-// 			draw_list->AddRectFilled(start, end, IM_COL32(0, 255, 255, 50));
-// 		}
-// 	}
-// 	ImGui::End();
-// 	style.WindowMinSize.x = oldSize;
-// }
-
-// void EditorUI::EntityEditor()
-// {
-// 	ImGui::Begin("Entity Editor");
-
-// 	ImGui::Separator();
-// 	ImGui::Text("Components");
-// 	ImGui::Separator();
-
-// 	static int selectedComp = 0;
-// 	std::vector<std::string> components({"Animation", "Image", "Transform", "Input"});
-// 	if (ImGui::ComboBox("Components", components, selectedComp))
-// 	{
-// 		LOG_I("selected {0}", components[selectedComp]);
-// 	}
-// 	ImGui::End();
-// }

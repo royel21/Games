@@ -47,7 +47,7 @@ namespace Plutus
 		TextLayer();
 		~TextLayer();
 
-		bool init(
+		bool Init(
 			Window *window,
 			std::string fontPath,
 			uint32_t fontSize);

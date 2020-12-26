@@ -32,13 +32,11 @@ namespace Plutus
 		void end();
 		void dispose();
 		//Grid Cell Size w = Width, h = Height
-		void setCellSize(int w, int h)
-		{
-			mCellWidth = w;
-			mCellHeight = h;
-		};
+		void setCellSize(int w, int h);
+		void setCellCount(int w, int h);
 
-		glm::vec2 getCellSize() { return glm::vec2(mCellWidth, mCellHeight); };
+		glm::ivec2 getCellSize() { return mCellSize; };
+		glm::ivec2 getCellCount() { return mCellCount; };
 
 		inline void resizeBuffer(unsigned int size) { m_vertexs.reserve(size); }
 
@@ -51,8 +49,9 @@ namespace Plutus
 	private:
 		DebugRender();
 
-		int mCellWidth = 32;
-		int mCellHeight = 32;
+		glm::ivec2 mCellSize;
+		glm::ivec2 mCellCount;
+
 		bool isDraw = true;
 
 		Shader m_shader;

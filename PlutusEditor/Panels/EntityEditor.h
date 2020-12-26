@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include "imgui.h"
+#include "glm/glm.hpp"
+#include "ComponentPanel.h"
 
 #define EDIT_PLACE 0
 #define EDIT_SELECT 1
@@ -8,17 +10,23 @@
 
 namespace Plutus
 {
-    class Scene;
+    class EntityManager;
+
     class EntityEditor
     {
     public:
         EntityEditor() = default;
-        void init(Scene *scene);
+        void init(EntityManager *emanager);
         void draw();
+        void drawEntity();
+        void LayerModal();
 
     private:
         int mMode;
+        EntityManager *mEntManager;
+        glm::vec2 modalPos;
         std::vector<ImVec2> mSelectedtiles;
-        Scene *mScene;
+        bool mShowCreateLayer = false;
+        ComponentPanel mComPanel;
     };
 } // namespace Plutus

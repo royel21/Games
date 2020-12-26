@@ -3,7 +3,7 @@
 
 #include "Texture/TextureManager.h"
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 #include "glm/glm.hpp"
@@ -33,24 +33,27 @@ namespace Plutus
 			tileWidth = w;
 			tileHeight = h;
 			columns = c;
-			if (w > 0)
+			calculateUV();
+		}
+
+		void calculateUV()
+		{
+			if (tileWidth > 0)
 			{
-				int size = columns * int(texHeight / h);
+				int size = columns * int(texHeight / tileHeight);
 				for (int i = 0; i < size; i++)
 				{
 					int y = i / columns;
 					int x = i % columns;
 					glm::vec4 UV;
-					UV.x = ((float)(x * tileWidth) / (float)tex.width);
-					UV.y = ((float)(y * tileHeight) / (float)tex.height);
-					UV.z = ((float)(x * tileWidth + tileWidth) / (float)tex.width);
-					UV.w = ((float)(y * tileHeight + tileHeight) / (float)tex.height);
-
+					UV.x = ((float)(x * tileWidth) / (float)texWidth);
+					UV.y = ((float)(y * tileHeight) / (float)texHeight);
+					UV.z = ((float)(x * tileWidth + tileWidth) / (float)texWidth);
+					UV.w = ((float)(y * tileHeight + tileHeight) / (float)texHeight);
 					uvs.push_back(UV);
 				}
 			}
 		}
-
 		const glm::vec4 getUV(int texcoord) { return uvs[texcoord]; }
 	};
 	//Manage all the texture of the game
@@ -63,8 +66,8 @@ namespace Plutus
 		const TileSet &addTexture(const std::string &id, const std::string &path);
 		const TileSet &addTexture(const std::string &id, const std::string &path, int c, int w, int h);
 
-		TileSet &getTexture(const std::string &id);
-		std::map<std::string, TileSet> &getTilesets() { return tilesets; };
+		TileSet *getTexture(const std::string &id);
+		std::unordered_map<std::string, TileSet> &getTilesets() { return tilesets; };
 
 		void setTextureFilter(GLuint filter, bool min) { TextureManager::setTextureFilter(filter, min); }
 		void Serialize(Serializer &serializer);
@@ -73,7 +76,7 @@ namespace Plutus
 	private:
 		AssetManager();
 
-		std::map<std::string, TileSet> tilesets;
+		std::unordered_map<std::string, TileSet> tilesets;
 	};
 } // namespace Plutus
 

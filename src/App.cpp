@@ -1,13 +1,15 @@
 
 #include "App.h"
-#include "ECS/Entity.h"
 #include <cstdlib>
 #include <ctime>
 #include <Log/Logger.h>
 
-#include "ECS/Components.h"
-#include "ECS/SpriteComponent.h"
+#include "ECS/Entity.h"
 #include "Assets/AssetManager.h"
+
+#include "ECS/Components/Transform.h"
+#include "ECS/Components/Sprite.h"
+#include "ECS/Components/TileMap.h"
 
 App::App(const char *windowName, int screenWidth, int screenHeight) : IMainGame(windowName, screenWidth, screenHeight)
 {
@@ -21,33 +23,41 @@ void App::onInit()
 {
     mCamera.init(getWidth(), getHeight());
     mCamera.update();
-    mEditor = Plutus::EditorUI::getInstance(&m_window, &mCamera);
 
-    mTextLayer.init(&m_window, "./assets/fonts/Zoika.ttf", 28);
+    mEntManager = Plutus::EntityManager::getInstance();
+    mEntManager->setCamera(&mCamera);
+    mEntManager->init();
 
-    mScene.Init(&mCamera);
-    auto pos = mCamera.convertScreenToWold(0, 0);
+    mEditor = Plutus::EditorUI::getInstance();
+    mEditor->Init(&m_window, &mCamera, mEntManager);
+
+    mTextLayer.Init(&m_window, "./assets/fonts/Zoika.ttf", 28);
 
     auto amanager = Plutus::AssetManager::getInstance();
     //"player", 12, 24, 32, "./assets/textures/link.png"
     amanager->addTexture("player", "./assets/textures/link.png", 12, 24, 32);
+    amanager->addTexture("cave", "./assets/textures/goblin_cave.png", 8, 32, 32);
+
     auto bg1 = amanager->addTexture("bg1", "./assets/textures/forest-zelda.png");
 
-    auto ent = mScene.createEntity("bg1");
-    ent.addComponent<Plutus::TransformComponent>(pos.x, pos.y, 1280, 768);
-    ent.addComponent<Plutus::SpriteComponent>(bg1.texId);
+    auto &ent = mEntManager->addEntity("bg1");
+    ent.addComponent<Plutus::Transform>(0.0f, 0.0f, 1280, 768);
+    ent.addComponent<Plutus::Sprite>("bg1");
+
+    auto &ent2 = mEntManager->addEntity("tileMap1");
+    ent2.addComponent<Plutus::TileMap>();
 }
 
 void App::onUpdate(float dt)
 {
-    mScene.update();
+    mEntManager->update(dt);
     mCamera.update();
 }
 
 void App::onDraw()
 {
     mEditor->bindFB();
-    mScene.draw();
+    mEntManager->draw();
     char text[20];
     snprintf(text, 20, "%.1f FPS", getFPS());
     mTextLayer.setColor(1.0f, 1.0f, 1.0f);
@@ -70,4 +80,5 @@ void App::onExit()
 
 void App::onEvent(SDL_Event &event)
 {
+    mEditor->onEvent(event);
 }

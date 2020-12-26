@@ -1,4 +1,5 @@
 #pragma once
+
 #include <unordered_map>
 #include <cstring>
 #include <memory>
@@ -7,17 +8,12 @@
 #include "Graphics/SpriteBatch.h"
 #include "Graphics/Shader.h"
 #include "Graphics/Camera2D.h"
+#include "Layer.h"
 
 namespace Plutus
 {
+    class Serializer;
     class Entity;
-
-    struct Layer2
-    {
-        bool isVisible = true;
-        std::string name;
-        std::vector<entt::entity> entities;
-    };
 
     class Scene
     {
@@ -28,21 +24,24 @@ namespace Plutus
         void update();
         Entity createEntity(const std::string &name);
 
-        void addLayer(const std::string &name);
-        Layer2 *getLayer(const std::string &name);
-        std::unordered_map<std::string, Layer2> *getLayers() { return &mLayers; };
+        void setCurrentLayer(const std::string &name) { mCurrentLayer = &mLayers[name]; };
+        std::unordered_map<std::string, Layer> &getLayers() { return mLayers; };
 
+        Layer *addLayer(const std::string name);
+        Layer *getLayer(const std::string &name);
+        Layer *getCurrentLayer() { return mCurrentLayer; }
+        const entt::registry *getRegistry() { return &mRegistry; }
+
+        void Serialize(Serializer &serializer);
         void draw();
 
     private:
-        std::unordered_map<std::string, Layer2> mLayers;
-        Layer2 *mCurrentLayer;
+        std::unordered_map<std::string, Layer> mLayers;
+        Layer *mCurrentLayer;
         entt::registry mRegistry;
         SpriteBatch2D renderer;
         SpriteBatch renderer2;
         Shader mShader;
         Camera2D *mCamera;
-
-        friend class Entity;
     };
 } // namespace Plutus

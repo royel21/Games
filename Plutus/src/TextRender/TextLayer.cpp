@@ -21,7 +21,7 @@ namespace Plutus
 		pShader.dispose();
 	}
 
-	bool TextLayer::init(
+	bool TextLayer::Init(
 		Window *window,
 		std::string fontPath,
 		uint32_t fontSize)

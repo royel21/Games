@@ -98,13 +98,14 @@ namespace Plutus
 		case SDL_MOUSEMOTION:
 		{
 			m_inputManager->setMouseCoords((float)event.motion.x, (float)event.motion.y);
+			m_inputManager->setMouseMove(true);
 			break;
 		}
 		case SDL_WINDOWEVENT:
 		{
 			if (event.window.event == SDL_WINDOWEVENT_RESIZED)
 			{
-				glViewport(0, 0, event.window.data1, event.window.data2);
+				// glViewport(0, 0, event.window.data1, event.window.data2);
 				m_window.setWindowSize(event.window.data1, event.window.data2);
 				onResize(event.window.data1, event.window.data2);
 			}

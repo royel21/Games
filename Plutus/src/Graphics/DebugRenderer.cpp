@@ -54,7 +54,7 @@ namespace Plutus
 		return instance;
 	}
 
-	DebugRender::DebugRender() : m_vao(0), m_vbo(0), m_ibo(0), mGridColor(0, 0, 0, 255)
+	DebugRender::DebugRender() : m_vao(0), m_vbo(0), m_ibo(0), mGridColor(0, 0, 0, 255), mCellCount(40, 24), mCellSize(32, 32)
 	{
 	}
 
@@ -226,40 +226,29 @@ namespace Plutus
 	{
 		if (isDraw)
 		{
-			glm::vec2 scaleScreen = m_camera->getScaleScreen();
+			glm::ivec2 endLine = mCellCount * mCellSize;
 
-			glm::vec2 screenStart = m_camera->getPosition() - (scaleScreen / 2.0f);
-			glm::vec2 screenEnd = m_camera->getPosition() + (scaleScreen / 2.0f);
-			glm::vec2 lineStart;
-			glm::vec2 lineEnd;
+			glm::ivec2 lineStart;
+			glm::ivec2 lineEnd;
 
-			// LOG_I("SC: {0} SC:{1}", scaleScreen.x, scaleScreen.y);
-
-			int sizeX = static_cast<int>((scaleScreen.x) / mCellWidth) + 2;
-			int sizeY = static_cast<int>((scaleScreen.y) / mCellHeight) + 2;
-
-			float x = floor(screenStart.x / mCellWidth);
-			float y = floor(screenStart.y / mCellHeight);
-
-			glm::vec2 cPos(x * mCellWidth, y * mCellHeight);
-
-			for (int x = 0; x <= sizeX; x++)
+			for (int x = 0; x <= mCellCount.x; x++)
 			{
-				lineStart.x = cPos.x + (x * mCellWidth);
-				lineStart.y = cPos.y;
+				int curPoint = x * mCellSize.x;
+				lineStart.x = curPoint;
+				lineStart.y = 0;
 
-				lineEnd.x = cPos.x + (x * mCellWidth);
-				lineEnd.y = screenEnd.y;
+				lineEnd.x = curPoint;
+				lineEnd.y = endLine.y;
 				drawLine(lineStart, lineEnd, mGridColor);
 			}
-
-			for (int y = 0; y <= sizeY; y++)
+			for (int y = 0; y <= mCellCount.y; y++)
 			{
-				lineStart.x = cPos.x;
-				lineStart.y = cPos.y + (y * mCellHeight);
+				int curPoint = y * mCellSize.y;
+				lineStart.y = curPoint;
+				lineStart.x = 0;
 
-				lineEnd.x = screenEnd.x;
-				lineEnd.y = cPos.y + (y * mCellHeight);
+				lineEnd.y = curPoint;
+				lineEnd.x = endLine.x;
 				drawLine(lineStart, lineEnd, mGridColor);
 			}
 			end();
@@ -270,16 +259,22 @@ namespace Plutus
 
 	glm::vec2 DebugRender::getSquareCoords(glm::vec2 mousePos)
 	{
-		glm::vec2 cmpos = m_camera->convertScreenToWoldInv(mousePos);
-		glm::vec2 center(m_win->getScreenWidth() / 2, m_win->getScreenHeight() / 2);
-		cmpos += center;
+		glm::vec2 cmpos = m_camera->convertScreenToWold(mousePos);
 
-		int x = (int)floor(cmpos.x / mCellWidth);
-		int y = (int)floor(cmpos.y / mCellHeight);
-
-		glm::vec2 coords(
-			(float)(x * mCellWidth) - center.x,
-			(float)(y * mCellHeight) - center.y);
+		int x = (int)floor(cmpos.x / mCellSize.x);
+		int y = (int)floor(cmpos.y / mCellSize.y);
+		glm::vec2 coords(x, y);
 		return coords;
 	}
+
+	void DebugRender::setCellSize(int w, int h)
+	{
+		mCellSize.x = w;
+		mCellSize.y = h;
+	}
+	void DebugRender::setCellCount(int w, int h)
+	{
+		mCellCount.x = w;
+		mCellCount.y = h;
+	};
 } // namespace Plutus

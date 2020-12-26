@@ -13,7 +13,7 @@ namespace Plutus
 		int m_screenHeight;
 		bool m_needsMatrixUpdate;
 		float m_scale;
-		glm::vec2 m_position;
+		glm::vec2 mCamPos;
 		glm::mat4 m_cameraMatrix;
 		glm::mat4 m_orthoMatrix;
 		glm::vec2 screenOrigin;
@@ -26,9 +26,15 @@ namespace Plutus
 
 		void update();
 		//Setters
+		void setPosition(float x, float y)
+		{
+			mCamPos.x = x;
+			mCamPos.y = y;
+			m_needsMatrixUpdate = true;
+		}
 		void setPosition(const glm::vec2 &newPosition)
 		{
-			m_position = newPosition;
+			mCamPos = newPosition;
 			m_needsMatrixUpdate = true;
 		}
 
@@ -48,7 +54,7 @@ namespace Plutus
 		}
 		glm::vec2 getViewPortSize() { return glm::vec2(m_screenWidth, m_screenHeight); }
 		//Getters
-		glm::vec2 getPosition() { return m_position; }
+		glm::vec2 getPosition() { return mCamPos; }
 
 		glm::mat4 getCameraMatrix() { return m_cameraMatrix; }
 

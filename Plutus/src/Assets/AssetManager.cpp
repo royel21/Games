@@ -38,9 +38,9 @@ namespace Plutus
 		return tilesets[id];
 	}
 
-	TileSet &AssetManager::getTexture(const std::string &id)
+	TileSet *AssetManager::getTexture(const std::string &id)
 	{
-		return tilesets[id];
+		return &tilesets[id];
 	}
 
 	void AssetManager::Serialize(Serializer &serializer)
@@ -49,7 +49,6 @@ namespace Plutus
 		writer->StartArray();
 		for (auto tile : tilesets)
 		{
-			std::cout << tile.first << " " << tile.second.name << std::endl;
 			writer->StartObject();
 
 			writer->String("id");

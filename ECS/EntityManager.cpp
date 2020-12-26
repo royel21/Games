@@ -79,7 +79,7 @@ namespace Plutus
 		glActiveTexture(GL_TEXTURE0);
 		m_shader.setUniform1i("hasTexture", 0);
 		m_shader.setUniform1i("mySampler", 0);
-		m_shader.setUniformMat4("cameraP", m_camera->getCameraMatrix());
+		m_shader.setUniformMat4("camera", m_camera->getCameraMatrix());
 		for (auto &layer : mLayers)
 		{
 			if (layer.second.isVisible && layer.second.entities.size() > 0)

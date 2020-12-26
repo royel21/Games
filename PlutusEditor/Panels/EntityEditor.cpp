@@ -1,13 +1,20 @@
 
+#include "EntityEditor.h"
 #include "SDL.h"
 #include "ImGuiEx.h"
-#include "EntityEditor.h"
 #include "Input/InputManager.h"
 #include "Assets/AssetManager.h"
 #include "Log/Logger.h"
+#include "ECS/EntityManager.h"
 
 namespace Plutus
 {
+    void EntityEditor::init(EntityManager *emanager)
+    {
+        mEntManager = emanager;
+        mComPanel.init();
+    }
+
     void EntityEditor::draw()
     {
         auto assetManager = Plutus::AssetManager::getInstance();
@@ -22,7 +29,6 @@ namespace Plutus
         ImDrawList *draw_list = ImGui::GetWindowDrawList();
         static std::string selected = data.begin()->first;
         static bool mDown;
-
         {
 
             ImGui::RadioButton("Place", &mMode, EDIT_PLACE);
@@ -144,6 +150,87 @@ namespace Plutus
         }
         ImGui::End();
 
+        mComPanel.drawUI();
+
         style.WindowMinSize.x = oldSize;
-    }; // namespace Plutus
+    }
+
+    void EntityEditor::drawEntity()
+    {
+        static auto mInManager = Plutus::InputManager::getInstance();
+
+        if (ImGui::CollapsingHeader("Layers##ent"))
+        {
+            auto layers = mEntManager->getLayers();
+            auto layer = mEntManager->getCurrentLayer();
+            static auto current = layer->name;
+            if (ImGui::Button("Add New##layer"))
+            {
+                mShowCreateLayer = true;
+                modalPos = mInManager->getMouseCoords();
+            }
+            ImGui::SameLine();
+            ImGui::Button("Edit Name");
+            ImGui::PushItemWidth(100);
+            if (ImGui::ComboBox<Plutus::Layer>("Layers", *layers, current))
+            {
+                mEntManager->setCurrentLayer(current);
+            }
+            ImGui::Checkbox("IsVisible", &layer->isVisible);
+            ImGui::Separator();
+            if (ImGui::Button("Add New##ent"))
+            {
+                mShowCreateLayer = true;
+                modalPos = mInManager->getMouseCoords();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Remove##ent"))
+            {
+            }
+            ImGui::Separator();
+            ImGui::Text("Entity List");
+            ImGui::Separator();
+            static int selected = 0;
+            ImGui::Entities("Entities##list", layer->entities, selected);
+            if (layer->entities[selected])
+            {
+                mComPanel.setEntity(layer->entities[selected]);
+            }
+        }
+        LayerModal();
+    }
+
+    void EntityEditor::LayerModal()
+    {
+        if (mShowCreateLayer)
+        {
+            ImGui::SetNextWindowPos(ImVec2(modalPos.x + 300, modalPos.y + 170));
+            ImGui::SetNextWindowSize(ImVec2(260.0f, 90.0f));
+
+            ImGui::OpenPopup("New Layer");
+            static char newlayer[128];
+            if (ImGui::BeginPopupModal("New Layer", NULL))
+            {
+                if (ImGui::InputText("##layer Name", newlayer, IM_ARRAYSIZE(newlayer)))
+                {
+
+                    LOG_I("Layer: {0}", newlayer);
+                }
+                if (ImGui::Button("Save") && !std::string(newlayer).empty())
+                {
+                    mEntManager->addLayer(newlayer);
+                    mShowCreateLayer = false;
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Close"))
+                    mShowCreateLayer = false;
+
+                ImGui::EndPopup();
+            }
+
+            if (mShowCreateLayer)
+                ImGui::CloseCurrentPopup();
+        }
+    }
 } // namespace Plutus

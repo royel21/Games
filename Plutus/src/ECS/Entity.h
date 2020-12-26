@@ -1,50 +1,64 @@
-#ifndef __ENTITY2_H__
-#define __ENTITY2_H__
+#ifndef _ENTITY_H
+#define _ENTITY_H
 
-#include <cstring>
-#include "entt.hpp"
-#include "Scene.h"
-#include <assert.h>
+#include <unordered_map>
+#include <string>
+#include <vector>
+#include <typeinfo>
+#include "Components/Component.h"
 
 namespace Plutus
 {
-    class Entity
-    {
-    public:
-        Entity(entt::entity Entity, Scene *scence);
+	class EntityManager;
 
-        template <typename T>
-        bool hasComponent()
-        {
-            return mScene->mRegistry.has<T>(mEntityId);
-        }
+	class Entity
+	{
+	private:
+		bool isActive;
+		EntityManager &manager;
+		std::vector<Component *> components;
+		std::unordered_map<const std::type_info *, Component *> componentTypeMap;
 
-        template <typename T, typename... Args>
-        T &addComponent(Args &&... args)
-        {
-            assert(!hasComponent<T>() && "Entity already has component!");
-            return mScene->mRegistry.emplace<T>(mEntityId, std::forward<Args>(args)...);
-        }
+	public:
+		std::string name;
+		std::string mLayerId;
+		Entity(EntityManager &manager, const std::string &layerId);
+		Entity(EntityManager &manager, const std::string &name, const std::string &layerId);
+		~Entity();
 
-        template <typename T>
-        T &getComponent()
-        {
-            assert(hasComponent<T>() && "Entity does not has component!");
-            return mScene->mRegistry.get<T>(mEntityId);
-        }
+		void update(float deltaTime);
 
-        template <typename T>
-        bool removeComponent()
-        {
-            assert(hasComponent<T>() && "Entity does not has component!");
-            return mScene->mRegistry.remove<T>(mEntityId);
-        }
-        entt::entity getEntityId() { return mEntityId; }
-        operator bool() const { return mEntityId != entt::null; }
+		inline std::vector<Component *> getComponents() { return components; };
 
-    private:
-        entt::entity mEntityId{entt::null};
-        Scene *mScene;
-    };
+		inline bool isAlive() const { return isActive; }
+
+		template <typename T, typename... TArgs>
+		T &addComponent(TArgs &&... args)
+		{
+			T *newComponent(new T(std::forward<TArgs>(args)...));
+			newComponent->owner = this;
+
+			components.emplace_back(newComponent);
+
+			componentTypeMap[&typeid(*newComponent)] = newComponent;
+
+			newComponent->init();
+			return *newComponent;
+		}
+
+		template <typename T>
+		T *getComponent()
+		{
+			return static_cast<T *>(componentTypeMap[&typeid(T)]);
+		}
+
+		template <typename T>
+		bool hasComponent()
+		{
+			return componentTypeMap[&typeid(T)];
+		}
+
+		void destroy();
+	};
 } // namespace Plutus
-#endif // __ENTITY_H__
+#endif

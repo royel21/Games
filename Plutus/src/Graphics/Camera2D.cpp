@@ -8,7 +8,7 @@ namespace Plutus
 						   m_screenHeight(500),
 						   m_needsMatrixUpdate(true),
 						   m_scale(1.0f),
-						   m_position(0.0f, 0.0f),
+						   mCamPos(0.0f, 0.0f),
 						   m_cameraMatrix(1.0f),
 						   m_orthoMatrix(1.0f)
 	{
@@ -23,7 +23,7 @@ namespace Plutus
 		m_screenWidth = screenWidth;
 		m_screenHeight = screenHeight;
 		//this is for convert the opengl espace -1.0 - 1.0 to 0 - screenW and height
-		m_orthoMatrix = glm::ortho(0.0f, (float)m_screenWidth, 0.0f, (float)m_screenHeight, 1.0f, -1.0f);
+		m_orthoMatrix = glm::ortho(0.0f, (float)m_screenWidth, (float)m_screenHeight, 0.0f, 1.0f, -1.0f);
 		m_needsMatrixUpdate = true;
 	}
 
@@ -31,50 +31,46 @@ namespace Plutus
 	{
 		if (m_needsMatrixUpdate == true)
 		{
-
-			//camera translation
-			glm::vec3 translate(-m_position.x + (m_screenWidth >> 1), -m_position.y + (m_screenHeight >> 1), 0.0f);
-			m_cameraMatrix = glm::translate(m_orthoMatrix, translate);
+			m_cameraMatrix = glm::translate(m_orthoMatrix, glm::vec3(-mCamPos.x, -mCamPos.y, 0.0f));
 
 			//Camera Scale
 			glm::vec3 scale(m_scale, m_scale, 0.0f);
 			m_cameraMatrix = glm::scale(glm::mat4(1.0f), scale) * m_cameraMatrix;
-
-			screenOrigin = (translate / scale) * -1.0f;
-			screenEnd = translate / scale;
 			m_needsMatrixUpdate = false;
 		}
 	}
 	//Convert screen coordination to opengl coordination and return it
-	glm::vec2 Camera2D::convertScreenToWold(glm::vec2 screenCoords)
+	glm::vec2 Camera2D::convertScreenToWold(glm::vec2 coords)
 	{
-		//inver Y direction;
-		// screenCoords.y = m_screenHeight - screenCoords.y;
-		//Make that 0 is the center
-		screenCoords -= glm::vec2(m_screenWidth >> 1, m_screenHeight >> 1);
+		//inver Y axis of the coords;
+		// coords.y = m_screenHeight - coords.y;
 
-		//Scale the coordinates
-		screenCoords /= m_scale;
+		coords -= glm::vec2(m_screenWidth >> 1, m_screenHeight >> 1);
+		//have to scale the coordinate and the camera current pos
+		coords /= m_scale;
+		auto camScale = mCamPos / m_scale;
 
 		//Translate with the camera position
-		screenCoords += m_position;
+		coords += mCamPos;
 
-		return screenCoords;
+		coords += glm::vec2(m_screenWidth >> 1, m_screenHeight >> 1);
+		// LOG_I("{0:.0f} {1:.0f}", coords.x, coords.y);
+		return coords;
 	}
-	glm::vec2 Camera2D::convertScreenToWoldInv(glm::vec2 screenCoords)
+	glm::vec2 Camera2D::convertScreenToWoldInv(glm::vec2 coords)
 	{
 		//inver Y direction;
-		screenCoords.y = m_screenHeight - screenCoords.y;
+		coords.y = m_screenHeight - coords.y;
 		//Make that 0 is the center
-		screenCoords -= glm::vec2(m_screenWidth >> 1, m_screenHeight >> 1);
+		coords -= glm::vec2(m_screenWidth >> 1, m_screenHeight >> 1);
 
 		//Scale the coordinates
-		screenCoords /= m_scale;
+		coords /= m_scale;
 
 		//Translate with the camera position
-		screenCoords += m_position;
+		coords += mCamPos;
 
-		return screenCoords;
+		return coords;
 	}
 
 	bool Camera2D::isBoxInView(const glm::vec2 position, const glm::vec2 dim)
@@ -86,7 +82,7 @@ namespace Plutus
 
 		glm::vec2 centerPos = position + dim / 2.0f;
 
-		glm::vec2 distVec = centerPos - m_position;
+		glm::vec2 distVec = centerPos - mCamPos;
 
 		float xDepth = MIN_DISTANCE_X - abs(distVec.x);
 		float yDepth = MIN_DISTANCE_Y - abs(distVec.y);

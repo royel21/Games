@@ -1,0 +1,20 @@
+{
+    "textures": [
+        {
+            "id": "player",
+            "path": "./assets/textures/Cocarico-zelda.png",
+            "type": "tile",
+            "columns": 12,
+            "width": 24,
+            "height": 32
+        },
+        {
+            "id": "bg0",
+            "path": "./assets/textures/goblin_cave.png",
+            "type": "texture",
+            "columns": 0,
+            "width": 0,
+            "height": 0
+        }
+    ]
+}
