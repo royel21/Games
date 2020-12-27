@@ -2,3 +2,4 @@ build/
 .vscode/
 Assets/
 build*
+SDL2.dll
