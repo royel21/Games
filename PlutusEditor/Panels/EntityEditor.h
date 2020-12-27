@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <string>
 #include "imgui.h"
 #include "glm/glm.hpp"
 #include "ComponentPanel.h"
@@ -11,6 +12,7 @@
 namespace Plutus
 {
     class EntityManager;
+    class Entity;
 
     class EntityEditor
     {
@@ -18,8 +20,10 @@ namespace Plutus
         EntityEditor() = default;
         void init(EntityManager *emanager);
         void draw();
+
+    private:
         void drawEntity();
-        void LayerModal();
+        std::string LayerModal(char *label, bool *open);
 
     private:
         int mMode;
@@ -28,5 +32,6 @@ namespace Plutus
         std::vector<ImVec2> mSelectedtiles;
         bool mShowCreateLayer = false;
         ComponentPanel mComPanel;
+        Entity *mCurrentEnt = nullptr;
     };
 } // namespace Plutus

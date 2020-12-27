@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cstdio>
 
+#include "Utils.h"
+#include "rapidjson/document.h"
 #include "Serialize/Serialize.h"
 
 #include "Components/Animate.h"
@@ -108,12 +110,12 @@ namespace Plutus
 		mShader.disable();
 	}
 
-	Entity &EntityManager::addEntity(const std::string &entityName)
+	Entity *EntityManager::addEntity(const std::string &entityName)
 	{
 		Entity *entity = new Entity(*this, entityName, currentLayer->name);
 		mEntities.emplace_back(entity);
 		currentLayer->entities.push_back(entity);
-		return *entity;
+		return entity;
 	}
 
 	Entity *EntityManager::getEntity(const std::string &id)
@@ -219,5 +221,13 @@ namespace Plutus
 		writer->EndArray();
 
 		writer->EndObject();
+	}
+
+	void EntityManager::deserialize(const std::string jsonFile)
+	{
+		rapidjson::Document doc;
+		if (Utils::loadJson(jsonFile, &doc))
+		{
+		}
 	}
 } // namespace Plutus

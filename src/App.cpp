@@ -40,12 +40,12 @@ void App::onInit()
 
     auto bg1 = amanager->addTexture("bg1", "./assets/textures/forest-zelda.png");
 
-    auto &ent = mEntManager->addEntity("bg1");
-    ent.addComponent<Plutus::Transform>(0.0f, 0.0f, 1280, 768);
-    ent.addComponent<Plutus::Sprite>("bg1");
+    auto ent = mEntManager->addEntity("bg1");
+    ent->addComponent<Plutus::Transform>(0.0f, 0.0f, 512, 512);
+    ent->addComponent<Plutus::Sprite>("bg1");
 
-    auto &ent2 = mEntManager->addEntity("tileMap1");
-    ent2.addComponent<Plutus::TileMap>();
+    auto ent2 = mEntManager->addEntity("tileMap1");
+    ent2->addComponent<Plutus::TileMap>();
 }
 
 void App::onUpdate(float dt)

@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "rapidjson/document.h"
 
 namespace Plutus
 {
@@ -7,15 +8,32 @@ namespace Plutus
     typedef unsigned short u16;
     typedef unsigned int u32;
     typedef unsigned long ulong;
-    inline std::string getExtension(const std::string &fileName)
+    namespace Utils
     {
-        auto pos = fileName.find_last_of(".");
-        if (pos != std::string::npos)
+        //Get file extenxion
+        inline std::string getExtension(const std::string &fileName)
         {
-            return fileName.substr(pos + 1);
+            auto pos = fileName.find_last_of(".");
+            if (pos != std::string::npos)
+            {
+                return fileName.substr(pos + 1);
+            }
+            return "";
         }
-        return "";
-    }
-    //Get file extenxion
+
+        inline bool loadJson(const std::string &filePath, rapidjson::Document *document)
+        {
+            std::string ex = getExtension(filePath);
+            if (ex == "json")
+            {
+                auto data = IOManager::readFileToString(filePath);
+                if (!data.empty())
+                {
+                    return document->Parse(data.c_str()).HasParseError() == false;
+                }
+            }
+            return false;
+        }
+    } // namespace Utils
 
 } // namespace Plutus

@@ -43,7 +43,7 @@ namespace Plutus
 
 		inline Layer *getCurrentLayer() { return currentLayer; }
 
-		Entity &addEntity(const std::string &entityName);
+		Entity *addEntity(const std::string &entityName);
 
 		Entity *getEntity(const std::string &id);
 
@@ -68,6 +68,8 @@ namespace Plutus
 		void clearData();
 
 		void serialize(Serializer &serializer);
+
+		void deserialize(const std::string jsonFile);
 
 	private:
 		EntityManager();

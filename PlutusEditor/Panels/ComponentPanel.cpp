@@ -148,7 +148,7 @@ namespace Plutus
         ImVec2 cv_destStart(cvPos.x, cvPos.y);
 
         ImVec2 cvDestEnd(cvPos.x + tileset->texWidth * scale, cvPos.y + tileset->texHeight * scale);
-        ImGui::Image((void *)tileset->texId, ImVec2(tileset->texWidth, tileset->texHeight));
+        ImGui::Image((void *)tileset->texId, ImVec2(tileset->texWidth * scale, tileset->texHeight * scale));
         {
             // drawList->AddRectFilledMultiColor(cvPos, cvDestEnd, color1, color2, color3, color2);
 
@@ -246,7 +246,7 @@ namespace Plutus
         ImVec2 cvPos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
         ImVec2 cv_destStart(cvPos.x, cvPos.y);
         ImVec2 cvDestEnd(cvPos.x + tileset->texWidth * scale, cvPos.y + tileset->texHeight * scale);
-        ImGui::InvisibleButton("#inv", ImVec2(tileset->texWidth, tileset->texHeight));
+        ImGui::Image((void *)tileset->texId, ImVec2(tileset->texWidth * scale, tileset->texHeight * scale));
         {
             static ImVec2 StartCoords(0, 0);
             static ImVec2 EndCoords(0, 0);

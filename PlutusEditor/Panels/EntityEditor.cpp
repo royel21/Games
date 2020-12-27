@@ -6,6 +6,7 @@
 #include "Assets/AssetManager.h"
 #include "Log/Logger.h"
 #include "ECS/EntityManager.h"
+#include "IconsFontAwesome5.h"
 
 namespace Plutus
 {
@@ -17,6 +18,9 @@ namespace Plutus
 
     void EntityEditor::draw()
     {
+        drawEntity();
+        mComPanel.drawUI();
+
         auto assetManager = Plutus::AssetManager::getInstance();
         auto mInputManager = InputManager::getInstance();
 
@@ -150,25 +154,38 @@ namespace Plutus
         }
         ImGui::End();
 
-        mComPanel.drawUI();
-
         style.WindowMinSize.x = oldSize;
     }
 
     void EntityEditor::drawEntity()
     {
-        static auto mInManager = Plutus::InputManager::getInstance();
-
-        if (ImGui::CollapsingHeader("Layers##ent"))
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(300, 300));
+        ImGui::Begin("Scene Editor");
         {
+            static auto mInManager = Plutus::InputManager::getInstance();
             auto layers = mEntManager->getLayers();
             auto layer = mEntManager->getCurrentLayer();
+
+            ImGui::Text(ICON_FA_LAYER_GROUP " Layers");
+            ImGui::Separator();
             static auto current = layer->name;
+
+            static bool openLayerModal = false;
             if (ImGui::Button("Add New##layer"))
             {
-                mShowCreateLayer = true;
+                openLayerModal = true;
                 modalPos = mInManager->getMouseCoords();
             }
+            if (openLayerModal)
+            {
+                std::string newLayer = LayerModal("Create Layer", &openLayerModal);
+                if (!openLayerModal && !newLayer.empty())
+                {
+                    mEntManager->addLayer(newLayer);
+                    current = newLayer;
+                }
+            }
+
             ImGui::SameLine();
             ImGui::Button("Edit Name");
             ImGui::PushItemWidth(100);
@@ -178,53 +195,70 @@ namespace Plutus
             }
             ImGui::Checkbox("IsVisible", &layer->isVisible);
             ImGui::Separator();
+            static bool openEntModal = false;
             if (ImGui::Button("Add New##ent"))
             {
-                mShowCreateLayer = true;
+                openEntModal = true;
                 modalPos = mInManager->getMouseCoords();
             }
+
+            if (openEntModal)
+            {
+                std::string newEntity = LayerModal("Create Entity", &openEntModal);
+                if (!openEntModal && !newEntity.empty())
+                {
+                    mCurrentEnt = mEntManager->addEntity(newEntity);
+                }
+            }
+
             ImGui::SameLine();
             if (ImGui::Button("Remove##ent"))
             {
             }
+            /***************************Entity List*************************/
             ImGui::Separator();
             ImGui::Text("Entity List");
             ImGui::Separator();
             static int selected = 0;
-            ImGui::Entities("Entities##list", layer->entities, selected);
-            if (layer->entities[selected])
+            if (ImGui::Entities("Entities##list", layer->entities, selected))
             {
-                mComPanel.setEntity(layer->entities[selected]);
+                if (layer->entities.size() && layer->entities[selected])
+                {
+                    mCurrentEnt = layer->entities[selected];
+                }
+            }
+            if (mCurrentEnt)
+            {
+                mComPanel.setEntity(mCurrentEnt);
             }
         }
-        LayerModal();
+        ImGui::End();
+        ImGui::PopStyleVar(1);
     }
 
-    void EntityEditor::LayerModal()
+    std::string EntityEditor::LayerModal(char *label, bool *open)
     {
-        if (mShowCreateLayer)
+        std::string result = "";
+        if (*open)
         {
             ImGui::SetNextWindowPos(ImVec2(modalPos.x + 300, modalPos.y + 170));
             ImGui::SetNextWindowSize(ImVec2(260.0f, 90.0f));
 
-            ImGui::OpenPopup("New Layer");
+            ImGui::OpenPopup(label);
             static char newlayer[128];
-            if (ImGui::BeginPopupModal("New Layer", NULL))
+            if (ImGui::BeginPopupModal(label, NULL))
             {
-                if (ImGui::InputText("##layer Name", newlayer, IM_ARRAYSIZE(newlayer)))
-                {
+                ImGui::InputText("Name##modal-1 ", newlayer, IM_ARRAYSIZE(newlayer));
 
-                    LOG_I("Layer: {0}", newlayer);
-                }
-                if (ImGui::Button("Save") && !std::string(newlayer).empty())
+                if (ImGui::Button("Save##modal-1") && !std::string(newlayer).empty())
                 {
-                    mEntManager->addLayer(newlayer);
-                    mShowCreateLayer = false;
+                    result = newlayer;
+                    *open = false;
                 }
 
                 ImGui::SameLine();
-                if (ImGui::Button("Close"))
-                    mShowCreateLayer = false;
+                if (ImGui::Button("Close##modal-1"))
+                    *open = false;
 
                 ImGui::EndPopup();
             }
@@ -232,5 +266,6 @@ namespace Plutus
             if (mShowCreateLayer)
                 ImGui::CloseCurrentPopup();
         }
+        return result;
     }
 } // namespace Plutus

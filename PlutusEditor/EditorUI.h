@@ -92,6 +92,7 @@ namespace Plutus
 		void drawMainDockingWin();
 		void viewPort();
 		void viewPortControl();
+		void EntityList();
 		void saveScene();
 	};
 

@@ -54,7 +54,7 @@ namespace Plutus
 
 	void EditorUI::Init(Window *win, Camera2D *cam, EntityManager *emanager)
 	{
-		mFb.resize(cam->getScaleScreen().x, cam->getScaleScreen().y);
+		mFb.resize(win->getScreenWidth(), win->getScreenHeight());
 		mCamera = cam;
 		mWindow = win;
 		mEntManager = emanager;
@@ -112,98 +112,6 @@ namespace Plutus
 		}
 	}
 
-	void EditorUI::DrawUI()
-	{
-		beginUI();
-		drawMainDockingWin();
-		viewPort();
-		viewPortControl();
-		mEntityEditor.draw();
-		showDemo();
-		LayerEditor::LayerControls();
-		endUI();
-	}
-
-	void EditorUI::viewPort()
-	{
-		auto vsize = mFb.getSize();
-
-		ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar;
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		static bool open = true;
-		ImGui::;
-		ImGui::Begin("Viewport", &open, flags);
-		auto size = ImGui::GetContentRegionAvail();
-
-		// if (size.x != mViewportSize.x || size.y != mViewportSize.y)
-		// {
-		// 	mViewportSize = size;
-		// 	mFb.resize(mViewportSize.x, mViewportSize.y);
-		// }
-
-		ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
-
-		int xPos = static_cast<int>(ImGui::GetIO().MousePos.x - ImGui::GetCursorScreenPos().x - ImGui::GetScrollX());
-		int yPos = static_cast<int>(ImGui::GetIO().MousePos.y - ImGui::GetCursorScreenPos().y - ImGui::GetScrollY());
-
-		auto scaleScreen = mCamera->getScaleScreen();
-
-		glm::vec2 pos;
-		auto cvPortSize = mCamera->getViewPortSize();
-		pos.x = mapIn(xPos, 0, static_cast<int>(size.x), 0, cvPortSize.x);
-		pos.y = mapIn(yPos, 0, static_cast<int>(size.y), 0, cvPortSize.y);
-
-		auto sqrPos = mDebugRender->getSquareCoords(pos);
-		ImGui::Image(reinterpret_cast<void *>(mFb.getTextureId()), ImVec2(vsize.x, vsize.y), ImVec2(0, 1), ImVec2(1, 0));
-		if (ImGui::IsWindowHovered())
-		{
-			if (mMoveCam || mInputManager->onKeyDown(SDLK_LCTRL))
-			{
-				if (mInputManager->onKeyPressed(SDLK_r))
-				{
-					mCamera->setPosition(0, 0);
-				}
-				if (mInputManager->onKeyPressed(SDLK_z))
-				{
-					mCamera->setScale(1);
-				}
-				// move the camera
-				if (mInputManager->onKeyPressed(SDL_BUTTON_LEFT))
-				{
-					lastCoords = mInputManager->getMouseCoords();
-				}
-				// move the camera
-				if (mInputManager->onKeyDown(SDLK_LCTRL) && mInputManager->onKeyDown(SDL_BUTTON_LEFT))
-				{
-					//get the mouseCoord;
-					auto coords = mInputManager->getMouseCoords();
-					// get mouse last coords
-					// get the camera scale factor
-					float scale = mCamera->getScale();
-					//calculate distance move with scale
-					auto result = (coords - lastCoords) / scale;
-					//get the camera position
-					auto camPos = mCamera->getPosition();
-
-					glm::vec2 newPos(camPos.x - result.x, result.y + camPos.y);
-					mCamera->setPosition(newPos);
-					lastCoords = coords;
-				}
-			}
-		}
-		ImGui::End();
-		ImGui::PopStyleVar(1);
-	}
-
-	void EditorUI::onEvent(SDL_Event &event)
-	{
-		ImGui_ImplSDL2_ProcessEvent(&event);
-	}
-
-	void EditorUI::Serialize(Serializer &serializer)
-	{
-	}
-
 	bool ZoomViewPort(int *value, int step, int min, int max)
 	{
 		bool zoom = false;
@@ -243,16 +151,16 @@ namespace Plutus
 
 	void EditorUI::viewPortControl()
 	{
-		ImGui::Begin("ViewPort");
-
-		if (ImGui::CollapsingHeader("Camera Controls"))
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::Begin("ViewPort Controls");
+		ImGui::Columns(2, NULL, true);
+		ImGui::Text("Camera Control");
 		{
 			int zoom = static_cast<int>(round(mCamera->getScale() * 100));
 			if (ZoomViewPort(&zoom, SCALE_STEP, MIN_SCALE, MAX_SCALE))
 			{
 				mCamera->setScale(zoom / 100.0f);
 			}
-
 			ImGui::Checkbox("Move Camera", &mMoveCam);
 			ImGui::SameLine();
 
@@ -267,9 +175,10 @@ namespace Plutus
 				mVPColor = glm::vec4(bg[0], bg[1], bg[2], bg[3]);
 			}
 		}
-		if (ImGui::CollapsingHeader("Grid Controls"))
+		ImGui::NextColumn();
+		ImGui::Text("Grid Controls");
+		ImGui::Separator();
 		{
-			ImGui::Text("Grid Controls");
 			static bool showGrid = true;
 			if (ImGui::Checkbox("Enable", &showGrid))
 			{
@@ -300,10 +209,102 @@ namespace Plutus
 				LOG_I("{0} {1} {2} {3}", color[0] * 255, color[1] * 255, color[1] * 255, 1);
 				mDebugRender->setColor(ColorRGBA8(color[0] * 255, color[1] * 255, color[1] * 255, 255));
 			}
-		}
 
-		mEntityEditor.drawEntity();
+			ImGui::Separator();
+		}
 		ImGui::End();
+		ImGui::PopStyleVar();
+	}
+	void EditorUI::DrawUI()
+	{
+		beginUI();
+		drawMainDockingWin();
+		viewPort();
+		viewPortControl();
+		mEntityEditor.draw();
+		// showDemo();
+		LayerEditor::LayerControls();
+		endUI();
+	}
+
+	void EditorUI::viewPort()
+	{
+		auto vsize = mFb.getSize();
+
+		ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_HorizontalScrollbar;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		static bool open = true;
+		ImGui::PushStyleColor(ImGuiCol_ChildWindowBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+		ImGui::Begin("Viewport", &open, flags);
+		auto size = ImGui::GetContentRegionAvail();
+
+		auto winPos = ImGui::GetWindowSize();
+		float x = max((winPos.x - vsize.x), 0) * 0.5;
+		float y = max((winPos.y - vsize.y), 0) * 0.5;
+		ImGui::SetCursorPos(ImVec2(x, y));
+
+		ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
+
+		float xPos = ImGui::GetIO().MousePos.x - ImGui::GetCursorScreenPos().x;
+		float yPos = ImGui::GetIO().MousePos.y - ImGui::GetCursorScreenPos().y;
+
+		auto sqrPos = mDebugRender->getSquareCoords(glm::vec2(xPos, yPos));
+
+		// LOG_I("{0} {1} {2} {3}", sqrPos.x, sqrPos.y, xPos, yPos);
+
+		ImGui::Image(reinterpret_cast<void *>(mFb.getTextureId()), ImVec2(vsize.x, vsize.y), ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0, 1.0, 1.0, 1.0), ImVec4(0.0, 0.0, 0.0, 1.0));
+		if (ImGui::IsWindowHovered())
+		{
+			if (mMoveCam || mInputManager->onKeyDown(SDLK_LCTRL))
+			{
+				if (mInputManager->onKeyPressed(SDLK_r))
+				{
+					mCamera->setPosition(0, 0);
+				}
+				if (mInputManager->onKeyPressed(SDLK_z))
+				{
+					mCamera->setScale(1);
+				}
+				// move the camera
+				if (mInputManager->onKeyPressed(SDL_BUTTON_LEFT))
+				{
+					lastCoords = mInputManager->getMouseCoords();
+				}
+				// move the camera
+				if (mInputManager->onKeyDown(SDLK_LCTRL) && mInputManager->onKeyDown(SDL_BUTTON_LEFT))
+				{
+					//get the mouseCoord;
+					auto coords = mInputManager->getMouseCoords();
+					// get mouse last coords
+					// get the camera scale factor
+					float scale = mCamera->getScale();
+					//calculate distance move with scale
+					auto result = (coords - lastCoords) / scale;
+					//get the camera position
+					auto camPos = mCamera->getPosition();
+
+					glm::vec2 newPos(camPos.x - result.x, result.y + camPos.y);
+					mCamera->setPosition(newPos);
+					lastCoords = coords;
+				}
+			}
+		}
+		ImGui::End();
+		ImGui::PopStyleVar(1);
+		ImGui::PopStyleColor(1);
+	}
+
+	void EditorUI::onEvent(SDL_Event &event)
+	{
+		ImGui_ImplSDL2_ProcessEvent(&event);
+	}
+
+	void EditorUI::Serialize(Serializer &serializer)
+	{
+	}
+
+	void EditorUI::EntityList()
+	{
 		//Control the camera with CTRL + MOUSE WHEEL
 		if (mInputManager->onKeyDown(SDLK_LCTRL))
 		{
