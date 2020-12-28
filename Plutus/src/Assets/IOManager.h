@@ -10,7 +10,7 @@ namespace Plutus
 {
 	namespace IOManager
 	{
-		std::string readFileToString(const std::string &filePath)
+		inline std::string readFileToString(const char *filePath)
 		{
 			std::ifstream f(filePath);
 			if (f.fail())

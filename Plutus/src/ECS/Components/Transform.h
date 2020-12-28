@@ -7,8 +7,8 @@ namespace Plutus
     class Transform : public Component
     {
     public:
-        glm::ivec2 position;
-        glm::ivec2 size;
+        glm::vec2 position;
+        glm::vec2 size;
         int rotation;
 
     public:

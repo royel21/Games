@@ -12,6 +12,7 @@
 #include "Components/Sprite.h"
 #include "Components/TileMap.h"
 #include "Components/Transform.h"
+#include "SceneLoader.h"
 
 using namespace rapidjson;
 
@@ -23,15 +24,8 @@ namespace Plutus
 		currentLayer = &mLayers["Layer0"];
 	}
 
-	EntityManager *EntityManager::getInstance()
-	{
-		static EntityManager manager = EntityManager();
-		return &manager;
-	}
-
 	void EntityManager::init()
 	{
-
 		mShader.CreateProgWithShader(vertexShader2, fragShader2);
 		mShader.setAtribute("vertexPosition");
 		mShader.setAtribute("vertexColor");
@@ -142,11 +136,12 @@ namespace Plutus
 		return (int)mEntities.size();
 	}
 
-	void EntityManager::addLayer(const std::string &layer)
+	Layer *EntityManager::addLayer(const std::string &layer)
 	{
 		mLayers[layer].isVisible = true;
 		mLayers[layer].name = layer;
 		currentLayer = &mLayers[layer];
+		return currentLayer;
 	}
 
 	void EntityManager::addToLayer(Entity *e, const std::string &layer)
@@ -197,9 +192,9 @@ namespace Plutus
 				writer->String("entities");
 				writer->StartArray();
 				{
-					writer->StartObject();
 					for (auto ent : layer.second.entities)
 					{
+						writer->StartObject();
 						writer->String("name");
 						writer->String(ent->name.c_str());
 						writer->String("components");
@@ -211,8 +206,8 @@ namespace Plutus
 							}
 						}
 						writer->EndArray();
+						writer->EndObject();
 					}
-					writer->EndObject();
 				}
 				writer->EndArray();
 			}
@@ -221,13 +216,5 @@ namespace Plutus
 		writer->EndArray();
 
 		writer->EndObject();
-	}
-
-	void EntityManager::deserialize(const std::string jsonFile)
-	{
-		rapidjson::Document doc;
-		if (Utils::loadJson(jsonFile, &doc))
-		{
-		}
 	}
 } // namespace Plutus

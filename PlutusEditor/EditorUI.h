@@ -94,6 +94,7 @@ namespace Plutus
 		void viewPortControl();
 		void EntityList();
 		void saveScene();
+		void loadScene();
 	};
 
 } // namespace Plutus

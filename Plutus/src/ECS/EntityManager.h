@@ -1,5 +1,5 @@
-#ifndef _ENTITYMANAGER_H
-#define _ENTITYMANAGER_H
+#pragma once
+
 #include <vector>
 #include <bitset>
 #include <unordered_map>
@@ -13,6 +13,7 @@
 namespace Plutus
 {
 	class Serializer;
+	class SceneLoader;
 
 	struct Layer
 	{
@@ -30,9 +31,10 @@ namespace Plutus
 		Shader mShader;
 		Camera2D *mCamera = nullptr;
 		SpriteBatch2D mSpriteBath2D;
+		friend SceneLoader;
 
 	public:
-		static EntityManager *getInstance();
+		EntityManager();
 
 		void init();
 		void update(float dt);
@@ -53,7 +55,7 @@ namespace Plutus
 
 		void setCamera(Camera2D *cm);
 
-		void addLayer(const std::string &layer);
+		Layer *addLayer(const std::string &layer);
 
 		void addToLayer(Entity *e, const std::string &layer);
 
@@ -68,12 +70,5 @@ namespace Plutus
 		void clearData();
 
 		void serialize(Serializer &serializer);
-
-		void deserialize(const std::string jsonFile);
-
-	private:
-		EntityManager();
 	};
 } // namespace Plutus
-
-#endif

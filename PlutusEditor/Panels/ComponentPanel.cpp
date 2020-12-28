@@ -10,6 +10,7 @@
 #include "ECS/Components/Transform.h"
 #include "ECS/Components/Sprite.h"
 #include "ECS/Components/TileMap.h"
+#include "ECS/EntityManager.h"
 #include "ECS/Entity.h"
 
 #define CHECKLIMIT(val, min, max) val<min ? min : val> max ? max : val
@@ -20,8 +21,9 @@ const uint32_t color3 = IM_COL32(60, 60, 70, 255);
 
 namespace Plutus
 {
-    void ComponentPanel::init()
+    void ComponentPanel::init(EntityManager *entManager)
     {
+        mEntManager = entManager;
         mAManager = AssetManager::getInstance();
         mInputManager = InputManager::getInstance();
     }
@@ -58,13 +60,14 @@ namespace Plutus
             if (ImGui::CollapsingHeader("Transform##comp"))
             {
                 auto trans = mEntity->getComponent<Transform>();
-                int position[] = {trans->position.x, trans->position.y};
+                int position[] = {static_cast<int>(trans->position.x), static_cast<int>(trans->position.y)};
+
                 if (ImGui::DragInt2("Position X Y", position))
                 {
-                    trans->position.x = position[0];
-                    trans->position.y = position[1];
+                    trans->position.x = static_cast<float>(position[0]);
+                    trans->position.y = static_cast<float>(position[1]);
                 }
-                int size[] = {trans->size.x, trans->size.y};
+                int size[] = {static_cast<int>(trans->size.x), static_cast<int>(trans->size.y)};
                 if (ImGui::DragInt2("Size W H", size))
                 {
                     trans->size.x = size[0];

@@ -8,19 +8,21 @@ namespace Plutus
     struct TileSet;
     class AssetManager;
     class InputManager;
+    class EntityManager;
 
     class ComponentPanel
     {
-    public:
+    private:
         Entity *mEntity = nullptr;
         AssetManager *mAManager = nullptr;
         InputManager *mInputManager = nullptr;
         std::vector<ImVec2> mSelectedtiles;
+        EntityManager *mEntManager = nullptr;
 
     public:
         ComponentPanel() = default;
 
-        void init();
+        void init(EntityManager *entmanager);
         void drawUI();
         void drawAnimate();
         void drawTransform();

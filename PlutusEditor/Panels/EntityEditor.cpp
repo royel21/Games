@@ -13,7 +13,7 @@ namespace Plutus
     void EntityEditor::init(EntityManager *emanager)
     {
         mEntManager = emanager;
-        mComPanel.init();
+        mComPanel.init(emanager);
     }
 
     void EntityEditor::draw()

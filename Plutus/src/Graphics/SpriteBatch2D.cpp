@@ -173,36 +173,4 @@ namespace Plutus
 		vertices2[textId].emplace_back(trans->position.x + trans->size.x, trans->position.y, uv.z, uv.w, sprite->mColor);
 	}
 
-	void SpriteBatch2D::end2()
-	{
-		// uint32_t start = SDL_GetTicks();
-		int i = 0;
-		GLuint offset = 0;
-		GLuint vertSize = 0;
-		for (auto vers : vertices2)
-		{
-			vertSize += vers.second.size();
-			mRenderBatches2[vers.first].texture = vers.first;
-			mRenderBatches2[vers.first].offset = offset;
-			mRenderBatches2[vers.first].numVertices = ((vers.second.size() / 4) * 6);
-			offset = (i + 1) * mRenderBatches2[vers.first].numVertices;
-		}
-
-		glBufferData(GL_ARRAY_BUFFER, vertSize * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
-
-		mIBO->bind();
-		glBindVertexArray(mVAO);
-		for (size_t i = 0; i < mRenderBatches.size(); i++)
-		{
-			glBindTexture(GL_TEXTURE_2D, mRenderBatches[i].texture);
-			glDrawElements(GL_TRIANGLES, mRenderBatches[i].numVertices, GL_UNSIGNED_INT, (void *)(mRenderBatches[i].offset * sizeof(GLuint)));
-		}
-		glBindTexture(GL_TEXTURE_2D, 0);
-		glBindVertexArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		mIBO->unbind();
-		mIndexCount = 0;
-		vertices2.clear();
-	}
 } // namespace Plutus

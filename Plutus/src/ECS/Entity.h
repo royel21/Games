@@ -55,7 +55,7 @@ namespace Plutus
 		template <typename T>
 		bool hasComponent()
 		{
-			return componentTypeMap[&typeid(T)];
+			return componentTypeMap[&typeid(T)] != nullptr;
 		}
 
 		void destroy();

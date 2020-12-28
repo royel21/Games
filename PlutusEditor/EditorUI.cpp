@@ -1,16 +1,20 @@
 #include "EditorUI.h"
-#include "ImGuiEx.h"
+#include "Window.h"
 #include "IconsFontAwesome5.h"
 
-#include "Window.h"
 #include "Graphics/DebugRenderer.h"
 #include "Graphics/Camera2D.h"
+
 #include "Serialize/Serialize.h"
 #include "Input/InputManager.h"
 #include "Log/Logger.h"
-#include "ECS/EntityManager.h"
-
 #include "LayerEditor.h"
+#include "Utils.h"
+
+#include "ImGuiEx.h"
+
+#include "ECS/EntityManager.h"
+#include "ECS/SceneLoader.h"
 
 #define mapIn(x, min_in, max_in, min_out, max_out) (x - min_in) * (max_out - min_out) / (max_in - min_in) + min_out
 
@@ -371,6 +375,7 @@ namespace Plutus
 
 				if (ImGui::MenuItem("Open", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
 				{
+					loadScene();
 				}
 				if (ImGui::MenuItem("Save", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
 				{
@@ -414,7 +419,20 @@ namespace Plutus
 	{
 		Plutus::Serializer sr;
 		mEntManager->serialize(sr);
-		std::cout << sr.sb.GetString() << std::endl;
+		std::string filePath;
+		if (Plutus::Utils::windowDialog(SAVE_FILE, filePath))
+		{
+			Plutus::Utils::toJsonFile(filePath, sr.sb.GetString());
+		}
+	}
+
+	void EditorUI::loadScene()
+	{
+		std::string path;
+		if (Utils::windowDialog(OPEN_FILE, path))
+		{
+			Plutus::SceneLoader::loadFromJson(path.c_str(), mEntManager);
+		}
 	}
 
 } // namespace Plutus

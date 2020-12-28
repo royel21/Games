@@ -1,0 +1,38 @@
+{
+    "layers": [
+        {
+            "name": "Layer0",
+            "entities": [
+                {
+                    "name": "bg1",
+                    "components": [
+                        {
+                            "name": "Transform",
+                            "x": 0,
+                            "y": 0,
+                            "w": 512,
+                            "h": 512
+                        },
+                        {
+                            "name": "Sprite",
+                            "texture": "bg1"
+                        }
+                    ]
+                },
+                {
+                    "name": "tileMap1",
+                    "components": []
+                }
+            ]
+        },
+        {
+            "name": "Layer1",
+            "entities": [
+                {
+                    "name": "Enemy",
+                    "components": []
+                }
+            ]
+        }
+    ]
+}

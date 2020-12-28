@@ -1,6 +1,10 @@
 #pragma once
 #include <string>
 #include "rapidjson/document.h"
+#include "Assets/IOManager.h"
+
+#define SAVE_FILE 0
+#define OPEN_FILE 1
 
 namespace Plutus
 {
@@ -8,6 +12,7 @@ namespace Plutus
     typedef unsigned short u16;
     typedef unsigned int u32;
     typedef unsigned long ulong;
+
     namespace Utils
     {
         //Get file extenxion
@@ -21,7 +26,7 @@ namespace Plutus
             return "";
         }
 
-        inline bool loadJson(const std::string &filePath, rapidjson::Document *document)
+        inline bool loadJson(const char *filePath, rapidjson::Document *document)
         {
             std::string ex = getExtension(filePath);
             if (ex == "json")
@@ -34,6 +39,10 @@ namespace Plutus
             }
             return false;
         }
+
+        bool windowDialog(int mode, std::string &path);
+
+        void toJsonFile(std::string filepath, const char *buffer);
     } // namespace Utils
 
 } // namespace Plutus

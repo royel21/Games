@@ -58,7 +58,6 @@ namespace Plutus
 		void submit(Sprite *renderable);
 		void submit(Transform *trans, Sprite *sprite);
 		void end();
-		void end2();
 
 		void flush();
 		void resizeBuffer(size_t size) { mRenderables.reserve(mRenderables.size() + size); }

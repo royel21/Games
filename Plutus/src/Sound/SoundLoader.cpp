@@ -14,7 +14,7 @@ namespace Plutus
 
 		unsigned long buffSize = 0;
 		unsigned long offset = 0;
-		if (getExtension(filePath) == "ogg")
+		if (Utils::getExtension(filePath) == "ogg")
 		{
 			return readOgg(filePath, wfx, buffer);
 		}
