@@ -37,11 +37,9 @@ namespace Plutus
 	GLTexture TextureManager::loadImage(std::string filePath, GLshort id = 0)
 	{
 		GLTexture texture = {};
-		std::vector<GLubyte> in;
-		uint8_t *out;
 
-		int width, height, BPP;
-		out = stbi_load(filePath.c_str(), &width, &height, &BPP, 4);
+		int BPP;
+		uint8_t *out = stbi_load(filePath.c_str(), &texture.width, &texture.height, &BPP, 4);
 
 		glGenTextures(1, &texture.id);
 		//link the image to a texture in the gpu texture array
@@ -53,20 +51,18 @@ namespace Plutus
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
 		//Load the image to the memory of the gpu
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, out);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, texture.width, texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, out);
 
 		//See https://en.wikipedia.org/wiki/Mipmap
 		glGenerateMipmap(GL_TEXTURE_2D);
 		//unlink the texture
 		glBindTexture(GL_TEXTURE_2D, 0);
-
-		texture.width = width;
-		texture.height = height;
 		//delete the image buffer from memory
 		if (out)
 		{
 			stbi_image_free(out);
 		}
+
 		return texture;
 	}
 } // namespace Plutus

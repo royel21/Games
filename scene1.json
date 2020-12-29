@@ -2,21 +2,21 @@
     "textures": [
         {
             "id": "cave",
-            "path": ".\\assets\\textures\\tiles.png",
+            "path": "./assets/textures/goblin_cave.png",
             "columns": 8,
             "width": 32,
             "height": 32
         },
         {
             "id": "player",
-            "path": ".\\assets\\textures\\link.png",
+            "path": "./assets/textures/link.png",
             "columns": 12,
             "width": 24,
             "height": 32
         },
         {
             "id": "bg1",
-            "path": ".\\assets\\textures\\forest-zelda.png",
+            "path": "./assets/textures/forest-zelda.png",
             "columns": 0,
             "width": 0,
             "height": 0
