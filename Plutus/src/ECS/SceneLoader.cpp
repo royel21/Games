@@ -21,6 +21,20 @@ namespace Plutus
     }
     void loadTileMap(Entity *ent, rapidjson::Value::Object &value)
     {
+        int w = value["tilewidth"].GetInt();
+        int h = value["tileheight"].GetInt();
+        auto &tmap = ent->addComponent<TileMap>(w, h);
+
+        auto tiles = value["tiles"].GetArray();
+        for (size_t i = 0; i < tiles.Size(); i++)
+        {
+            auto tile = tiles[i].GetJsonObject();
+            tmap.mTiles.emplace_back(
+                tile["texId"].GetString(),
+                tile["x"].GetInt(),
+                tile["y"].GetInt(),
+                tile["coordId"].GetInt());
+        }
     }
 
     bool SceneLoader::loadFromJson(const char *path, EntityManager *entManager)

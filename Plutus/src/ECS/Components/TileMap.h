@@ -35,6 +35,7 @@ namespace Plutus
 
     public:
         TileMap() = default;
+        TileMap(int w, int h) : mTileWidth(w), mTileHeight(h) {}
         void serialize(Serializer &serializer) override;
     };
 } // namespace Plutus
