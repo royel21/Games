@@ -47,12 +47,12 @@ namespace Plutus
 		TextLayer();
 		~TextLayer();
 
-		bool Init(
-			Window *window,
-			std::string fontPath,
-			uint32_t fontSize);
+		bool Init(Window *window, float width, float height, std::string fontPath, uint32_t fontSize);
 
-		void setActiveTexture(GLushort slot) { mActiveTexture = slot; }
+		inline void setActiveTexture(GLushort slot)
+		{
+			mActiveTexture = slot;
+		}
 
 		inline void setColor(float r, float g, float b, float a) { color = glm::vec4(r, g, b, a); };
 		inline void setColor(float r, float g, float b) { color = glm::vec4(r, g, b, 1); };

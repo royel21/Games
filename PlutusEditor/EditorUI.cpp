@@ -14,7 +14,6 @@
 #include "ImGuiEx.h"
 
 #include "ECS/EntityManager.h"
-#include "ECS/SceneLoader.h"
 
 #define mapIn(x, min_in, max_in, min_out, max_out) (x - min_in) * (max_out - min_out) / (max_in - min_in) + min_out
 
@@ -58,7 +57,7 @@ namespace Plutus
 
 	void EditorUI::Init(Window *win, Camera2D *cam, EntityManager *emanager)
 	{
-		mFb.resize(win->getScreenWidth(), win->getScreenHeight());
+		mFb.resize(cam->getScaleScreen());
 		mCamera = cam;
 		mWindow = win;
 		mEntManager = emanager;
@@ -157,7 +156,23 @@ namespace Plutus
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::Begin("ViewPort Controls");
-		ImGui::Columns(2, NULL, true);
+		ImGui::Columns(3, NULL, true);
+		ImGui::Text("ViewPort Props");
+		ImGui::PushItemWidth(100);
+		static auto size = mFb.getSize();
+		if (ImGui::InputFloat("Zoom##vp", &mVPScale, 0.05))
+		{
+			// mCamera->setScale(scale);
+			// mFb.resize(size * scale);
+		}
+		// ImGui::SameLine();
+		// static int height = static_cast<int>(size.y);
+		// if (ImGui::InputInt("Height", &height))
+		// {
+		// 	mFb.resize(size.x, height);
+		// }
+		ImGui::PopItemWidth();
+		ImGui::NextColumn();
 		ImGui::Text("Camera Control");
 		{
 			int zoom = static_cast<int>(round(mCamera->getScale() * 100));
@@ -210,7 +225,6 @@ namespace Plutus
 			static float color[] = {0, 0, 0, 1.0f};
 			if (ImGui::ColorEdit3("Grid Color", color))
 			{
-				LOG_I("{0} {1} {2} {3}", color[0] * 255, color[1] * 255, color[1] * 255, 1);
 				mDebugRender->setColor(ColorRGBA8(color[0] * 255, color[1] * 255, color[1] * 255, 255));
 			}
 
@@ -226,7 +240,6 @@ namespace Plutus
 		viewPort();
 		viewPortControl();
 		mEntityEditor.draw();
-		// showDemo();
 		LayerEditor::LayerControls();
 		endUI();
 	}
@@ -254,7 +267,7 @@ namespace Plutus
 
 		auto sqrPos = mDebugRender->getSquareCoords(glm::vec2(xPos, yPos));
 
-		// LOG_I("{0} {1} {2} {3}", sqrPos.x, sqrPos.y, xPos, yPos);
+		LOG_I("{0} {1} {2} {3}", sqrPos.x, sqrPos.y, xPos, yPos);
 
 		ImGui::Image(reinterpret_cast<void *>(mFb.getTextureId()), ImVec2(vsize.x, vsize.y), ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0, 1.0, 1.0, 1.0), ImVec4(0.0, 0.0, 0.0, 1.0));
 		if (ImGui::IsWindowHovered())
@@ -375,7 +388,7 @@ namespace Plutus
 
 				if (ImGui::MenuItem("Open", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
 				{
-					loadScene();
+					mEntityEditor.loadScene();
 				}
 				if (ImGui::MenuItem("Save", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
 				{
@@ -423,15 +436,6 @@ namespace Plutus
 		if (Plutus::Utils::windowDialog(SAVE_FILE, filePath))
 		{
 			Plutus::Utils::toJsonFile(filePath, sr.sb.GetString());
-		}
-	}
-
-	void EditorUI::loadScene()
-	{
-		std::string path;
-		if (Utils::windowDialog(OPEN_FILE, path))
-		{
-			Plutus::SceneLoader::loadFromJson(path.c_str(), mEntManager);
 		}
 	}
 

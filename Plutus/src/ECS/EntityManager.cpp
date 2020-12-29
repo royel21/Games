@@ -179,8 +179,9 @@ namespace Plutus
 	void EntityManager::serialize(Serializer &ser)
 	{
 		auto writer = ser.getWriter();
+		auto assManager = AssetManager::getInstance();
 		writer->StartObject();
-
+		assManager->Serialize(ser);
 		writer->String("layers");
 		writer->StartArray();
 		for (auto layer : mLayers)

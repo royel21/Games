@@ -46,6 +46,7 @@ namespace Plutus
 	void AssetManager::Serialize(Serializer &serializer)
 	{
 		auto writer = serializer.getWriter();
+		writer->String("textures");
 		writer->StartArray();
 		for (auto tile : tilesets)
 		{

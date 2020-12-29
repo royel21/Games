@@ -52,6 +52,7 @@ namespace Plutus
 		bool m_moveCamera = false;
 
 		glm::vec2 lastCoords;
+		float mVPScale = 1;
 
 	public:
 		std::vector<ImVec2>
@@ -94,7 +95,6 @@ namespace Plutus
 		void viewPortControl();
 		void EntityList();
 		void saveScene();
-		void loadScene();
 	};
 
 } // namespace Plutus

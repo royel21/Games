@@ -38,14 +38,9 @@ namespace Plutus
 			m_needsMatrixUpdate = true;
 		}
 
-		void setWindowSize(float w, float h)
-		{
-			m_screenWidth = w;
-			m_screenHeight = h;
-			m_needsMatrixUpdate = true;
-		}
+		void setWindowSize(float w, float h) { init(w, h); }
 
-		void setWindowSize(const glm::vec2 &size) { setWindowSize(size.x, size.y); }
+		void setWindowSize(const glm::vec2 &size) { init(size.x, size.y); }
 
 		void setScale(float newScale)
 		{

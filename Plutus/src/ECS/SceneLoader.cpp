@@ -8,6 +8,7 @@
 #include "Components/Transform.h"
 #include "Components/Sprite.h"
 #include "Components/TileMap.h"
+#include "SDL.h"
 
 namespace Plutus
 {
@@ -24,6 +25,7 @@ namespace Plutus
 
     bool SceneLoader::loadFromJson(const char *path, EntityManager *entManager)
     {
+        uint32_t start = SDL_GetTicks();
         bool success = false;
         rapidjson::Document doc;
         if (Utils::loadJson(path, &doc))
@@ -31,6 +33,21 @@ namespace Plutus
             if (doc["layers"].IsArray())
             {
                 entManager->clearData();
+                auto assetManager = AssetManager::getInstance();
+                assetManager->clearData();
+
+                auto textures = doc["textures"].GetArray();
+                for (size_t i = 0; i < textures.Size(); i++)
+                {
+                    auto tex = textures[i].GetJsonObject();
+                    auto id = tex["id"].GetString();
+                    auto path = tex["path"].GetString();
+                    int columns = tex["columns"].GetInt();
+                    int width = tex["width"].GetInt();
+                    int height = tex["height"].GetInt();
+                    assetManager->addTexture(id, path, columns, width, height);
+                }
+
                 //Get the layers
                 auto layers = doc["layers"].GetArray();
                 for (size_t i = 0; i < layers.Size(); i++)
@@ -79,8 +96,15 @@ namespace Plutus
                         }
                     }
                 }
+                auto nlayers = entManager->getLayers();
+                if (layers.Size() > 0)
+                {
+                    auto second = nlayers->begin()->second;
+                    entManager->setCurrentLayer(second.name);
+                }
                 success = true;
             }
+            std::cout << "Time: " << SDL_GetTicks() - start << std::endl;
         }
         return success;
     }

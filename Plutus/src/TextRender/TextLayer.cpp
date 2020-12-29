@@ -21,13 +21,10 @@ namespace Plutus
 		pShader.dispose();
 	}
 
-	bool TextLayer::Init(
-		Window *window,
-		std::string fontPath,
-		uint32_t fontSize)
+	bool TextLayer::Init(Window *window, float width, float height, std::string fontPath, uint32_t fontSize)
 	{
-		pWidth = static_cast<float>(window->getScreenWidth());
-		pHeight = static_cast<float>(window->getScreenHeight());
+		pWidth = width;
+		pHeight = height;
 		if (!pShader.CreateProgWithShader(vertTextLayer, fragTextLayer))
 		{
 			std::cout << "Error Creating program \n";

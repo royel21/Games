@@ -27,8 +27,12 @@ namespace Plutus
         mAManager = AssetManager::getInstance();
         mInputManager = InputManager::getInstance();
     }
-    void ComponentPanel::drawUI()
+    void ComponentPanel::drawUI(Entity *ent)
     {
+        if (ent)
+        {
+            mEntity = ent;
+        }
         static bool isOpen = true;
         ImGui::Begin("Components", &isOpen, ImGuiWindowFlags_HorizontalScrollbar);
         {
@@ -153,12 +157,9 @@ namespace Plutus
         ImVec2 cvDestEnd(cvPos.x + tileset->texWidth * scale, cvPos.y + tileset->texHeight * scale);
         ImGui::Image((void *)tileset->texId, ImVec2(tileset->texWidth * scale, tileset->texHeight * scale));
         {
-            // drawList->AddRectFilledMultiColor(cvPos, cvDestEnd, color1, color2, color3, color2);
-
             auto color = IM_COL32(255, 255, 255, 100);
             if (tileset->texId)
             {
-                // drawList->AddImage((void *)tileset->texId, cvPos, cvDestEnd);
                 drawList->AddRect(cvPos, cvDestEnd, color);
             }
 

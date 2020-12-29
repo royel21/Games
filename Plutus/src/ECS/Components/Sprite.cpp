@@ -4,11 +4,11 @@
 
 namespace Plutus
 {
-    Sprite::Sprite() : mPosition(0), mSize(0), mUVCoord(0, 1, 1, 0), mTextureId(0)
+    Sprite::Sprite() : mPosition(0), mSize(0), mUVCoord(0, 0, 1, 1), mTextureId(0)
     {
     }
 
-    Sprite::Sprite(std::string textId) : mPosition(0), mSize(0), mUVCoord(0, 1, 1, 0), mTextureId(textId)
+    Sprite::Sprite(std::string textId) : mPosition(0), mSize(0), mUVCoord(0, 0, 1, 1), mTextureId(textId)
     {
         mTexId = AssetManager::getInstance()->getTexture(textId)->texId;
     }

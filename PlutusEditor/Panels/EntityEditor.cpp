@@ -7,233 +7,252 @@
 #include "Log/Logger.h"
 #include "ECS/EntityManager.h"
 #include "IconsFontAwesome5.h"
+#include "ECS/SceneLoader.h"
+#include "Utils.h"
 
 namespace Plutus
 {
     void EntityEditor::init(EntityManager *emanager)
     {
+        mInputManager = Plutus::InputManager::getInstance();
         mEntManager = emanager;
         mComPanel.init(emanager);
+        mLayers = mEntManager->getLayers();
+        mCurrentLayer = mEntManager->getCurrentLayer();
+
+        mCurLayerName = mCurrentLayer->name;
+
+        if (mCurrentLayer != nullptr && mCurrentLayer->entities.size() > 0)
+        {
+            mCurrentEnt = mCurrentLayer->entities[0];
+        }
     }
 
     void EntityEditor::draw()
     {
         drawEntity();
-        mComPanel.drawUI();
+        mComPanel.drawUI(mCurrentEnt);
+    }
 
-        auto assetManager = Plutus::AssetManager::getInstance();
-        auto mInputManager = InputManager::getInstance();
+    void EntityEditor::drawTileset()
+    {
+        // auto assetManager = Plutus::AssetManager::getInstance();
 
-        auto data = assetManager->getTilesets();
-        ImGuiStyle &style = ImGui::GetStyle();
-        int oldSize = style.WindowMinSize.x;
-        style.WindowMinSize.x = 300;
-        ImGui::Begin("TileSets Window");
+        // auto data = assetManager->getTilesets();
+        // ImGuiStyle &style = ImGui::GetStyle();
+        // int oldSize = style.WindowMinSize.x;
+        // style.WindowMinSize.x = 300;
+        // ImGui::Begin("TileSets Window");
+        // ImGui::RadioButton("Place", &mMode, EDIT_PLACE);
+        // ImGui::SameLine();
+        // ImGui::RadioButton("Select", &mMode, EDIT_SELECT);
+        // ImGui::SameLine();
+        // ImGui::RadioButton("Remove", &mMode, EDIT_REMOVE);
 
-        ImDrawList *draw_list = ImGui::GetWindowDrawList();
-        static std::string selected = data.begin()->first;
-        static bool mDown;
-        {
+        // ImDrawList *draw_list = ImGui::GetWindowDrawList();
+        // if (data.size() > 0)
+        // {
+        //     static std::string selected = data.begin()->first;
+        //     auto tileTex = data[selected];
 
-            ImGui::RadioButton("Place", &mMode, EDIT_PLACE);
-            ImGui::SameLine();
-            ImGui::RadioButton("Select", &mMode, EDIT_SELECT);
-            ImGui::SameLine();
-            ImGui::RadioButton("Remove", &mMode, EDIT_REMOVE);
+        //     static int sc = 100;
+        //     static float scale = 1.0f;
+        //     ImGui::PushItemWidth(100);
+        //     {
+        //         if (ImGui::InputInt("Scale", &sc, 5))
+        //         {
+        //             sc = sc > 25 ? sc : 25;
+        //             scale = sc / 100.0f;
+        //         }
+        //         ImGui::SameLine();
+        //         ImGui::ComboBox<TileSet>("TileSheet", data, selected);
+        //         ImGui::PopItemWidth();
+        //     }
 
-            auto tileTex = data[selected];
+        //     ImGui::Separator();
+        //     //Show texture if size > 0
+        //     if (tileTex.texWidth > 0 && tileTex.texHeight > 0)
+        //     {
+        //         ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
 
-            static int sc = 100;
-            static float scale = 1.0f;
-            ImGui::PushItemWidth(100);
-            {
-                if (ImGui::InputInt("Scale", &sc, 5))
-                {
-                    sc = sc > 25 ? sc : 25;
-                    scale = sc / 100.0f;
-                }
-                ImGui::SameLine();
-                ImGui::ComboBox<TileSet>("TileSheet", data, selected);
-                ImGui::PopItemWidth();
-            }
+        //         ImVec2 cv_destStart(canvas_pos.x, canvas_pos.y);
+        //         ImVec2 cv_destEnd(canvas_pos.x + tileTex.texWidth * scale, canvas_pos.y + tileTex.texHeight * scale);
 
-            ImGui::Separator();
-            //Show texture if size > 0
-            if (tileTex.texWidth > 0 && tileTex.texHeight > 0)
-            {
-                ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
+        //         //background
+        //         draw_list->AddRectFilledMultiColor(canvas_pos, cv_destEnd, IM_COL32(50, 50, 50, 255),
+        //                                            IM_COL32(50, 50, 60, 255), IM_COL32(60, 60, 70, 255), IM_COL32(50, 50, 60, 255));
 
-                ImVec2 cv_destStart(canvas_pos.x, canvas_pos.y);
-                ImVec2 cv_destEnd(canvas_pos.x + tileTex.texWidth * scale, canvas_pos.y + tileTex.texHeight * scale);
+        //         ImGui::InvisibleButton("#inv", ImVec2(tileTex.texWidth * scale, tileTex.texHeight * scale));
+        //         {
+        //             //Grid Line color
+        //             auto color = IM_COL32(255, 255, 255, 100);
+        //             if (tileTex.texId)
+        //             {
+        //                 draw_list->AddImage((void *)tileTex.texId, canvas_pos, cv_destEnd);
+        //                 draw_list->AddRect(canvas_pos, cv_destEnd, color);
+        //             }
+        //             if (tileTex.tileWidth && tileTex.tileHeight)
+        //             {
+        //                 float tileWidth = tileTex.tileWidth * scale;
+        //                 float tileHeight = tileTex.tileHeight * scale;
 
-                //background
-                draw_list->AddRectFilledMultiColor(canvas_pos, cv_destEnd, IM_COL32(50, 50, 50, 255),
-                                                   IM_COL32(50, 50, 60, 255), IM_COL32(60, 60, 70, 255), IM_COL32(50, 50, 60, 255));
+        //                 float textureHeight = tileTex.texHeight * scale;
+        //                 float textureWidth = tileTex.texWidth * scale;
+        //                 int columns = static_cast<int>(textureWidth / tileWidth);
+        //                 if (tileWidth)
+        //                 {
 
-                ImGui::InvisibleButton("#inv", ImVec2(tileTex.texWidth * scale, tileTex.texHeight * scale));
-                {
-                    //Grid Line color
-                    auto color = IM_COL32(255, 255, 255, 100);
-                    if (tileTex.texId)
-                    {
-                        draw_list->AddImage((void *)tileTex.texId, canvas_pos, cv_destEnd);
-                        draw_list->AddRect(canvas_pos, cv_destEnd, color);
-                    }
-                    if (tileTex.tileWidth && tileTex.tileHeight)
-                    {
-                        float tileWidth = tileTex.tileWidth * scale;
-                        float tileHeight = tileTex.tileHeight * scale;
+        //                     for (float y = 0; y < textureHeight; y += tileHeight)
+        //                     {
+        //                         draw_list->AddLine(ImVec2(canvas_pos.x, canvas_pos.y + y),
+        //                                            ImVec2(cv_destEnd.x, canvas_pos.y + y), color, 1.0f);
+        //                     }
+        //                 }
+        //                 if (tileWidth)
+        //                 {
+        //                     for (float x = 0; x < textureWidth; x += tileWidth)
+        //                     {
+        //                         draw_list->AddLine(ImVec2(canvas_pos.x + x, canvas_pos.y),
+        //                                            ImVec2(canvas_pos.x + x, cv_destEnd.y), color, 1.0f);
+        //                     }
+        //                 }
+        //                 //Rect
+        //                 static bool mDown = false;
+        //                 if (ImGui::IsItemHovered())
+        //                 {
+        //                     ImVec2 mpos_in_canvas = ImVec2(ImGui::GetIO().MousePos.x - canvas_pos.x, ImGui::GetIO().MousePos.y - canvas_pos.y);
 
-                        float textureHeight = tileTex.texHeight * scale;
-                        float textureWidth = tileTex.texWidth * scale;
-                        int columns = static_cast<int>(textureWidth / tileWidth);
-                        if (tileWidth)
-                        {
+        //                     float x = floor(mpos_in_canvas.x / tileWidth);
+        //                     float y = floor(mpos_in_canvas.y / tileHeight);
+        //                     ImVec2 start(x * tileWidth + canvas_pos.x, y * tileHeight + canvas_pos.y);
+        //                     ImVec2 end(start.x + tileWidth, start.y + tileHeight);
 
-                            for (float y = 0; y < textureHeight; y += tileHeight)
-                            {
-                                draw_list->AddLine(ImVec2(canvas_pos.x, canvas_pos.y + y),
-                                                   ImVec2(cv_destEnd.x, canvas_pos.y + y), color, 1.0f);
-                            }
-                        }
-                        if (tileWidth)
-                        {
-                            for (float x = 0; x < textureWidth; x += tileWidth)
-                            {
-                                draw_list->AddLine(ImVec2(canvas_pos.x + x, canvas_pos.y),
-                                                   ImVec2(canvas_pos.x + x, cv_destEnd.y), color, 1.0f);
-                            }
-                        }
-                        //Rect
-                        static bool mDown = false;
-                        if (ImGui::IsItemHovered())
-                        {
-                            ImVec2 mpos_in_canvas = ImVec2(ImGui::GetIO().MousePos.x - canvas_pos.x, ImGui::GetIO().MousePos.y - canvas_pos.y);
+        //                     draw_list->AddRect(start, end, IM_COL32(255, 0, 0, 255));
 
-                            float x = floor(mpos_in_canvas.x / tileWidth);
-                            float y = floor(mpos_in_canvas.y / tileHeight);
-                            ImVec2 start(x * tileWidth + canvas_pos.x, y * tileHeight + canvas_pos.y);
-                            ImVec2 end(start.x + tileWidth, start.y + tileHeight);
+        //                     if (mInputManager->onKeyPressed(SDL_BUTTON_LEFT))
+        //                     {
+        //                         mDown = true;
+        //                         mSelectedtiles.clear();
+        //                     }
 
-                            draw_list->AddRect(start, end, IM_COL32(255, 0, 0, 255));
+        //                     if (!mInputManager->onKeyDown(SDL_BUTTON_LEFT))
+        //                     {
+        //                         mDown = false;
+        //                     }
 
-                            if (mInputManager->onKeyPressed(SDL_BUTTON_LEFT))
-                            {
-                                mDown = true;
-                                mSelectedtiles.clear();
-                            }
+        //                     if (mDown)
+        //                     {
+        //                         ImVec2 vec(x, y);
 
-                            if (!mInputManager->onKeyDown(SDL_BUTTON_LEFT))
-                            {
-                                mDown = false;
-                            }
+        //                         auto found = std::find_if(mSelectedtiles.begin(), mSelectedtiles.end(),
+        //                                                   [vec](const ImVec2 &m) -> bool { return m.x == vec.x && m.y == vec.y; });
+        //                         if (found == mSelectedtiles.end())
+        //                         {
+        //                             mSelectedtiles.push_back(vec);
+        //                             LOG_I("X:{0}, Y:{1} {2} textCoord: {3} total: {4}", x, y, columns, x + y * columns, mSelectedtiles.size());
+        //                         }
+        //                     }
+        //                 }
 
-                            if (mDown)
-                            {
-                                ImVec2 vec(x, y);
+        //                 for (int i = 0; i < mSelectedtiles.size(); i++)
+        //                 {
+        //                     ImVec2 start(mSelectedtiles[i].x * tileWidth + cv_destStart.x, mSelectedtiles[i].y * tileHeight + cv_destStart.y);
+        //                     ImVec2 end(start.x + tileWidth, start.y + tileHeight);
+        //                     draw_list->AddRectFilled(start, end, IM_COL32(0, 255, 255, 50));
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+        // ImGui::End();
 
-                                auto found = std::find_if(mSelectedtiles.begin(), mSelectedtiles.end(),
-                                                          [vec](const ImVec2 &m) -> bool { return m.x == vec.x && m.y == vec.y; });
-                                if (found == mSelectedtiles.end())
-                                {
-                                    mSelectedtiles.push_back(vec);
-                                    LOG_I("X:{0}, Y:{1} {2} textCoord: {3} total: {4}", x, y, columns, x + y * columns, mSelectedtiles.size());
-                                }
-                            }
-                        }
-
-                        for (int i = 0; i < mSelectedtiles.size(); i++)
-                        {
-                            ImVec2 start(mSelectedtiles[i].x * tileWidth + cv_destStart.x, mSelectedtiles[i].y * tileHeight + cv_destStart.y);
-                            ImVec2 end(start.x + tileWidth, start.y + tileHeight);
-                            draw_list->AddRectFilled(start, end, IM_COL32(0, 255, 255, 50));
-                        }
-                    }
-                }
-            }
-        }
-        ImGui::End();
-
-        style.WindowMinSize.x = oldSize;
+        // style.WindowMinSize.x = oldSize;
     }
 
     void EntityEditor::drawEntity()
     {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(300, 300));
         ImGui::Begin("Scene Editor");
-        {
-            static auto mInManager = Plutus::InputManager::getInstance();
-            auto layers = mEntManager->getLayers();
-            auto layer = mEntManager->getCurrentLayer();
-
-            ImGui::Text(ICON_FA_LAYER_GROUP " Layers");
-            ImGui::Separator();
-            static auto current = layer->name;
-
-            static bool openLayerModal = false;
-            if (ImGui::Button("Add New##layer"))
-            {
-                openLayerModal = true;
-                modalPos = mInManager->getMouseCoords();
-            }
-            if (openLayerModal)
-            {
-                std::string newLayer = LayerModal("Create Layer", &openLayerModal);
-                if (!openLayerModal && !newLayer.empty())
-                {
-                    mEntManager->addLayer(newLayer);
-                    current = newLayer;
-                }
-            }
-
-            ImGui::SameLine();
-            ImGui::Button("Edit Name");
-            ImGui::PushItemWidth(100);
-            if (ImGui::ComboBox<Plutus::Layer>("Layers", *layers, current))
-            {
-                mEntManager->setCurrentLayer(current);
-            }
-            ImGui::Checkbox("IsVisible", &layer->isVisible);
-            ImGui::Separator();
-            static bool openEntModal = false;
-            if (ImGui::Button("Add New##ent"))
-            {
-                openEntModal = true;
-                modalPos = mInManager->getMouseCoords();
-            }
-
-            if (openEntModal)
-            {
-                std::string newEntity = LayerModal("Create Entity", &openEntModal);
-                if (!openEntModal && !newEntity.empty())
-                {
-                    mCurrentEnt = mEntManager->addEntity(newEntity);
-                }
-            }
-
-            ImGui::SameLine();
-            if (ImGui::Button("Remove##ent"))
-            {
-            }
-            /***************************Entity List*************************/
-            ImGui::Separator();
-            ImGui::Text("Entity List");
-            ImGui::Separator();
-            static int selected = 0;
-            if (ImGui::Entities("Entities##list", layer->entities, selected))
-            {
-                if (layer->entities.size() && layer->entities[selected])
-                {
-                    mCurrentEnt = layer->entities[selected];
-                }
-            }
-            if (mCurrentEnt)
-            {
-                mComPanel.setEntity(mCurrentEnt);
-            }
-        }
+        layers();
+        entity();
         ImGui::End();
         ImGui::PopStyleVar(1);
+    }
+
+    void EntityEditor::layers()
+    {
+        ImGui::Text(ICON_FA_LAYER_GROUP " Layers");
+        ImGui::Separator();
+        static bool openLayerModal = false;
+
+        if (ImGui::Button("Add New##layer"))
+        {
+            openLayerModal = true;
+            modalPos = mInputManager->getMouseCoords();
+        }
+        if (openLayerModal)
+        {
+            std::string newLayer = LayerModal("Create Layer", &openLayerModal);
+            if (!openLayerModal && !newLayer.empty())
+            {
+                mCurrentLayer = mEntManager->addLayer(newLayer);
+                mCurLayerName = newLayer;
+                mCurrentEnt = nullptr;
+            }
+        }
+
+        ImGui::SameLine();
+        ImGui::Button("Edit Name");
+        ImGui::PushItemWidth(100);
+        if (ImGui::ComboBox<Layer>("Layers", *mLayers, mCurLayerName))
+        {
+            mEntManager->setCurrentLayer(mCurLayerName);
+            mCurrentLayer = mEntManager->getCurrentLayer();
+            if (mCurrentLayer->entities.size() > 0)
+            {
+
+                mCurrentEnt = mCurrentLayer->entities[0];
+            }
+        }
+        ImGui::Checkbox("IsVisible", &mCurrentLayer->isVisible);
+        ImGui::Separator();
+    }
+
+    /***************************Entity List*************************/
+    void EntityEditor::entity()
+    {
+        static bool openEntModal = false;
+        if (ImGui::Button("Add New##ent"))
+        {
+            openEntModal = true;
+            modalPos = mInputManager->getMouseCoords();
+        }
+
+        if (openEntModal)
+        {
+            std::string newEntity = LayerModal("Create Entity", &openEntModal);
+            if (!openEntModal && !newEntity.empty())
+            {
+                mCurrentEnt = mEntManager->addEntity(newEntity);
+            }
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Remove##ent"))
+        {
+        }
+
+        ImGui::Separator();
+        ImGui::Text("Entity List");
+        ImGui::Separator();
+        static int selected = 0;
+        if (ImGui::Entities("Entities##list", mCurrentLayer->entities, selected))
+        {
+            if (mCurrentLayer->entities.size() && mCurrentLayer->entities[selected])
+            {
+                mCurrentEnt = mCurrentLayer->entities[selected];
+            }
+        }
     }
 
     std::string EntityEditor::LayerModal(char *label, bool *open)
@@ -267,5 +286,21 @@ namespace Plutus
                 ImGui::CloseCurrentPopup();
         }
         return result;
+    }
+
+    void EntityEditor::loadScene()
+    {
+        std::string path;
+        if (Utils::windowDialog(OPEN_FILE, path))
+        {
+            if (Plutus::SceneLoader::loadFromJson(path.c_str(), mEntManager))
+            {
+                mCurrentLayer = mEntManager->getCurrentLayer();
+                if (mCurrentLayer != nullptr && mCurrentLayer->entities.size() > 0)
+                {
+                    mCurrentEnt = mCurrentLayer->entities[0];
+                }
+            }
+        }
     }
 } // namespace Plutus

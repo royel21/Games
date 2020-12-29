@@ -35,8 +35,6 @@ namespace Plutus
 
     public:
         TileMap() = default;
-        TileMap(const std::string &filePath);
-
         void serialize(Serializer &serializer) override;
     };
 } // namespace Plutus

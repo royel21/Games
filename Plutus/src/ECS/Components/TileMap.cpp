@@ -4,11 +4,6 @@
 
 namespace Plutus
 {
-    TileMap::TileMap(const std::string &filePath)
-    {
-        AssetsParser::getInstance()->ParserTileMapFromJSON(filePath, this);
-    }
-
     void TileMap::serialize(Serializer &serializer)
     {
         auto writer = serializer.getWriter();

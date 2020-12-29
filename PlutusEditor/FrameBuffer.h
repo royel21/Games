@@ -12,8 +12,12 @@ public:
     void init(float width, float height, bool reset = false);
     void bind();
     void unBind();
-
-    void resize(float w, float h)
+    inline void resize(glm::vec2 size)
+    {
+        isDirty = true;
+        mSize = size;
+    }
+    inline void resize(float w, float h)
     {
         isDirty = true;
         mSize = glm::vec2(w, h);

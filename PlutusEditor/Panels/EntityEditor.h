@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <unordered_map>
 #include <string>
 #include "imgui.h"
 #include "glm/glm.hpp"
@@ -11,8 +12,10 @@
 
 namespace Plutus
 {
+    class InputManager;
     class EntityManager;
     class Entity;
+    struct Layer;
 
     class EntityEditor
     {
@@ -20,18 +23,27 @@ namespace Plutus
         EntityEditor() = default;
         void init(EntityManager *emanager);
         void draw();
+        void loadScene();
 
     private:
         void drawEntity();
+        void layers();
+        void entity();
+        void drawTileset();
         std::string LayerModal(char *label, bool *open);
 
     private:
         int mMode;
-        EntityManager *mEntManager;
         glm::vec2 modalPos;
         std::vector<ImVec2> mSelectedtiles;
         bool mShowCreateLayer = false;
         ComponentPanel mComPanel;
+        InputManager *mInputManager = nullptr;
+
+        EntityManager *mEntManager = nullptr;
+        Layer *mCurrentLayer = nullptr;
         Entity *mCurrentEnt = nullptr;
+        std::unordered_map<std::string, Layer> *mLayers;
+        std::string mCurLayerName;
     };
 } // namespace Plutus

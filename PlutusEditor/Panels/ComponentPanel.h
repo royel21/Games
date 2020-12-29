@@ -23,7 +23,7 @@ namespace Plutus
         ComponentPanel() = default;
 
         void init(EntityManager *entmanager);
-        void drawUI();
+        void drawUI(Entity *ent);
         void drawAnimate();
         void drawTransform();
         void drawSprite();
