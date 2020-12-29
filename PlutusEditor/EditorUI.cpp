@@ -160,8 +160,9 @@ namespace Plutus
 		ImGui::Text("ViewPort Props");
 		ImGui::PushItemWidth(100);
 		static auto size = mFb.getSize();
-		if (ImGui::InputFloat("Zoom##vp", &mVPScale, 0.05))
+		if (ImGui::InputFloat("Zoom##vp", &mVPScale, 0.25))
 		{
+			mVPScale = CHECKLIMIT(mVPScale, 0.25, 6);
 			// mCamera->setScale(scale);
 			// mFb.resize(size * scale);
 		}
@@ -246,7 +247,6 @@ namespace Plutus
 
 	void EditorUI::viewPort()
 	{
-		auto vsize = mFb.getSize();
 
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_HorizontalScrollbar;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -256,18 +256,22 @@ namespace Plutus
 		auto size = ImGui::GetContentRegionAvail();
 
 		auto winPos = ImGui::GetWindowSize();
+
+		auto vsize = mFb.getSize() * mVPScale;
 		float x = max((winPos.x - vsize.x), 0) * 0.5;
 		float y = max((winPos.y - vsize.y), 0) * 0.5;
 		ImGui::SetCursorPos(ImVec2(x, y));
 
 		ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // ImDrawList API uses screen coordinates!
 
-		float xPos = ImGui::GetIO().MousePos.x - ImGui::GetCursorScreenPos().x;
-		float yPos = ImGui::GetIO().MousePos.y - ImGui::GetCursorScreenPos().y;
+		float xPos = ImGui::GetIO().MousePos.x - canvas_pos.x;
+		float yPos = ImGui::GetIO().MousePos.y - canvas_pos.y;
 
-		auto sqrPos = mDebugRender->getSquareCoords(glm::vec2(xPos, yPos));
-
-		LOG_I("{0} {1} {2} {3}", sqrPos.x, sqrPos.y, xPos, yPos);
+		auto sqrPos = mDebugRender->getSquareCoords(glm::vec2(xPos / mVPScale, yPos / mVPScale));
+		if (mInputManager->onKeyPressed(SDL_BUTTON_LEFT))
+		{
+			LOG_I("{0} {1} {2} {3}", sqrPos.x, sqrPos.y, canvas_pos.x, canvas_pos.y);
+		}
 
 		ImGui::Image(reinterpret_cast<void *>(mFb.getTextureId()), ImVec2(vsize.x, vsize.y), ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0, 1.0, 1.0, 1.0), ImVec4(0.0, 0.0, 0.0, 1.0));
 		if (ImGui::IsWindowHovered())

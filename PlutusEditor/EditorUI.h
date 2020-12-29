@@ -52,7 +52,7 @@ namespace Plutus
 		bool m_moveCamera = false;
 
 		glm::vec2 lastCoords;
-		float mVPScale = 1;
+		float mVPScale = 0.5f;
 
 	public:
 		std::vector<ImVec2>

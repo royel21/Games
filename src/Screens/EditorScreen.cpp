@@ -40,7 +40,7 @@ void EditorScreen::build()
     mEntManager.setCamera(&mCamera);
     mEntManager.init();
 
-    mTextLayer.Init(mEngine->getWindow(), 1920, 1080, "./assets/fonts/Zoika.ttf", 28);
+    mTextLayer.Init(mEngine->getWindow(), 1920, 1088, "./assets/fonts/Zoika.ttf", 28);
 
     // auto amanager = Plutus::AssetManager::getInstance();
     // //"player", 12, 24, 32, "./assets/textures/link.png"

@@ -1,5 +1,4 @@
 #include "TileMap.h"
-#include "Assets/AssetsParser.h"
 #include "Serialize/Serialize.h"
 
 namespace Plutus

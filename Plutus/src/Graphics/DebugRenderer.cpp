@@ -54,7 +54,7 @@ namespace Plutus
 		return instance;
 	}
 
-	DebugRender::DebugRender() : m_vao(0), m_vbo(0), m_ibo(0), mGridColor(0, 0, 0, 255), mCellCount(40, 24), mCellSize(32, 32)
+	DebugRender::DebugRender() : m_vao(0), m_vbo(0), m_ibo(0), mGridColor(0, 0, 0, 255), mCellCount(60, 34), mCellSize(32, 32)
 	{
 	}
 
