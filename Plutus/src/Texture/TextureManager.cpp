@@ -1,6 +1,7 @@
 #include <vector>
 #include "TextureManager.h"
 #include "stb_image.h"
+#include <filesystem>
 
 namespace Plutus
 {
@@ -37,7 +38,8 @@ namespace Plutus
 	GLTexture TextureManager::loadImage(std::string filePath, GLshort id = 0)
 	{
 		GLTexture texture = {};
-
+		std::filesystem::path path = filePath.c_str();
+		std::cout << std::filesystem::absolute(path).string() << std::endl;
 		int BPP;
 		uint8_t *out = stbi_load(filePath.c_str(), &texture.width, &texture.height, &BPP, 4);
 
@@ -62,7 +64,10 @@ namespace Plutus
 		{
 			stbi_image_free(out);
 		}
-
+		else
+		{
+			std::cout << stbi_failure_reason() << std::endl;
+		}
 		return texture;
 	}
 } // namespace Plutus

@@ -34,20 +34,20 @@ int EditorScreen::getPrevScreentIndex() const
 void EditorScreen::build()
 {
     mInputManager = Plutus::InputManager::getInstance();
-    mCamera.init(1920, 1080);
+    mCamera.init(1280, 1280);
     mCamera.update();
 
     mEntManager.setCamera(&mCamera);
     mEntManager.init();
 
-    mTextLayer.Init(mEngine->getWindow(), 1920, 1088, "./assets/fonts/Zoika.ttf", 28);
+    mTextLayer.Init(mEngine->getWindow(), 1280, 1280, "./assets/fonts/Zoika.ttf", 28);
 
-    // auto amanager = Plutus::AssetManager::getInstance();
+    auto amanager = Plutus::AssetManager::getInstance();
     // //"player", 12, 24, 32, "./assets/textures/link.png"
-    // amanager->addTexture("player", "./assets/textures/link.png", 12, 24, 32);
-    // amanager->addTexture("cave", "./assets/textures/goblin_cave.png", 8, 32, 32);
+    amanager->addTexture("player", "./assets/textures/link.png", 12, 24, 32);
+    amanager->addTexture("cave", "./assets/textures/goblin_cave.png", 8, 32, 32);
 
-    // auto bg1 = amanager->addTexture("bg1", "./assets/textures/forest-zelda.png");
+    auto bg1 = amanager->addTexture("bg1", "./assets/textures/forest-zelda.png");
 
     // auto ent = mEntManager.addEntity("bg1");
     // ent->addComponent<Plutus::Transform>(0.0f, 0.0f, 512, 512);

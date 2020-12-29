@@ -30,8 +30,9 @@ namespace Plutus
 		mShader.setAtribute("vertexPosition");
 		mShader.setAtribute("vertexColor");
 		mShader.setAtribute("vertexUV");
-		mShader.enable();
+		// mShader.enable();
 		mSpriteBath2D.init();
+		// mShader.disable();
 	}
 
 	void EntityManager::clearData()
