@@ -28,6 +28,7 @@ namespace Plutus
         tmap.mTileset = AssetManager::getInstance()->getTexture(tileset);
 
         auto tiles = value["tiles"].GetArray();
+        std::cout << tiles.Size() << std::endl;
         for (size_t i = 0; i < tiles.Size(); i++)
         {
             auto tile = tiles[i].GetJsonObject();
