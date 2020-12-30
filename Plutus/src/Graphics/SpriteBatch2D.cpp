@@ -8,6 +8,7 @@
 #include "Log/Logger.h"
 #include "ECS/Components/Transform.h"
 #include "ECS/Components/Sprite.h"
+#include "ECS/Components/TileMap.h"
 
 namespace Plutus
 {
@@ -70,17 +71,30 @@ namespace Plutus
 		glBindBuffer(GL_ARRAY_BUFFER, mVBO);
 	}
 
+	void SpriteBatch2D::submit(float w, float h, std::vector<Tile> &tiles, TileSet *tileset)
+	{
+		mRenderBatches.emplace_back(0, 0, tileset->texId);
+		ColorRGBA8 c;
+		for (auto tile : tiles)
+		{
+			glm::vec4 uv = tileset->getUV(tile.texId);
+			vertices.emplace_back(tile.x * w, tile.y * h, uv.x, uv.w, c);
+			vertices.emplace_back(tile.x * w, tile.y * h + h, uv.x, uv.y, c);
+			vertices.emplace_back(tile.x * w + w, tile.y * h + h, uv.z, uv.y, c);
+			vertices.emplace_back(tile.x * w + w, tile.y * h, uv.z, uv.w, c);
+			mRenderBatches.back().numVertices += 6;
+		}
+	}
+
 	void SpriteBatch2D::submit(Sprite *renderable)
 	{
 		mRenderables.push_back(renderable);
+		isSprite = true;
 	}
 
-	void SpriteBatch2D::end()
+	void SpriteBatch2D::processSprite()
 	{
-		// uint32_t start = SDL_GetTicks();
 		std::stable_sort(mRenderables.begin(), mRenderables.end(), compareTexture);
-		// vertices.reserve(mRenderables.size() * 4);
-		// LOG_I("time: {0}", SDL_GetTicks() - start);
 
 		if (mRenderables.size())
 			mRenderBatches.emplace_back(0, 0, mRenderables[0]->mTexId);
@@ -119,6 +133,14 @@ namespace Plutus
 
 			mIndexCount += 6;
 		}
+	}
+
+	void SpriteBatch2D::end()
+	{
+		if (isSprite)
+		{
+			processSprite();
+		}
 
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
@@ -136,6 +158,7 @@ namespace Plutus
 		mIBO->unbind();
 		mIndexCount = 0;
 		vertices.clear();
+		isSprite = false;
 	}
 
 	glm::vec2 SpriteBatch2D::rotatePoint(glm::vec2 pos, float angle)

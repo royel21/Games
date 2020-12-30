@@ -15,7 +15,8 @@ namespace Plutus
             writer->String("tileheight");
             writer->Int(mTileHeight);
             //Array of tileset name
-            serializer.WriteMap("tilesets", mTilesets);
+            writer->String("tileset");
+            writer->String(mTileset->name.c_str());
             //Tiles Array
             writer->String("tiles");
             writer->StartArray();
@@ -26,13 +27,12 @@ namespace Plutus
                     writer->StartObject();
                     {
                         writer->String("texId");
-                        writer->String(tile.texId.c_str());
-                        writer->String("coordId");
-                        writer->Int(tile.coordId);
+                        writer->Int(tile.texId);
                         writer->String("x");
                         writer->Int(tile.x);
                         writer->String("y");
                         writer->Int(tile.y);
+                        writer->Bool(tile.isSolid);
                     }
                     writer->EndObject();
                 }

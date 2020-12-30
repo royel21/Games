@@ -38,25 +38,70 @@
                         },
                         {
                             "name": "Sprite",
-                            "texture": "bg1"
+                            "texture": "bg1",
+                            "texId": 0
+                        }
+                    ]
+                },
+                {
+                    "name": "tile",
+                    "components": [
+                        {
+                            "name": "Transform",
+                            "x": 544,
+                            "y": 0,
+                            "w": 32,
+                            "h": 32
+                        },
+                        {
+                            "name": "Sprite",
+                            "texture": "cave",
+                            "texId": 1
                         }
                     ]
                 },
                 {
                     "name": "tileMap1",
-                    "components": [{
-                        "name": "TileMap",
-                        "tilewidth": 32,
-                        "tileheight": 32,
-                        "tilesets": [],
-                        "tiles":[
-                            {"x": 0, "y":0, "texId": "cave", "coordId": 1}, 
-                            {"x": 0, "y":1, "texId": "cave", "coordId": 1},
-                            {"x": 0, "y":2, "texId": "cave", "coordId": 1},
-                            {"x": 0, "y":1, "texId": "cave", "coordId": 1},
-                            {"x": 0, "y":2, "texId": "cave", "coordId": 1}
-                        ]
-                    }]
+                    "components": [
+                        {
+                            "name": "TileMap",
+                            "tilewidth": 32,
+                            "tileheight": 32,
+                            "tileset": "cave",
+                            "tiles": [
+                                {
+                                    "x": 16,
+                                    "y": 0,
+                                    "texId": 1,
+                                    "isSolid": true
+                                },
+                                {
+                                    "x": 17,
+                                    "y": 0,
+                                    "texId": 1,
+                                    "isSolid": true
+                                },
+                                {
+                                    "x": 18,
+                                    "y": 2,
+                                    "texId": 2,
+                                    "isSolid": true
+                                },
+                                {
+                                    "x": 19,
+                                    "y": 3,
+                                    "texId": 2,
+                                    "isSolid": true
+                                },
+                                {
+                                    "x": 16,
+                                    "y": 1,
+                                    "texId": 3,
+                                    "isSolid": true
+                                }
+                            ]
+                        }
+                    ]
                 }
             ]
         },

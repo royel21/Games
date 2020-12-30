@@ -243,7 +243,7 @@ namespace Plutus
         }
 
         ImGui::Separator();
-        ImGui::Text("Entity List");
+        ImGui::Text(ICON_FA_LIST_OL " Entity List");
         ImGui::Separator();
         static int selected = 0;
         if (ImGui::Entities("Entities##list", mCurrentLayer->entities, selected))

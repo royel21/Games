@@ -160,9 +160,9 @@ namespace Plutus
 		ImGui::Text("ViewPort Props");
 		ImGui::PushItemWidth(100);
 		static auto size = mFb.getSize();
-		if (ImGui::InputFloat("Zoom##vp", &mVPScale, 0.25))
+		if (ImGui::InputFloat("Zoom##vp", &mVPScale, 0.05))
 		{
-			mVPScale = CHECKLIMIT(mVPScale, 0.25, 6);
+			mVPScale = CHECKLIMIT(mVPScale, 0.20, 6);
 			// mCamera->setScale(scale);
 			// mFb.resize(size * scale);
 		}
@@ -268,14 +268,15 @@ namespace Plutus
 		float yPos = ImGui::GetIO().MousePos.y - canvas_pos.y;
 
 		auto sqrPos = mDebugRender->getSquareCoords(glm::vec2(xPos / mVPScale, yPos / mVPScale));
-		if (mInputManager->onKeyPressed(SDL_BUTTON_LEFT))
-		{
-			LOG_I("{0} {1} {2} {3}", sqrPos.x, sqrPos.y, canvas_pos.x, canvas_pos.y);
-		}
 
 		ImGui::Image(reinterpret_cast<void *>(mFb.getTextureId()), ImVec2(vsize.x, vsize.y), ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0, 1.0, 1.0, 1.0), ImVec4(0.0, 0.0, 0.0, 1.0));
 		if (ImGui::IsWindowHovered())
 		{
+
+			if (mInputManager->onKeyPressed(SDL_BUTTON_LEFT))
+			{
+				LOG_I("{0} {1} {2} {3}", sqrPos.x, sqrPos.y, canvas_pos.x, canvas_pos.y);
+			}
 			if (mMoveCam || mInputManager->onKeyDown(SDLK_LCTRL))
 			{
 				if (mInputManager->onKeyPressed(SDLK_r))

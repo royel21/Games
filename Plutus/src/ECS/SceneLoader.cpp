@@ -23,17 +23,19 @@ namespace Plutus
     {
         int w = value["tilewidth"].GetInt();
         int h = value["tileheight"].GetInt();
+        auto tileset = value["tileset"].GetString();
         auto &tmap = ent->addComponent<TileMap>(w, h);
+        tmap.mTileset = AssetManager::getInstance()->getTexture(tileset);
 
         auto tiles = value["tiles"].GetArray();
         for (size_t i = 0; i < tiles.Size(); i++)
         {
             auto tile = tiles[i].GetJsonObject();
-            tmap.mTiles.emplace_back(
-                tile["texId"].GetString(),
-                tile["x"].GetInt(),
-                tile["y"].GetInt(),
-                tile["coordId"].GetInt());
+            int x = tile["x"].GetInt();
+            int y = tile["y"].GetInt();
+            int texId = tile["texId"].GetInt();
+            bool isSolid = tile["isSolid"].GetBool();
+            tmap.mTiles.emplace_back(x, y, texId, isSolid);
         }
     }
 

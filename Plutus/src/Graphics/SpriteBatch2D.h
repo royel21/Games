@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "IndexBuffer.h"
-#include "Texture/Texture.h"
 #include "vertex.h"
 #include <unordered_map>
 
@@ -22,6 +21,8 @@ namespace Plutus
 {
 	class Sprite;
 	class Transform;
+	struct Tile;
+	struct TileSet;
 
 	class RenderBatch2D
 	{
@@ -40,9 +41,10 @@ namespace Plutus
 	private:
 		GLuint mVAO;
 		GLuint mVBO;
-		IndexBuffer *mIBO;
 		GLsizei mIndexCount;
+		bool isSprite = false;
 		Vertex *mBuffer;
+		IndexBuffer *mIBO;
 		std::vector<Sprite *> mRenderables;
 		std::vector<RenderBatch2D> mRenderBatches;
 		std::vector<Vertex> vertices;
@@ -57,6 +59,7 @@ namespace Plutus
 
 		void submit(Sprite *renderable);
 		void submit(Transform *trans, Sprite *sprite);
+		void submit(float w, float h, std::vector<Tile> &tiles, TileSet *tileset);
 		void end();
 
 		void flush();
@@ -65,6 +68,7 @@ namespace Plutus
 	private:
 		static glm::vec2 rotatePoint(glm::vec2 pos, float angle);
 		static bool compareTexture(Sprite *a, Sprite *b);
+		void processSprite();
 	};
 
 } // namespace Plutus

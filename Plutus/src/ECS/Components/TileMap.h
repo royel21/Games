@@ -12,16 +12,16 @@ namespace Plutus
 
     struct Tile
     {
-        std::string texId;
         float x;
         float y;
-        int coordId;
-        Tile(const std::string _textId, int _x, int _y, int _coord)
+        int texId;
+        bool isSolid = false;
+        Tile(int _x, int _y, int _texId, bool _isSolid)
         {
             x = _x;
             y = _y;
-            texId = _textId;
-            coordId = _coord;
+            texId = _texId;
+            isSolid = _isSolid;
         }
     };
 
@@ -31,11 +31,11 @@ namespace Plutus
         int mTileWidth;
         int mTileHeight;
         std::vector<Tile> mTiles;
-        std::unordered_map<std::string, TileSet *> mTilesets;
+        TileSet *mTileset = nullptr;
 
     public:
         TileMap() = default;
-        TileMap(int w, int h) : mTileWidth(w), mTileHeight(h) {}
+        TileMap(int tileWidth, int tileHeight) : mTileWidth(tileWidth), mTileHeight(tileHeight) {}
         void serialize(Serializer &serializer) override;
     };
 } // namespace Plutus

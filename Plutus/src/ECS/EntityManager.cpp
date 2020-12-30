@@ -89,17 +89,30 @@ namespace Plutus
 				mSpriteBath2D.begin(entCount);
 				for (auto &entity : layer.second.entities)
 				{
-					auto sprite = entity->getComponent<Sprite>();
-					if (sprite)
+					auto tileMap = entity->getComponent<TileMap>();
+					if (tileMap)
 					{
-
-						auto trans = entity->getComponent<Transform>();
-						sprite->mPosition = trans->position;
-						sprite->mSize = trans->size;
-						mSpriteBath2D.submit(sprite);
+						mSpriteBath2D.submit(tileMap->mTileWidth, tileMap->mTileHeight, tileMap->mTiles, tileMap->mTileset);
 					}
 				}
 				mSpriteBath2D.end();
+				// mSpriteBath2D.begin(entCount);
+				// for (auto &entity : layer.second.entities)
+				// {
+				// 	auto sprite = entity->getComponent<Sprite>();
+				// 	if (sprite)
+				// 	{
+
+				// 		auto trans = entity->getComponent<Transform>();
+				// 		sprite->mPosition = trans->position;
+				// 		sprite->mSize = trans->size;
+				// 		if (sprite->mTexId)
+				// 		{
+				// 		}
+				// 		mSpriteBath2D.submit(sprite);
+				// 	}
+				// }
+				// mSpriteBath2D.end();
 			}
 		}
 		mShader.disable();
