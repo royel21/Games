@@ -43,7 +43,7 @@ namespace Plutus
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		GLuint *indices = new GLuint[RENDERER_INDICES_SIZE];
+		GLushort *indices = new GLushort[RENDERER_INDICES_SIZE];
 
 		int offest = 0;
 		for (size_t i = 0; i < RENDERER_INDICES_SIZE; i += 6)

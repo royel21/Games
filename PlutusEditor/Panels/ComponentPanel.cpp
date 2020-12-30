@@ -66,6 +66,7 @@ namespace Plutus
                 auto trans = mEntity->getComponent<Transform>();
                 int position[] = {static_cast<int>(trans->position.x), static_cast<int>(trans->position.y)};
 
+                ImGui::PushItemWidth(60);
                 if (ImGui::DragInt2("Position X Y", position))
                 {
                     trans->position.x = static_cast<float>(position[0]);
@@ -77,6 +78,7 @@ namespace Plutus
                     trans->size.x = size[0];
                     trans->size.y = size[1];
                 }
+                ImGui::PopItemWidth();
             }
         }
     }
@@ -140,9 +142,7 @@ namespace Plutus
     {
         if (mEntity->hasComponent<TileMap>())
         {
-            if (ImGui::CollapsingHeader("TileMap##comp"))
-            {
-            }
+            mTileMapPanel.draw(mEntity->getComponent<TileMap>());
         }
     }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "imgui.h"
+#include "TileMapPanel.h"
 
 namespace Plutus
 {
@@ -18,6 +19,7 @@ namespace Plutus
         InputManager *mInputManager = nullptr;
         std::vector<ImVec2> mSelectedtiles;
         EntityManager *mEntManager = nullptr;
+        TileMapPanel mTileMapPanel;
 
     public:
         ComponentPanel() = default;

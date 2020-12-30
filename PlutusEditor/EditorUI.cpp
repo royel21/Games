@@ -242,6 +242,10 @@ namespace Plutus
 		viewPortControl();
 		mEntityEditor.draw();
 		LayerEditor::LayerControls();
+		if (mShowDemo)
+		{
+			drawDemo();
+		}
 		endUI();
 	}
 
@@ -267,15 +271,14 @@ namespace Plutus
 		float xPos = ImGui::GetIO().MousePos.x - canvas_pos.x;
 		float yPos = ImGui::GetIO().MousePos.y - canvas_pos.y;
 
-		auto sqrPos = mDebugRender->getSquareCoords(glm::vec2(xPos / mVPScale, yPos / mVPScale));
-
+		mouseGridCoords = mDebugRender->getSquareCoords(glm::vec2(xPos / mVPScale, yPos / mVPScale));
 		ImGui::Image(reinterpret_cast<void *>(mFb.getTextureId()), ImVec2(vsize.x, vsize.y), ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0, 1.0, 1.0, 1.0), ImVec4(0.0, 0.0, 0.0, 1.0));
 		if (ImGui::IsWindowHovered())
 		{
 
 			if (mInputManager->onKeyPressed(SDL_BUTTON_LEFT))
 			{
-				LOG_I("{0} {1} {2} {3}", sqrPos.x, sqrPos.y, canvas_pos.x, canvas_pos.y);
+				LOG_I("{0} {1} {2} {3}", mouseGridCoords.x, mouseGridCoords.y, canvas_pos.x, canvas_pos.y);
 			}
 			if (mMoveCam || mInputManager->onKeyDown(SDLK_LCTRL))
 			{
@@ -399,6 +402,12 @@ namespace Plutus
 				{
 					saveScene();
 				}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Tools"))
+			{
+				ImGui::MenuItem("Show Demo", NULL, &mShowDemo);
+
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenuBar();

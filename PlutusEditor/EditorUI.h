@@ -53,6 +53,8 @@ namespace Plutus
 
 		glm::vec2 lastCoords;
 		float mVPScale = 0.5f;
+		bool mShowDemo = false;
+		glm::ivec2 mouseGridCoords;
 
 	public:
 		std::vector<ImVec2>
@@ -83,7 +85,7 @@ namespace Plutus
 		inline void setLastCoord(const glm::vec2 &coords) { lastCoords = coords; }
 		inline bool moveCamera() { return m_moveCamera; }
 		inline bool isHover() { return ImGui::IsAnyItemHovered() || ImGui::IsAnyWindowHovered(); }
-		inline void showDemo() { ImGui::ShowDemoWindow(); }
+		inline void drawDemo() { ImGui::ShowDemoWindow(); }
 		void viewPortBGColor(float r, float b, float g, float a);
 		void Serialize(Serializer &serializer);
 
