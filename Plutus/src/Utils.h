@@ -2,9 +2,12 @@
 #include <string>
 #include "rapidjson/document.h"
 #include "Assets/IOManager.h"
+#include "glm/glm.hpp"
 
 #define SAVE_FILE 0
 #define OPEN_FILE 1
+
+#define LIMIT(v, min, max) v<min ? min : v> max ? max : v
 
 namespace Plutus
 {

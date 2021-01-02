@@ -70,5 +70,9 @@ namespace Plutus
 		void clearData();
 
 		void serialize(Serializer &serializer);
+
+		void startDraw();
+		void endDraw() { mShader.disable(); }
+		SpriteBatch2D *getRenderer() { return &mSpriteBath2D; }
 	};
 } // namespace Plutus

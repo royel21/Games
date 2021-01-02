@@ -1,4 +1,0 @@
-#ifndef __COMPONENTPROPSUI_H__
-#define __COMPONENTPROPSUI_H__
-
-#endif // __COMPONENTPROPSUI_H__

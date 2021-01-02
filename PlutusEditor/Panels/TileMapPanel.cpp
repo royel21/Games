@@ -2,11 +2,50 @@
 #include "ECS/Components/TileMap.h"
 #include "imgui.h"
 #include "ImGuiEx.h"
+#include "Log/Logger.h"
+#include <iostream>
+#include <algorithm>
+#include "ECS/EntityManager.h"
+#include "Graphics/SpriteBatch2D.h"
+#include "Log/Logger.h"
+#include "Utils.h"
+
+#define MODE_PLACE 0
+#define MODE_EDIT 1
+#define MODE_REMOVE 2
 
 namespace Plutus
 {
-    void TileMapPanel::draw(TileMap *mTileMap)
+    void TileMapPanel::init(EntityManager *entManager)
     {
+        mEntManager = entManager;
+    }
+
+    void TileMapPanel::tileProps()
+    {
+        int pos[] = {static_cast<int>(mCurrentTile->x), static_cast<int>(mCurrentTile->y)};
+        if (ImGui::DragInt2("Position", pos))
+        {
+            mCurrentTile->x = pos[0];
+            mCurrentTile->y = pos[1];
+        }
+        static float rotation = mCurrentTile->rotate;
+        if (ImGui::InputFloat("Rotation##ctile", &rotation, 45.0f, 90.0f, "%0.0f"))
+        {
+            rotation = LIMIT(rotation, 0.0f, 360.0f);
+            mCurrentTile->rotate = rotation;
+        }
+        static int texId = mCurrentTile->texId;
+        if (ImGui::InputInt("Texture##ctile", &texId, 1))
+        {
+            texId = LIMIT(texId, 0, mTileMap->mTileset->totalTiles - 1);
+            mCurrentTile->texId = texId;
+        }
+    }
+
+    void TileMapPanel::draw(TileMap *tileMap)
+    {
+        mTileMap = tileMap;
         if (ImGui::CollapsingHeader("TileMap##comp"))
         {
             int size[] = {mTileMap->mTileWidth, mTileMap->mTileHeight};
@@ -16,12 +55,111 @@ namespace Plutus
                 mTileMap->mTileWidth = size[0];
                 mTileMap->mTileHeight = size[1];
             }
+
+            ImGui::PopItemWidth();
+            ImGui::PushItemWidth(85);
+            if (mCurrentTile != nullptr && mMode == MODE_EDIT)
+            {
+                tileProps();
+            }
+            else
+            {
+                if (ImGui::InputFloat("Rotation", &mRotation, 45.0f, 90.0f, "%0.0f"))
+                {
+                    mRotation = mRotation < 0 ? 0 : mRotation > 360 ? 360 : mRotation;
+                    if (mCurrentTile != nullptr)
+                    {
+                        mCurrentTile->rotate = mRotation;
+                    }
+                }
+            }
+
             ImGui::PopItemWidth();
             auto assets = AssetManager::getInstance();
-            static std::vector<glm::ivec2> selected;
-            if (ImGui::TileSet(mTileMap->mTileset, 1, selected))
-            {
-            }
+            ImGui::Separator();
+
+            ImGui::RadioButton("Place", &mMode, MODE_PLACE);
+            ImGui::SameLine();
+            ImGui::RadioButton("Edit", &mMode, MODE_EDIT);
+            ImGui::SameLine();
+            ImGui::RadioButton("Remove", &mMode, MODE_REMOVE);
+            ImGui::Separator();
+            ImGui::Separator();
+            ImGui::TileSet(mTileMap->mTileset, 1, mTempTiles);
         }
+    }
+
+    void TileMapPanel::renderTiles(SpriteBatch2D *renderer, glm::ivec2 mCoords)
+    {
+        if (mTempTiles.size() && mMode == MODE_PLACE)
+        {
+            std::vector<Tile> tiles;
+            for (auto tile : mTempTiles)
+            {
+                tiles.emplace_back(mCoords.x + tile.x, mCoords.y + tile.y, tile.z, mRotation);
+            }
+            renderer->begin(1);
+            renderer->submit(mTileMap->mTileWidth, mTileMap->mTileHeight, tiles, mTileMap->mTileset);
+            renderer->end();
+        }
+    }
+
+    void TileMapPanel::createTiles(const glm::ivec2 &mCoords)
+    {
+        auto tiles = &mTileMap->mTiles;
+        switch (mMode)
+        {
+        case MODE_PLACE:
+        {
+            for (auto tile : mTempTiles)
+            {
+                Tile tile(mCoords.x + tile.x, mCoords.y + tile.y, tile.z, mRotation);
+                int index = mTileMap->tileIndex(tile);
+                if (index == -1)
+                {
+                    tiles->push_back(tile);
+                }
+                else if (mTileMap->mTiles[index].texId != tile.texId)
+                {
+                    tiles->insert(tiles->begin(), index, tile);
+                }
+            }
+            break;
+        }
+        case MODE_EDIT:
+        {
+            Tile tile(mCoords.x, mCoords.y, 0);
+            int index = mTileMap->tileIndex(tile);
+            if (index > -1)
+            {
+                mCurrentTile = &mTileMap->mTiles[index];
+            }
+            else
+            {
+                mCurrentTile = nullptr;
+            }
+            break;
+        }
+        default:
+        {
+            auto found = std::remove_if(tiles->begin(), tiles->end(), [mCoords](const Tile &tile) -> bool {
+                return static_cast<int>(tile.x) == mCoords.x && static_cast<int>(tile.y) == mCoords.y;
+            });
+            tiles->erase(found, tiles->end());
+        }
+        }
+    }
+
+    bool TileMapPanel::compare(const glm::ivec2 &a, const glm::ivec2 &b)
+    {
+        if (a.x < b.x)
+            return true;
+        if (a.x > b.x)
+            return false;
+        if (a.y < b.y)
+            return true;
+        if (a.y > b.y)
+            return false;
+        return false;
     }
 } // namespace Plutus

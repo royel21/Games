@@ -1,6 +1,10 @@
 #include "Utils.h"
 #include <window.h>
 #include <fstream>
+#include <cmath>
+
+#define PI 3.141592653589793238463
+#define DEC2RA(dec) dec *(PI / 180)
 
 namespace Plutus
 {

@@ -16,12 +16,25 @@ namespace Plutus
         float y;
         int texId;
         bool isSolid = false;
-        Tile(int _x, int _y, int _texId, bool _isSolid)
+        float rotate = 0.0f;
+
+        Tile(int _x, int _y, int _texId, float r = 0.0f, bool _isSolid = false)
         {
-            x = _x;
-            y = _y;
+            x = static_cast<float>(_x);
+            y = static_cast<float>(_y);
             texId = _texId;
             isSolid = _isSolid;
+            rotate = r;
+        }
+
+        inline bool Tile::operator==(Tile tile)
+        {
+            return (x == tile.x && y == tile.y && texId == tile.texId);
+        }
+
+        inline bool Tile::operator!=(Tile tile)
+        {
+            return (x != tile.x && y != tile.y && texId != tile.texId);
         }
     };
 
@@ -37,5 +50,6 @@ namespace Plutus
         TileMap() = default;
         TileMap(int tileWidth, int tileHeight) : mTileWidth(tileWidth), mTileHeight(tileHeight) {}
         void serialize(Serializer &serializer) override;
+        int tileIndex(const Tile &tile);
     };
 } // namespace Plutus

@@ -8,6 +8,30 @@
 #include "Assets/AssetManager.h"
 #include "Input/InputManager.h"
 #include "SDL.h"
+#include "IconsFontAwesome5.h"
+
+namespace Plutus
+{
+    inline bool compare(const glm::ivec2 &a, const glm::ivec2 &b)
+    {
+        if (a.x < b.x)
+            return true;
+        if (a.x > b.x)
+            return false;
+        if (a.y < b.y)
+            return true;
+        if (a.y > b.y)
+            return false;
+        return false;
+    }
+
+    template <typename T>
+    inline bool hasVec(std::vector<T> items, int x, int y)
+    {
+        auto found = std::find_if(items.begin(), items.end(), [x, y](const glm::ivec2 &m) -> bool { return m.x == x && m.y == y; });
+        return found != items.end();
+    }
+} // namespace Plutus
 
 namespace ImGui
 {
@@ -107,13 +131,21 @@ namespace ImGui
         return isSelected;
     }
 
-    inline bool Entities(const char *label, std::vector<Plutus::Entity *> entities, int &selected)
+    inline bool Entities(const char *label, std::vector<Plutus::Entity *> entities, int &selected, int &remove)
     {
         bool isSelected = false;
         for (int i = 0; i < entities.size(); i++)
         {
             bool is_selected = i == selected;
-
+            ImGui::PushID(i);
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 1.0f));
+            if (ImGui::Button(ICON_FA_TRASH_ALT " ##remove"))
+            {
+                remove = i;
+            }
+            ImGui::PopID();
+            ImGui::PopStyleColor();
+            ImGui::SameLine();
             if (ImGui::Selectable(entities[i]->name.c_str(), is_selected))
             {
                 isSelected = true;
@@ -125,7 +157,7 @@ namespace ImGui
         return isSelected;
     }
 
-    inline bool TileSet(Plutus::TileSet *tileset, float scale, std::vector<glm::ivec2> &selected)
+    inline bool TileSet(Plutus::TileSet *tileset, float scale, std::vector<glm::ivec3> &selected)
     {
         bool isSelected = false;
         auto mInput = Plutus::InputManager::getInstance();
@@ -166,6 +198,9 @@ namespace ImGui
                     }
                 }
                 //Rect
+                static std::vector<glm::ivec2> sels;
+                static std::vector<glm::ivec2> drawSelect;
+
                 static bool mDown = false;
                 if (ImGui::IsItemHovered())
                 {
@@ -181,7 +216,9 @@ namespace ImGui
                     if (mInput->onKeyPressed(SDL_BUTTON_LEFT))
                     {
                         mDown = true;
+                        sels.clear();
                         selected.clear();
+                        drawSelect.clear();
                     }
 
                     if (!mInput->onKeyDown(SDL_BUTTON_LEFT))
@@ -191,22 +228,37 @@ namespace ImGui
 
                     if (mDown)
                     {
-                        glm::ivec2 vec(x, y);
-
-                        auto found = std::find_if(selected.begin(), selected.end(),
-                                                  [vec](const glm::ivec2 &m) -> bool { return m.x == vec.x && m.y == vec.y; });
-                        if (found == selected.end())
+                        if (!Plutus::hasVec(sels, x, y))
                         {
-                            selected.push_back(vec);
-                            std::cout << "x: " << x << "y: " << y << std::endl;
+                            sels.emplace_back(x, y);
+
                             isSelected = true;
+                            if (sels.size())
+                            {
+                                std::sort(sels.begin(), sels.end(), Plutus::compare);
+                                auto first = sels.front();
+                                auto last = sels.back();
+                                selected.clear();
+                                int i = 0;
+                                for (int xPos = first.x; xPos <= last.x; xPos++)
+                                {
+                                    int i2 = 0;
+                                    for (int yPos = last.y; yPos >= first.y; yPos--)
+                                    {
+                                        selected.emplace_back(i, i2++, xPos + yPos * columns);
+                                        if (!Plutus::hasVec(drawSelect, xPos, yPos))
+                                            drawSelect.emplace_back(xPos, yPos);
+                                    }
+                                    i++;
+                                }
+                            }
                         }
                     }
                 }
 
-                for (int i = 0; i < selected.size(); i++)
+                for (int i = 0; i < drawSelect.size(); i++)
                 {
-                    ImVec2 start(selected[i].x * tileWidth + cv_destStart.x, selected[i].y * tileHeight + cv_destStart.y);
+                    ImVec2 start(drawSelect[i].x * tileWidth + cv_destStart.x, drawSelect[i].y * tileHeight + cv_destStart.y);
                     ImVec2 end(start.x + tileWidth, start.y + tileHeight);
                     drawList->AddRectFilled(start, end, IM_COL32(0, 255, 255, 50));
                 }

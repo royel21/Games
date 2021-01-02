@@ -1,5 +1,6 @@
 #include "TileMap.h"
 #include "Serialize/Serialize.h"
+#include <algorithm>
 
 namespace Plutus
 {
@@ -32,7 +33,10 @@ namespace Plutus
                         writer->Int(tile.x);
                         writer->String("y");
                         writer->Int(tile.y);
+                        writer->String("isSolid");
                         writer->Bool(tile.isSolid);
+                        writer->String("rotate");
+                        writer->Double(tile.rotate);
                     }
                     writer->EndObject();
                 }
@@ -40,5 +44,14 @@ namespace Plutus
             writer->EndArray();
         }
         writer->EndObject();
+    }
+
+    int TileMap::tileIndex(const Tile &tile)
+    {
+        auto it = std::find_if(mTiles.begin(), mTiles.end(), [tile](const Tile &ntile) -> bool {
+            return ntile.x == tile.x && ntile.y == tile.y; // && ntile.texId == tile.texId;
+        });
+
+        return it != mTiles.end() ? it - mTiles.begin() : -1;
     }
 } // namespace Plutus

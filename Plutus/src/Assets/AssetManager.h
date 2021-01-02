@@ -20,6 +20,7 @@ namespace Plutus
 		int tileHeight;
 		int texWidth;
 		int texHeight;
+		int totalTiles;
 		uint32_t texId;
 		std::string path;
 		std::vector<glm::vec4> uvs;
@@ -33,6 +34,11 @@ namespace Plutus
 			tileWidth = w;
 			tileHeight = h;
 			columns = c;
+			totalTiles = 0;
+			if (h)
+			{
+				totalTiles = static_cast<int>(tex.width / h) * static_cast<int>(tex.height / h);
+			}
 			calculateUV();
 		}
 

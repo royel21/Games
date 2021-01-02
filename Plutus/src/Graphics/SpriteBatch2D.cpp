@@ -9,6 +9,10 @@
 #include "ECS/Components/Transform.h"
 #include "ECS/Components/Sprite.h"
 #include "ECS/Components/TileMap.h"
+#include "Utils.h"
+
+#define PI 3.141592653589793238463
+#define DEC2RA(dec) dec *(PI / 180)
 
 namespace Plutus
 {
@@ -43,7 +47,7 @@ namespace Plutus
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		GLushort *indices = new GLushort[RENDERER_INDICES_SIZE];
+		GLuint *indices = new GLuint[RENDERER_INDICES_SIZE];
 
 		int offest = 0;
 		for (size_t i = 0; i < RENDERER_INDICES_SIZE; i += 6)
@@ -77,13 +81,56 @@ namespace Plutus
 		ColorRGBA8 c;
 		for (auto tile : tiles)
 		{
+
 			glm::vec4 uv = tileset->getUV(tile.texId);
-			vertices.emplace_back(tile.x * w, tile.y * h, uv.x, uv.w, c);
-			vertices.emplace_back(tile.x * w, tile.y * h + h, uv.x, uv.y, c);
-			vertices.emplace_back(tile.x * w + w, tile.y * h + h, uv.z, uv.y, c);
-			vertices.emplace_back(tile.x * w + w, tile.y * h, uv.z, uv.w, c);
+
+			float x = tile.x * w;
+			float y = tile.y * h;
+
+			glm::vec2 botL(x, y);
+			glm::vec2 topR(x, y + h);
+			glm::vec2 topL(x + w, y + h);
+			glm::vec2 botR(x + w, y);
+
+			if (tile.rotate > 0)
+			{
+				glm::vec2 halfDim(w / 2, h / 2);
+
+				glm::vec2 tl(-halfDim.x, halfDim.y);
+				glm::vec2 bl(-halfDim.x, -halfDim.y);
+				glm::vec2 br(halfDim.x, -halfDim.y);
+				glm::vec2 tr(halfDim.x, halfDim.y);
+
+				tl = rotatePoint(tl, tile.rotate) + halfDim;
+				bl = rotatePoint(bl, tile.rotate) + halfDim;
+				br = rotatePoint(br, tile.rotate) + halfDim;
+				tr = rotatePoint(tr, tile.rotate) + halfDim;
+
+				vertices.emplace_back(x + tl.x, y + tl.y, uv.x, uv.w, c);
+				vertices.emplace_back(x + bl.x, y + bl.y, uv.x, uv.y, c);
+				vertices.emplace_back(x + br.x, y + br.y, uv.z, uv.y, c);
+				vertices.emplace_back(x + tr.x, y + tr.y, uv.z, uv.w, c);
+			}
+			else
+			{
+				vertices.emplace_back(botL.x, botL.y, uv.x, uv.w, c);
+				vertices.emplace_back(topR.x, topR.y, uv.x, uv.y, c);
+				vertices.emplace_back(topL.x, topL.y, uv.z, uv.y, c);
+				vertices.emplace_back(botR.x, botR.y, uv.z, uv.w, c);
+			}
+
 			mRenderBatches.back().numVertices += 6;
 		}
+	}
+
+	glm::vec2 SpriteBatch2D::rotatePoint(glm::vec2 pos, float angle)
+	{
+		glm::vec2 newV;
+		float rad = DEC2RA(angle);
+		newV.x = pos.x * cos(rad) - pos.y * sin(rad);
+		newV.y = pos.x * sin(rad) + pos.y * cos(rad);
+
+		return newV;
 	}
 
 	void SpriteBatch2D::submit(Sprite *renderable)
@@ -159,15 +206,6 @@ namespace Plutus
 		mIndexCount = 0;
 		vertices.clear();
 		isSprite = false;
-	}
-
-	glm::vec2 SpriteBatch2D::rotatePoint(glm::vec2 pos, float angle)
-	{
-		glm::vec2 newV;
-		newV.x = pos.x * cos(angle) - pos.y * sin(angle);
-		newV.y = pos.x * sin(angle) + pos.y * cos(angle);
-
-		return newV;
 	}
 
 	bool SpriteBatch2D::compareTexture(Sprite *a, Sprite *b)

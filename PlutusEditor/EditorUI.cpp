@@ -64,6 +64,8 @@ namespace Plutus
 
 		mAssetsMangager = AssetManager::getInstance();
 
+		mRender.init();
+
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		mImGui_IO = &ImGui::GetIO();
@@ -78,8 +80,8 @@ namespace Plutus
 		// mImGui_IO->FontDefault =
 		mDebugRender = Plutus::DebugRender::geInstances();
 		mDebugRender->init(win, cam);
-		mEntityEditor.init(mEntManager);
-
+		mEntityEditor.init(mEntManager, this);
+		mComPanel.init(mEntManager);
 		//Settup font
 
 		// merge in icons from Font Awesome
@@ -113,6 +115,23 @@ namespace Plutus
 			ImGui::RenderPlatformWindowsDefault();
 			SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
 		}
+	}
+
+	void EditorUI::DrawUI()
+	{
+		beginUI();
+		drawMainDockingWin();
+		viewPort();
+		viewPortControl();
+		mEntityEditor.draw();
+		LayerEditor::LayerControls();
+		mComPanel.drawUI(mEnt);
+
+		if (mShowDemo)
+		{
+			drawDemo();
+		}
+		endUI();
 	}
 
 	bool ZoomViewPort(int *value, int step, int min, int max)
@@ -234,20 +253,6 @@ namespace Plutus
 		ImGui::End();
 		ImGui::PopStyleVar();
 	}
-	void EditorUI::DrawUI()
-	{
-		beginUI();
-		drawMainDockingWin();
-		viewPort();
-		viewPortControl();
-		mEntityEditor.draw();
-		LayerEditor::LayerControls();
-		if (mShowDemo)
-		{
-			drawDemo();
-		}
-		endUI();
-	}
 
 	void EditorUI::viewPort()
 	{
@@ -273,12 +278,12 @@ namespace Plutus
 
 		mouseGridCoords = mDebugRender->getSquareCoords(glm::vec2(xPos / mVPScale, yPos / mVPScale));
 		ImGui::Image(reinterpret_cast<void *>(mFb.getTextureId()), ImVec2(vsize.x, vsize.y), ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0, 1.0, 1.0, 1.0), ImVec4(0.0, 0.0, 0.0, 1.0));
-		if (ImGui::IsWindowHovered())
+		if (ImGui::IsItemHovered())
 		{
 
-			if (mInputManager->onKeyPressed(SDL_BUTTON_LEFT))
+			if (mInputManager->onKeyDown(SDL_BUTTON_LEFT))
 			{
-				LOG_I("{0} {1} {2} {3}", mouseGridCoords.x, mouseGridCoords.y, canvas_pos.x, canvas_pos.y);
+				mComPanel.createTiles(mouseGridCoords);
 			}
 			if (mMoveCam || mInputManager->onKeyDown(SDLK_LCTRL))
 			{
@@ -421,11 +426,16 @@ namespace Plutus
 		glColorMask(true, true, true, true);
 		glClearColor(mVPColor.x, mVPColor.y, mVPColor.z, mVPColor.w);
 		glClear(GL_COLOR_BUFFER_BIT);
+		mEntManager->startDraw();
+		mEntManager->draw();
+		mComPanel.render(mEntManager->getRenderer(), mouseGridCoords);
+		mEntManager->endDraw();
 	}
 
 	void EditorUI::unBindFB()
 	{
 		mDebugRender->drawGrid();
+
 		mFb.unBind();
 	}
 

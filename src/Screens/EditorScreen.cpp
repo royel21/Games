@@ -34,13 +34,13 @@ int EditorScreen::getPrevScreentIndex() const
 void EditorScreen::build()
 {
     mInputManager = Plutus::InputManager::getInstance();
-    mCamera.init(1280, 768);
+    mCamera.init(2560, 768);
     mCamera.update();
 
     mEntManager.setCamera(&mCamera);
     mEntManager.init();
 
-    mTextLayer.Init(mEngine->getWindow(), 1280, 768, "./assets/fonts/Zoika.ttf", 28);
+    mTextLayer.Init(mEngine->getWindow(), 2560, 768, "./assets/fonts/Zoika.ttf", 28);
 
     // auto amanager = Plutus::AssetManager::getInstance();
     // //"player", 12, 24, 32, "./assets/textures/link.png"
@@ -78,7 +78,6 @@ void EditorScreen::update(float dt)
 void EditorScreen::draw()
 {
     mEditor->bindFB();
-    mEntManager.draw();
     char text[20];
     snprintf(text, 20, "%.1f FPS", mEngine->getFPS());
     mTextLayer.setColor(1.0f, 1.0f, 1.0f);

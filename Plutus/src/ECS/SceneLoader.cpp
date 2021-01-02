@@ -36,7 +36,9 @@ namespace Plutus
             int y = tile["y"].GetInt();
             int texId = tile["texId"].GetInt();
             bool isSolid = tile["isSolid"].GetBool();
-            tmap.mTiles.emplace_back(x, y, texId, isSolid);
+            float rotate = tile["rotate"].GetFloat();
+
+            tmap.mTiles.emplace_back(x, y, texId, rotate, isSolid);
         }
     }
 

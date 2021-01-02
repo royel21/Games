@@ -12,6 +12,8 @@
 #include "glm/glm.hpp"
 #include "FrameBuffer.h"
 #include "Assets/AssetManager.h"
+#include "Panels/ComponentPanel.h"
+#include "Graphics/SpriteBatch2D.h"
 
 namespace Plutus
 {
@@ -21,6 +23,7 @@ namespace Plutus
 	class DebugRender;
 	class InputManager;
 	class Window;
+	class Entity;
 
 	class EditorUI
 	{
@@ -40,21 +43,25 @@ namespace Plutus
 		ImGuiIO *mImGui_IO = nullptr;
 		DebugRender *mDebugRender = nullptr;
 		InputManager *mInputManager = nullptr;
+		AssetManager *mAssetsMangager = nullptr;
+		SpriteBatch2D mRender;
 		FrameBuffer mFb;
 		ImVec2 mViewportSize;
-		AssetManager *mAssetsMangager;
 		glm::vec4 mVPColor;
 		//Panels
 		EntityEditor mEntityEditor;
 		EntityManager *mEntManager;
+		Entity *mEnt = nullptr;
 
 		bool mMoveCam = false;
 		bool m_moveCamera = false;
 
 		glm::vec2 lastCoords;
-		float mVPScale = 0.5f;
+		float mVPScale = 0.75f;
 		bool mShowDemo = false;
 		glm::ivec2 mouseGridCoords;
+
+		ComponentPanel mComPanel;
 
 	public:
 		std::vector<ImVec2>
@@ -88,6 +95,8 @@ namespace Plutus
 		inline void drawDemo() { ImGui::ShowDemoWindow(); }
 		void viewPortBGColor(float r, float b, float g, float a);
 		void Serialize(Serializer &serializer);
+		void setEntity(Entity *ent) { mEnt = ent; }
+		Entity *getEntity() { return mEnt; }
 
 	private:
 		EditorUI();

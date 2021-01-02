@@ -4,7 +4,6 @@
 #include <string>
 #include "imgui.h"
 #include "glm/glm.hpp"
-#include "ComponentPanel.h"
 
 #define EDIT_PLACE 0
 #define EDIT_SELECT 1
@@ -15,18 +14,18 @@ namespace Plutus
     class InputManager;
     class EntityManager;
     class Entity;
+    class EditorUI;
     struct Layer;
 
     class EntityEditor
     {
     public:
         EntityEditor() = default;
-        void init(EntityManager *emanager);
+        void init(EntityManager *emanager, EditorUI *parent);
         void draw();
         void loadScene();
 
     private:
-        void drawEntity();
         void layers();
         void entity();
         void drawTileset();
@@ -37,13 +36,12 @@ namespace Plutus
         glm::vec2 modalPos;
         std::vector<ImVec2> mSelectedtiles;
         bool mShowCreateLayer = false;
-        ComponentPanel mComPanel;
         InputManager *mInputManager = nullptr;
 
         EntityManager *mEntManager = nullptr;
         Layer *mCurrentLayer = nullptr;
-        Entity *mCurrentEnt = nullptr;
         std::unordered_map<std::string, Layer> *mLayers;
         std::string mCurLayerName;
+        EditorUI *mParentUI;
     };
 } // namespace Plutus

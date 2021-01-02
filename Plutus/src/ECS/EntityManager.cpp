@@ -76,11 +76,6 @@ namespace Plutus
 
 	void EntityManager::draw()
 	{
-		mShader.enable();
-		glActiveTexture(GL_TEXTURE0);
-		mShader.setUniform1i("hasTexture", 0);
-		mShader.setUniform1i("mySampler", 0);
-		mShader.setUniformMat4("camera", mCamera->getCameraMatrix());
 		for (auto &layer : mLayers)
 		{
 			size_t entCount = layer.second.entities.size();
@@ -96,26 +91,8 @@ namespace Plutus
 					}
 				}
 				mSpriteBath2D.end();
-				// mSpriteBath2D.begin(entCount);
-				// for (auto &entity : layer.second.entities)
-				// {
-				// 	auto sprite = entity->getComponent<Sprite>();
-				// 	if (sprite)
-				// 	{
-
-				// 		auto trans = entity->getComponent<Transform>();
-				// 		sprite->mPosition = trans->position;
-				// 		sprite->mSize = trans->size;
-				// 		if (sprite->mTexId)
-				// 		{
-				// 		}
-				// 		mSpriteBath2D.submit(sprite);
-				// 	}
-				// }
-				// mSpriteBath2D.end();
 			}
 		}
-		mShader.disable();
 	}
 
 	Entity *EntityManager::addEntity(const std::string &entityName)
@@ -182,11 +159,13 @@ namespace Plutus
 	{
 		//Remove from Entities
 		auto e1 = std::remove_if(mEntities.begin(), mEntities.end(), [e](Entity *entity) -> bool { return e == entity; });
+		mEntities.erase(e1, mEntities.end());
 
 		auto entities = &mLayers[e->mLayerId].entities;
 		//Remove from Layer
 		e1 = std::remove_if(entities->begin(), entities->end(), [e](Entity *entity) -> bool { return e == entity; });
 		//Delete memory
+		entities->erase(e1, entities->end());
 		delete e;
 	}
 
@@ -231,5 +210,14 @@ namespace Plutus
 		writer->EndArray();
 
 		writer->EndObject();
+	}
+
+	void EntityManager::startDraw()
+	{
+		mShader.enable();
+		glActiveTexture(GL_TEXTURE0);
+		mShader.setUniform1i("hasTexture", 0);
+		mShader.setUniform1i("mySampler", 0);
+		mShader.setUniformMat4("camera", mCamera->getCameraMatrix());
 	}
 } // namespace Plutus

@@ -12,6 +12,7 @@
 #include "ECS/Components/TileMap.h"
 #include "ECS/EntityManager.h"
 #include "ECS/Entity.h"
+#include "Graphics/SpriteBatch2D.h"
 
 #define CHECKLIMIT(val, min, max) val<min ? min : val> max ? max : val
 
@@ -26,9 +27,11 @@ namespace Plutus
         mEntManager = entManager;
         mAManager = AssetManager::getInstance();
         mInputManager = InputManager::getInstance();
+        mTileMapPanel.init(entManager);
     }
     void ComponentPanel::drawUI(Entity *ent)
     {
+        mEntity = ent;
         if (ent)
         {
             mEntity = ent;
@@ -45,6 +48,11 @@ namespace Plutus
             }
         }
         ImGui::End();
+    }
+
+    void ComponentPanel::render(SpriteBatch2D *renderer, glm::vec2 mcoords)
+    {
+        mTileMapPanel.renderTiles(renderer, mcoords);
     }
 
     void ComponentPanel::drawAnimate()
