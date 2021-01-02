@@ -8,7 +8,6 @@
 #include "Serialize/Serialize.h"
 #include "Input/InputManager.h"
 #include "Log/Logger.h"
-#include "LayerEditor.h"
 #include "Utils.h"
 
 #include "ImGuiEx.h"
@@ -124,7 +123,6 @@ namespace Plutus
 		viewPort();
 		viewPortControl();
 		mEntityEditor.draw();
-		LayerEditor::LayerControls();
 		mComPanel.drawUI(mEnt);
 
 		if (mShowDemo)
