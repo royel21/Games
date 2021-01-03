@@ -150,6 +150,24 @@ namespace Plutus
 		return &mLayers;
 	}
 
+	bool EntityManager::removeLayer(const std::string &name)
+	{
+		if (mLayers.size() > 1)
+		{
+			auto found = mLayers.find(name);
+			if (found != mLayers.end())
+			{
+				for (int i = found->second.entities.size() - 1; i >= 0; i--)
+				{
+					removeEntity(found->second.entities[i]);
+				}
+				mLayers.erase(found);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	std::vector<Entity *> &EntityManager::getEntityByLayer(const std::string &layer)
 	{
 		return mLayers[layer].entities;
@@ -159,13 +177,18 @@ namespace Plutus
 	{
 		//Remove from Entities
 		auto e1 = std::remove_if(mEntities.begin(), mEntities.end(), [e](Entity *entity) -> bool { return e == entity; });
-		mEntities.erase(e1, mEntities.end());
 
-		auto entities = &mLayers[e->mLayerId].entities;
-		//Remove from Layer
-		e1 = std::remove_if(entities->begin(), entities->end(), [e](Entity *entity) -> bool { return e == entity; });
-		//Delete memory
-		entities->erase(e1, entities->end());
+		if (e1 != mEntities.end())
+			mEntities.erase(e1, mEntities.end());
+		if (e)
+		{
+			auto entities = &mLayers[e->mLayerId].entities;
+			//Remove from Layer
+			e1 = std::remove_if(entities->begin(), entities->end(), [e](Entity *entity) -> bool { return e == entity; });
+			//Delete memory
+			if (e1 != entities->end())
+				entities->erase(e1, entities->end());
+		}
 		delete e;
 	}
 

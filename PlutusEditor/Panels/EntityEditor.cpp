@@ -35,28 +35,29 @@ namespace Plutus
 
     void EntityEditor::draw()
     {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(300, 300));
         ImGui::Begin("Scene Editor");
         layers();
         entity();
         ImGui::End();
-        ImGui::PopStyleVar(1);
     }
 
     void EntityEditor::layers()
     {
         ImGui::Text(ICON_FA_LAYER_GROUP " Layers");
-        ImGui::Separator();
+        ImGui::SameLine();
         static bool openLayerModal = false;
 
-        if (ImGui::Button("Add New##layer"))
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0.0f));
+        if (ImGui::Button(ICON_FA_PLUS_CIRCLE " ##layer"))
         {
             openLayerModal = true;
-            modalPos = mInputManager->getMouseCoords();
         }
+        ImGui::PopStyleColor();
         if (openLayerModal)
         {
-            std::string newLayer = LayerModal("Create Layer", &openLayerModal);
+            auto pos = ImGui::GetWindowPos();
+            ImGui::SetNextWindowPos(ImVec2(pos.x + 100, pos.y + 60));
+            std::string newLayer = LayerModal("New Layer", &openLayerModal);
             if (!openLayerModal && !newLayer.empty())
             {
                 mCurrentLayer = mEntManager->addLayer(newLayer);
@@ -66,8 +67,34 @@ namespace Plutus
         }
 
         ImGui::SameLine();
-        ImGui::Button("Edit Name");
-        ImGui::PushItemWidth(100);
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0.0f));
+        ImGui::Button(ICON_FA_EDIT " ##Edit_Layer_Name");
+        //Remove Layer from list
+        ImGui::SameLine();
+        if (ImGui::Button(ICON_FA_TRASH_ALT " ##Remove_Layer"))
+        {
+            if (mEntManager->removeLayer(mCurrentLayer->name))
+            {
+                mLayers = mEntManager->getLayers();
+                if (mLayers->size())
+                {
+                    auto it = mLayers->begin();
+                    mEntManager->setCurrentLayer(it->first);
+                    mCurrentLayer = mEntManager->getCurrentLayer();
+                    mCurLayerName = mCurrentLayer->name;
+
+                    auto ent = mCurrentLayer->entities.begin();
+                    mParentUI->setEntity(ent != mCurrentLayer->entities.end() ? *ent : nullptr);
+                }
+                else
+                {
+                    mParentUI->setEntity(nullptr);
+                    mCurLayerName = "";
+                }
+            }
+        }
+        ImGui::PopStyleColor();
+        ImGui::PushItemWidth(80);
         if (ImGui::ComboBox<Layer>("Layers", *mLayers, mCurLayerName))
         {
             mEntManager->setCurrentLayer(mCurLayerName);
@@ -77,36 +104,33 @@ namespace Plutus
                 mParentUI->setEntity(mCurrentLayer->entities[0]);
             }
         }
-        ImGui::Checkbox("IsVisible", &mCurrentLayer->isVisible);
-        ImGui::Separator();
+        ImGui::SameLine();
+        ImGui::Checkbox(ICON_FA_EYE " ##IsVisible", &mCurrentLayer->isVisible);
     }
 
     /***************************Entity List*************************/
     void EntityEditor::entity()
     {
+        ImGui::Separator();
+        ImGui::Text(ICON_FA_LIST_OL " Entities");
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0.0f));
         static bool openEntModal = false;
-        if (ImGui::Button("Add New##ent"))
+        if (ImGui::Button(ICON_FA_PLUS_CIRCLE " ##ent"))
         {
             openEntModal = true;
-            modalPos = mInputManager->getMouseCoords();
         }
-
         if (openEntModal)
         {
-            std::string newEntity = LayerModal("Create Entity", &openEntModal);
+            auto pos = ImGui::GetWindowPos();
+            ImGui::SetNextWindowPos(ImVec2(pos.x + 100, pos.y + 120));
+            std::string newEntity = LayerModal("New Entity", &openEntModal);
             if (!openEntModal && !newEntity.empty())
             {
                 mParentUI->setEntity(mEntManager->addEntity(newEntity));
             }
         }
-
-        ImGui::SameLine();
-        if (ImGui::Button("Remove##ent"))
-        {
-        }
-
-        ImGui::Separator();
-        ImGui::Text(ICON_FA_LIST_OL " Entity List");
+        ImGui::PopStyleColor();
         ImGui::Separator();
         static int selected = 0;
         static int remove = -1;
@@ -119,10 +143,15 @@ namespace Plutus
         }
         if (remove > -1)
         {
-            std::cout << "Remove Ent:" << mCurrentLayer->entities[remove]->name << std::endl;
             mEntManager->removeEntity(mCurrentLayer->entities[remove]);
             if (mCurrentLayer->entities.size() == 0)
+            {
                 mParentUI->setEntity(nullptr);
+            }
+            else
+            {
+                mParentUI->setEntity(mCurrentLayer->entities[0]);
+            }
             remove = -1;
         }
     }
@@ -132,13 +161,14 @@ namespace Plutus
         std::string result = "";
         if (*open)
         {
-            ImGui::SetNextWindowPos(ImVec2(modalPos.x + 300, modalPos.y + 170));
-            ImGui::SetNextWindowSize(ImVec2(260.0f, 90.0f));
+            ImGui::SetNextWindowSize(ImVec2(260.0f, 95.0f));
 
             ImGui::OpenPopup(label);
             static char newlayer[128];
-            if (ImGui::BeginPopupModal(label, NULL))
+            ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+            if (ImGui::BeginPopupModal(label, NULL, window_flags))
             {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.33f, 0.33f, 0.33f, 0.8f));
                 ImGui::InputText("Name##modal-1 ", newlayer, IM_ARRAYSIZE(newlayer));
 
                 if (ImGui::Button("Save##modal-1") && !std::string(newlayer).empty())
@@ -151,26 +181,25 @@ namespace Plutus
                 if (ImGui::Button("Close##modal-1"))
                     *open = false;
 
+                ImGui::PopStyleColor(1);
                 ImGui::EndPopup();
             }
-
-            if (mShowCreateLayer)
-                ImGui::CloseCurrentPopup();
         }
         return result;
     }
 
-    void EntityEditor::loadScene()
+    void EntityEditor::loadScene(std::string path)
     {
-        std::string path;
-        if (Utils::windowDialog(OPEN_FILE, path))
+        if (!path.empty() || Utils::windowDialog(OPEN_FILE, path))
         {
             if (Plutus::SceneLoader::loadFromJson(path.c_str(), mEntManager))
             {
                 mCurrentLayer = mEntManager->getCurrentLayer();
+                mCurLayerName = mCurrentLayer->name;
                 if (mCurrentLayer != nullptr && mCurrentLayer->entities.size() > 0)
                 {
                     mParentUI->setEntity(mCurrentLayer->entities[0]);
+                    mParentUI->addRecent(path);
                 }
             }
         }

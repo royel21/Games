@@ -61,6 +61,8 @@ namespace Plutus
 		bool mShowDemo = false;
 		glm::ivec2 mouseGridCoords;
 
+		std::vector<std::string> mRecents;
+
 		ComponentPanel mComPanel;
 
 	public:
@@ -97,6 +99,7 @@ namespace Plutus
 		void Serialize(Serializer &serializer);
 		void setEntity(Entity *ent) { mEnt = ent; }
 		Entity *getEntity() { return mEnt; }
+		void addRecent(const std::string &path);
 
 	private:
 		EditorUI();
@@ -106,6 +109,7 @@ namespace Plutus
 		void viewPortControl();
 		void EntityList();
 		void saveScene();
+		void newScene();
 	};
 
 } // namespace Plutus

@@ -40,5 +40,7 @@ namespace Plutus
         void drawCanvas(TileSet *tileset, float scale);
         void drawTexCoords(TileSet *tileset, float scale);
         void drawTilesetProps(TileSet *tileset);
+        bool showCreateComp(bool &open);
+        std::vector<std::string> getCompList();
     };
 } // namespace Plutus

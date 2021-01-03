@@ -23,7 +23,7 @@ namespace Plutus
         EntityEditor() = default;
         void init(EntityManager *emanager, EditorUI *parent);
         void draw();
-        void loadScene();
+        void loadScene(std::string path);
 
     private:
         void layers();

@@ -40,39 +40,29 @@ namespace Plutus
 		void update(float dt);
 
 		void draw();
-
-		bool hasNoEntities();
-
-		inline Layer *getCurrentLayer() { return currentLayer; }
-
-		Entity *addEntity(const std::string &entityName);
-
-		Entity *getEntity(const std::string &id);
-
-		std::vector<Entity *> getEntityList() const;
-
-		unsigned int getEntityCount();
-
 		void setCamera(Camera2D *cm);
 
-		Layer *addLayer(const std::string &layer);
-
-		void addToLayer(Entity *e, const std::string &layer);
-
-		void setCurrentLayer(const std::string &layer);
-
-		std::unordered_map<std::string, Layer> *getLayers();
-
+		bool hasNoEntities();
+		Entity *addEntity(const std::string &entityName);
+		Entity *getEntity(const std::string &id);
+		std::vector<Entity *> getEntityList() const;
+		unsigned int getEntityCount();
 		std::vector<Entity *> &getEntityByLayer(const std::string &layer);
-
 		void removeEntity(Entity *e);
 
-		void clearData();
-
-		void serialize(Serializer &serializer);
+		Layer *addLayer(const std::string &layer);
+		void addToLayer(Entity *e, const std::string &layer);
+		void setCurrentLayer(const std::string &layer);
+		std::unordered_map<std::string, Layer> *getLayers();
+		inline Layer *getCurrentLayer() { return currentLayer; }
+		bool removeLayer(const std::string &name);
 
 		void startDraw();
 		void endDraw() { mShader.disable(); }
 		SpriteBatch2D *getRenderer() { return &mSpriteBath2D; }
+
+		void clearData();
+
+		void serialize(Serializer &serializer);
 	};
 } // namespace Plutus

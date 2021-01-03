@@ -7,7 +7,7 @@
 #define SAVE_FILE 0
 #define OPEN_FILE 1
 
-#define LIMIT(v, min, max) v<min ? min : v> max ? max : v
+#define LIMIT(v, min, max) v<min ? max : v> max ? min : v
 
 namespace Plutus
 {

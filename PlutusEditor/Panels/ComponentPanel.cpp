@@ -13,6 +13,11 @@
 #include "ECS/EntityManager.h"
 #include "ECS/Entity.h"
 #include "Graphics/SpriteBatch2D.h"
+#include "Utils.h"
+
+#define COMP_TRASNFORM 0
+#define COMP_SPRITE 1
+#define COMP_ANIMATE 2
 
 #define CHECKLIMIT(val, min, max) val<min ? min : val> max ? max : val
 
@@ -31,16 +36,24 @@ namespace Plutus
     }
     void ComponentPanel::drawUI(Entity *ent)
     {
-        mEntity = ent;
-        if (ent)
-        {
-            mEntity = ent;
-        }
         static bool isOpen = true;
         ImGui::Begin("Components", &isOpen, ImGuiWindowFlags_HorizontalScrollbar);
         {
-            if (mEntity)
+            if (ent != nullptr)
             {
+                mEntity = ent;
+                static bool showCreate;
+                if (!ent->hasComponent<TileMap>())
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0.0f));
+                    if (ImGui::Button(ICON_FA_PLUS_CIRCLE " Add Component##createComp"))
+                    {
+                        showCreate = true;
+                    }
+                    showCreateComp(showCreate);
+                    ImGui::PopStyleColor();
+                    ImGui::Separator();
+                }
                 drawAnimate();
                 drawTransform();
                 drawSprite();
@@ -61,6 +74,19 @@ namespace Plutus
         {
             if (ImGui::CollapsingHeader("Animate##comp"))
             {
+                auto animate = mEntity->getComponent<Animate>();
+                auto animations = animate->animations;
+                static bool newAnin = false;
+                if (ImGui::Button(ICON_FA_PLUS_CIRCLE " New Animation#anin"))
+                {
+                    newAnin = true;
+                }
+
+                auto it = animations.begin();
+                static std::string selected = it != animations.end() ? it->first : "";
+                if (ImGui::ComboBox("Animations", animations, selected))
+                {
+                }
             }
         }
     }
@@ -319,5 +345,125 @@ namespace Plutus
                     ImVec2(cvPos.x + points[i + 1].x, cvPos.y + points[i + 1].y),
                     IM_COL32(255, 255, 255, 255));
         }
+    }
+
+    bool ComponentPanel::showCreateComp(bool &open)
+    {
+
+        std::vector<std::string> datas = getCompList();
+
+        bool save = false;
+        if (open)
+        {
+            //Sprite Props
+            auto tileMaps = mAManager->getTilesets();
+            auto it = tileMaps.begin();
+            static std::string selectedTex = it != tileMaps.end() ? it->first : "";
+
+            // Transform Props
+            static int tpos[] = {0, 0}, size[] = {0, 0};
+            static float r = 0;
+
+            static int selected = 0;
+            auto pos = ImGui::GetWindowPos();
+            ImGui::SetNextWindowPos(ImVec2(pos.x, pos.y + 60));
+
+            ImGui::SetNextWindowSize(ImVec2(250.0f, 300.0f));
+            ImGui::OpenPopup("New Component");
+            ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+            if (ImGui::BeginPopupModal("New Component", NULL, window_flags))
+            {
+                if (datas.size())
+                {
+                    ImGui::ComboBox("Type", datas, selected);
+                    switch (selected)
+                    {
+                    case COMP_TRASNFORM:
+                    {
+                        ImGui::DragInt2("Position##trans-modal", tpos, 1);
+                        if (ImGui::DragInt2("Size##trans-modal", size, 1, 0))
+                        {
+                            size[0] = LIMIT(size[0], 0, 8000);
+                            size[1] = LIMIT(size[1], 0, 8000);
+                        }
+                        if (ImGui::InputFloat("Rotation", &r))
+                        {
+                            r = LIMIT(r, 0.0f, 360.0f);
+                        }
+                        break;
+                    }
+                    case COMP_SPRITE:
+                    {
+
+                        break;
+                    }
+                    case COMP_ANIMATE:
+                    {
+
+                        break;
+                    }
+                    default:
+                    {
+                    }
+                    }
+                }
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.33f, 0.33f, 0.33f, 0.8f));
+                if (ImGui::Button("Create##Comp"))
+                {
+                    open = false;
+                    switch (selected)
+                    {
+                    case COMP_TRASNFORM:
+                    {
+                        mEntity->addComponent<Transform>(tpos[1], tpos[0], size[0], size[1], r);
+                        break;
+                    }
+                    case COMP_SPRITE:
+                    {
+                        mEntity->addComponent<Sprite>("");
+                        break;
+                    }
+                    case COMP_ANIMATE:
+                    {
+                        mEntity->addComponent<Animate>();
+                        break;
+                    }
+                    default:
+                    {
+                        mEntity->addComponent<TileMap>(32, 32);
+                    }
+                    }
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel##modal-1"))
+                    open = false;
+                ImGui::PopStyleColor();
+                ImGui::EndPopup();
+            }
+        }
+        return save;
+    }
+
+    std::vector<std::string> ComponentPanel::getCompList()
+    {
+        std::vector<std::string> datas;
+        if (!mEntity->hasComponent<Transform>())
+        {
+            datas.push_back("Trasnform");
+        }
+        if (!mEntity->hasComponent<Sprite>() && !mEntity->hasComponent<Animation>())
+        {
+            datas.push_back("Sprite");
+        }
+        if (!mEntity->hasComponent<Sprite>() && !mEntity->hasComponent<Animation>())
+        {
+            datas.push_back("Animation");
+        }
+        if (datas.size() == 3)
+        {
+            datas.push_back("TileMap");
+        }
+        return datas;
     }
 } // namespace Plutus

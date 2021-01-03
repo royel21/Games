@@ -10,11 +10,8 @@ namespace Plutus
     {
     }
 
-    Animate::Animate(float _aninTime, const std::string aninId, Animation anin)
+    void Animate::update(float dt)
     {
-        aninTime = _aninTime;
-        animations[aninId] = anin;
-        currentAnin = &anin;
     }
 
     void Animate::AddAnimation(const std::string id, const Animation &anin)

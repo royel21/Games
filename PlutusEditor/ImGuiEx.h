@@ -138,7 +138,7 @@ namespace ImGui
         {
             bool is_selected = i == selected;
             ImGui::PushID(i);
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0.0f));
             if (ImGui::Button(ICON_FA_TRASH_ALT " ##remove"))
             {
                 remove = i;

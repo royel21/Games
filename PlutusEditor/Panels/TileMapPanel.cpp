@@ -21,28 +21,6 @@ namespace Plutus
         mEntManager = entManager;
     }
 
-    void TileMapPanel::tileProps()
-    {
-        int pos[] = {static_cast<int>(mCurrentTile->x), static_cast<int>(mCurrentTile->y)};
-        if (ImGui::DragInt2("Position", pos))
-        {
-            mCurrentTile->x = pos[0];
-            mCurrentTile->y = pos[1];
-        }
-        static float rotation = mCurrentTile->rotate;
-        if (ImGui::InputFloat("Rotation##ctile", &rotation, 45.0f, 90.0f, "%0.0f"))
-        {
-            rotation = LIMIT(rotation, 0.0f, 360.0f);
-            mCurrentTile->rotate = rotation;
-        }
-        static int texId = mCurrentTile->texId;
-        if (ImGui::InputInt("Texture##ctile", &texId, 1))
-        {
-            texId = LIMIT(texId, 0, mTileMap->mTileset->totalTiles - 1);
-            mCurrentTile->texId = texId;
-        }
-    }
-
     void TileMapPanel::draw(TileMap *tileMap)
     {
         mTileMap = tileMap;
@@ -66,11 +44,7 @@ namespace Plutus
             {
                 if (ImGui::InputFloat("Rotation", &mRotation, 45.0f, 90.0f, "%0.0f"))
                 {
-                    mRotation = mRotation < 0 ? 0 : mRotation > 360 ? 360 : mRotation;
-                    if (mCurrentTile != nullptr)
-                    {
-                        mCurrentTile->rotate = mRotation;
-                    }
+                    mRotation = LIMIT(mRotation, 0.0f, 360.0f);
                 }
             }
 
@@ -83,7 +57,6 @@ namespace Plutus
             ImGui::RadioButton("Edit", &mMode, MODE_EDIT);
             ImGui::SameLine();
             ImGui::RadioButton("Remove", &mMode, MODE_REMOVE);
-            ImGui::Separator();
             ImGui::Separator();
             ImGui::TileSet(mTileMap->mTileset, 1, mTempTiles);
         }
@@ -101,6 +74,37 @@ namespace Plutus
             renderer->begin(1);
             renderer->submit(mTileMap->mTileWidth, mTileMap->mTileHeight, tiles, mTileMap->mTileset);
             renderer->end();
+        }
+    }
+
+    void TileMapPanel::tileProps()
+    {
+        ImGui::Separator();
+        ImGui::Text("Tile Props");
+        ImGui::Separator();
+        int x = mCurrentTile->x;
+        int y = mCurrentTile->y;
+        if (ImGui::InputInt("X##ctile", &x, 1))
+        {
+            mCurrentTile->x = x;
+        }
+        ImGui::SameLine();
+        if (ImGui::InputInt("Y##ctile", &y, 1))
+        {
+            mCurrentTile->y = y;
+        }
+
+        float rotation = mCurrentTile->rotate;
+        if (ImGui::InputFloat("Rotation##ctile", &rotation, 45.0f, 90.0f, "%0.0f"))
+        {
+            rotation = LIMIT(rotation, 0.0f, 360.0f);
+            mCurrentTile->rotate = rotation;
+        }
+        int texId = mCurrentTile->texId;
+        if (ImGui::InputInt("Texture##ctile", &texId, 1))
+        {
+            texId = LIMIT(texId, 0, mTileMap->mTileset->totalTiles - 1);
+            mCurrentTile->texId = texId;
         }
     }
 

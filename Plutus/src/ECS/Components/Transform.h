@@ -13,6 +13,9 @@ namespace Plutus
 
     public:
         Transform() = default;
+        //position x,y
+        //Size w,h
+        //rotation r
         Transform(float x, float y, int w, int h, int r = 0);
         Transform(const glm::vec2 &pos, glm::vec2 _size, int r = 0);
         void update(float dt) override;

@@ -1,6 +1,7 @@
 #include "EditorUI.h"
 #include "Window.h"
 #include "IconsFontAwesome5.h"
+#include <algorithm>
 
 #include "Graphics/DebugRenderer.h"
 #include "Graphics/Camera2D.h"
@@ -331,6 +332,14 @@ namespace Plutus
 	{
 	}
 
+	void EditorUI::addRecent(const std::string &path)
+	{
+		if (std::find(mRecents.begin(), mRecents.end(), path) == mRecents.end())
+		{
+			mRecents.push_back(path);
+		}
+	}
+
 	void EditorUI::EntityList()
 	{
 		//Control the camera with CTRL + MOUSE WHEEL
@@ -393,13 +402,26 @@ namespace Plutus
 		{
 			if (ImGui::BeginMenu("Files"))
 			{
-				// Disabling fullscreen would allow the window to be moved to the front of other windows,
-				// which we can't undo at the moment without finer window depth/z control.
-				//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
-
+				if (ImGui::MenuItem("New", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
+				{
+				}
 				if (ImGui::MenuItem("Open", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
 				{
-					mEntityEditor.loadScene();
+					mEntityEditor.loadScene("");
+				}
+				if (ImGui::BeginMenu("Recent"))
+				{
+					for (auto recent : mRecents)
+					{
+						std::string item = ICON_FA_FILE_IMAGE;
+						item += " ";
+						item += recent;
+						if (ImGui::MenuItem(item.c_str()))
+						{
+							mEntityEditor.loadScene(recent);
+						}
+					}
+					ImGui::EndMenu();
 				}
 				if (ImGui::MenuItem("Save", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))
 				{
