@@ -24,6 +24,7 @@ namespace Plutus
 		uint32_t texId;
 		std::string path;
 		std::vector<glm::vec4> uvs;
+		int mTexCount = 0;
 		TileSet() : columns(0), tileWidth(0), tileHeight(0), texWidth(0), texHeight(0), texId(0) {}
 
 		TileSet(const std::string &id, const std::string &p, int c, int w, int h, GLTexture tex) : name(id), path(p)
@@ -46,8 +47,8 @@ namespace Plutus
 		{
 			if (tileWidth > 0)
 			{
-				int size = columns * int(texHeight / tileHeight);
-				for (int i = 0; i < size; i++)
+				mTexCount = columns * int(texHeight / tileHeight);
+				for (int i = 0; i < mTexCount; i++)
 				{
 					int y = i / columns;
 					int x = i % columns;
@@ -60,7 +61,10 @@ namespace Plutus
 				}
 			}
 		}
-		const glm::vec4 getUV(int texcoord) { return uvs[texcoord]; }
+		inline const glm::vec4 getUV(int texcoord)
+		{
+			return texcoord < mTexCount ? uvs[texcoord] : glm::vec4();
+		}
 	};
 	//Manage all the texture of the game
 	class AssetManager

@@ -95,6 +95,7 @@ void EditorScreen::onScreenResize(int w, int h)
 
 void EditorScreen::onExit()
 {
+    delete mEditor;
 }
 
 void EditorScreen::destroy()

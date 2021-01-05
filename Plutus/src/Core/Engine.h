@@ -7,6 +7,7 @@
 #include "Sound/SoundManager.h"
 #include "Graphics/Shader.h"
 #include "glm/glm.hpp"
+#include <chrono>
 
 namespace Plutus
 {
@@ -67,5 +68,8 @@ namespace Plutus
         void sysEvents(SDL_Event &event);
         void checkEvent();
         void exitGame();
+        float mLastElapsed = 0.0f;
+        float mFrameTime = 1.0f;
+        int mnFrameTime = 0;
     };
 } // namespace Plutus

@@ -77,49 +77,50 @@ namespace Plutus
 
 	void SpriteBatch2D::submit(float w, float h, std::vector<Tile> &tiles, TileSet *tileset)
 	{
-		mRenderBatches.emplace_back(0, 0, tileset->texId);
-		ColorRGBA8 c;
-		for (auto tile : tiles)
+		if (tiles.size())
 		{
-
-			glm::vec4 uv = tileset->getUV(tile.texId);
-
-			float x = tile.x * w;
-			float y = tile.y * h;
-
-			glm::vec2 botL(x, y);
-			glm::vec2 topR(x, y + h);
-			glm::vec2 topL(x + w, y + h);
-			glm::vec2 botR(x + w, y);
-
-			if (tile.rotate > 0)
+			mRenderBatches.emplace_back(0, 0, tileset->texId);
+			ColorRGBA8 c;
+			for (auto tile : tiles)
 			{
-				glm::vec2 halfDim(w / 2, h / 2);
 
-				glm::vec2 tl(-halfDim.x, halfDim.y);
-				glm::vec2 bl(-halfDim.x, -halfDim.y);
-				glm::vec2 br(halfDim.x, -halfDim.y);
-				glm::vec2 tr(halfDim.x, halfDim.y);
+				glm::vec4 uv = tileset->getUV(tile.texId);
+				float x = tile.x * w;
+				float y = tile.y * h;
+				glm::vec2 botL(x, y);
+				glm::vec2 topR(x, y + h);
+				glm::vec2 topL(x + w, y + h);
+				glm::vec2 botR(x + w, y);
 
-				tl = rotatePoint(tl, tile.rotate) + halfDim;
-				bl = rotatePoint(bl, tile.rotate) + halfDim;
-				br = rotatePoint(br, tile.rotate) + halfDim;
-				tr = rotatePoint(tr, tile.rotate) + halfDim;
+				if (tile.rotate > 0)
+				{
+					glm::vec2 halfDim(w / 2, h / 2);
 
-				vertices.emplace_back(x + tl.x, y + tl.y, uv.x, uv.w, c);
-				vertices.emplace_back(x + bl.x, y + bl.y, uv.x, uv.y, c);
-				vertices.emplace_back(x + br.x, y + br.y, uv.z, uv.y, c);
-				vertices.emplace_back(x + tr.x, y + tr.y, uv.z, uv.w, c);
+					glm::vec2 tl(-halfDim.x, halfDim.y);
+					glm::vec2 bl(-halfDim.x, -halfDim.y);
+					glm::vec2 br(halfDim.x, -halfDim.y);
+					glm::vec2 tr(halfDim.x, halfDim.y);
+
+					tl = rotatePoint(tl, tile.rotate) + halfDim;
+					bl = rotatePoint(bl, tile.rotate) + halfDim;
+					br = rotatePoint(br, tile.rotate) + halfDim;
+					tr = rotatePoint(tr, tile.rotate) + halfDim;
+
+					vertices.emplace_back(x + tl.x, y + tl.y, uv.x, uv.w, c);
+					vertices.emplace_back(x + bl.x, y + bl.y, uv.x, uv.y, c);
+					vertices.emplace_back(x + br.x, y + br.y, uv.z, uv.y, c);
+					vertices.emplace_back(x + tr.x, y + tr.y, uv.z, uv.w, c);
+				}
+				else
+				{
+					vertices.emplace_back(botL.x, botL.y, uv.x, uv.w, c);
+					vertices.emplace_back(topR.x, topR.y, uv.x, uv.y, c);
+					vertices.emplace_back(topL.x, topL.y, uv.z, uv.y, c);
+					vertices.emplace_back(botR.x, botR.y, uv.z, uv.w, c);
+				}
+
+				mRenderBatches.back().numVertices += 6;
 			}
-			else
-			{
-				vertices.emplace_back(botL.x, botL.y, uv.x, uv.w, c);
-				vertices.emplace_back(topR.x, topR.y, uv.x, uv.y, c);
-				vertices.emplace_back(topL.x, topL.y, uv.z, uv.y, c);
-				vertices.emplace_back(botR.x, botR.y, uv.z, uv.w, c);
-			}
-
-			mRenderBatches.back().numVertices += 6;
 		}
 	}
 

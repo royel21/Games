@@ -50,6 +50,11 @@ namespace Plutus
 
             ImGui::PopItemWidth();
             auto assets = AssetManager::getInstance();
+            static std::string currentTS = mTileMap->mTileset != nullptr ? mTileMap->mTileset->name : "";
+            if (ImGui::ComboBox("TileSheet", assets->getTilesets(), currentTS))
+            {
+                mTileMap->mTileset = assets->getTexture(currentTS);
+            }
             ImGui::Separator();
 
             ImGui::RadioButton("Place", &mMode, MODE_PLACE);
@@ -58,7 +63,8 @@ namespace Plutus
             ImGui::SameLine();
             ImGui::RadioButton("Remove", &mMode, MODE_REMOVE);
             ImGui::Separator();
-            ImGui::TileSet(mTileMap->mTileset, 1, mTempTiles);
+            if (mTileMap->mTileset != nullptr)
+                ImGui::TileSet(mTileMap->mTileset, 1, mTempTiles);
         }
     }
 
@@ -125,9 +131,10 @@ namespace Plutus
                 }
                 else if (mTileMap->mTiles[index].texId != tile.texId)
                 {
-                    tiles->insert(tiles->begin(), index, tile);
+                    mTileMap->mTiles[index] = tile;
                 }
             }
+            LOG_I("tiles {0}", tiles->size());
             break;
         }
         case MODE_EDIT:

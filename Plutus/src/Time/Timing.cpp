@@ -14,20 +14,21 @@ namespace Plutus
 	{
 		mMaxFPS = 1000 / maxFPS;
 	}
-	void FpsLimiter::begin()
+	double FpsLimiter::begin()
 	{
 		mStartTick = SDL_GetTicks();
+		double dt = mStartTick - mLastTick;
+		return dt;
 	}
 	float FpsLimiter::end()
 	{
 		float frameTicks = (float)(SDL_GetTicks() - mStartTick);
-		// LOG_I("{0} {1}", m_maxFPS, frameTicks);
-		if (mMaxFPS > frameTicks)
-		{
-			// LOG_I("{0}", m_maxFPS - (float)(SDL_GetTicks() - m_startTick));
-			while (mMaxFPS - (float)(SDL_GetTicks() - mStartTick) > 0)
-				;
-		}
+		mLastTick = mStartTick;
+		// if (mMaxFPS > frameTicks)
+		// {
+		// 	while (mMaxFPS - (float)(SDL_GetTicks() - mStartTick) > 0)
+		// 		;
+		// }
 		// Get samples for calculate fps
 		if (mCurrentSample > FRAMESAMPLES)
 		{

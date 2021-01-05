@@ -39,7 +39,7 @@ namespace Plutus
 	{
 		GLTexture texture = {};
 		std::filesystem::path path = filePath.c_str();
-		std::cout << std::filesystem::absolute(path).string() << std::endl;
+		filePath = std::filesystem::absolute(path).string();
 		int BPP;
 		uint8_t *out = stbi_load(filePath.c_str(), &texture.width, &texture.height, &BPP, 4);
 

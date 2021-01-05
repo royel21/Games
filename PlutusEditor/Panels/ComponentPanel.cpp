@@ -77,16 +77,21 @@ namespace Plutus
                 auto animate = mEntity->getComponent<Animate>();
                 auto animations = animate->animations;
                 static bool newAnin = false;
-                if (ImGui::Button(ICON_FA_PLUS_CIRCLE " New Animation#anin"))
+
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0.0f));
+                if (ImGui::Button(ICON_FA_PLUS_CIRCLE "##add-anin"))
                 {
                     newAnin = true;
                 }
-
+                ImGui::PopStyleColor();
+                ImGui::SameLine();
                 auto it = animations.begin();
                 static std::string selected = it != animations.end() ? it->first : "";
+                ImGui::PushItemWidth(100);
                 if (ImGui::ComboBox("Animations", animations, selected))
                 {
                 }
+                ImGui::PopItemWidth();
             }
         }
     }
@@ -376,9 +381,7 @@ namespace Plutus
                 if (datas.size())
                 {
                     ImGui::ComboBox("Type", datas, selected);
-                    switch (selected)
-                    {
-                    case COMP_TRASNFORM:
+                    if (std::strcmp(datas[selected].c_str(), "Transform") == 0)
                     {
                         ImGui::DragInt2("Position##trans-modal", tpos, 1);
                         if (ImGui::DragInt2("Size##trans-modal", size, 1, 0))
@@ -390,49 +393,30 @@ namespace Plutus
                         {
                             r = LIMIT(r, 0.0f, 360.0f);
                         }
-                        break;
-                    }
-                    case COMP_SPRITE:
-                    {
-
-                        break;
-                    }
-                    case COMP_ANIMATE:
-                    {
-
-                        break;
-                    }
-                    default:
-                    {
-                    }
                     }
                 }
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.33f, 0.33f, 0.33f, 0.8f));
+
                 if (ImGui::Button("Create##Comp"))
                 {
                     open = false;
-                    switch (selected)
-                    {
-                    case COMP_TRASNFORM:
+                    if (std::strcmp(datas[selected].c_str(), "Transform") == 0)
                     {
                         mEntity->addComponent<Transform>(tpos[1], tpos[0], size[0], size[1], r);
-                        break;
                     }
-                    case COMP_SPRITE:
+                    else if (std::strcmp(datas[selected].c_str(), "Sprite") == 0)
                     {
                         mEntity->addComponent<Sprite>("");
-                        break;
                     }
-                    case COMP_ANIMATE:
+                    else if (std::strcmp(datas[selected].c_str(), "Animate") == 0)
                     {
                         mEntity->addComponent<Animate>();
-                        break;
                     }
-                    default:
+                    else if (std::strcmp(datas[selected].c_str(), "TileMap") == 0)
                     {
                         mEntity->addComponent<TileMap>(32, 32);
                     }
-                    }
+                    save = true;
                 }
 
                 ImGui::SameLine();
@@ -450,7 +434,7 @@ namespace Plutus
         std::vector<std::string> datas;
         if (!mEntity->hasComponent<Transform>())
         {
-            datas.push_back("Trasnform");
+            datas.push_back("Transform");
         }
         if (!mEntity->hasComponent<Sprite>() && !mEntity->hasComponent<Animation>())
         {
@@ -458,7 +442,7 @@ namespace Plutus
         }
         if (!mEntity->hasComponent<Sprite>() && !mEntity->hasComponent<Animation>())
         {
-            datas.push_back("Animation");
+            datas.push_back("Animate");
         }
         if (datas.size() == 3)
         {

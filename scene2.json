@@ -1,0 +1,129 @@
+{
+    "textures": [
+        {
+            "id": "cave",
+            "path": "./assets/textures/goblin_cave.png",
+            "columns": 8,
+            "width": 32,
+            "height": 32
+        },
+        {
+            "id": "player",
+            "path": "./assets/textures/link.png",
+            "columns": 12,
+            "width": 24,
+            "height": 32
+        },
+        {
+            "id": "bg1",
+            "path": "./assets/textures/forest-zelda.png",
+            "columns": 0,
+            "width": 0,
+            "height": 0
+        }
+    ],
+    "layers": [
+        {
+            "name": "Layer0",
+            "entities": [
+                {
+                    "name": "tileMap1",
+                    "components": [
+                        {
+                            "name": "TileMap",
+                            "tilewidth": 32,
+                            "tileheight": 32,
+                            "tileset": "cave",
+                            "tiles": [
+                                {
+                                    "texId": 92,
+                                    "x": 13,
+                                    "y": 12,
+                                    "isSolid": false,
+                                    "rotate": 0.0
+                                },
+                                {
+                                    "texId": 84,
+                                    "x": 13,
+                                    "y": 13,
+                                    "isSolid": false,
+                                    "rotate": 0.0
+                                },
+                                {
+                                    "texId": 14,
+                                    "x": 21,
+                                    "y": 20,
+                                    "isSolid": false,
+                                    "rotate": 0.0
+                                },
+                                {
+                                    "texId": 7,
+                                    "x": 17,
+                                    "y": 20,
+                                    "isSolid": false,
+                                    "rotate": 0.0
+                                },
+                                {
+                                    "texId": 7,
+                                    "x": 18,
+                                    "y": 20,
+                                    "isSolid": false,
+                                    "rotate": 0.0
+                                },
+                                {
+                                    "texId": 7,
+                                    "x": 19,
+                                    "y": 20,
+                                    "isSolid": false,
+                                    "rotate": 0.0
+                                },
+                                {
+                                    "texId": 12,
+                                    "x": 20,
+                                    "y": 20,
+                                    "isSolid": false,
+                                    "rotate": 0.0
+                                },
+                                {
+                                    "texId": 12,
+                                    "x": 18,
+                                    "y": 22,
+                                    "isSolid": false,
+                                    "rotate": 0.0
+                                },
+                                {
+                                    "texId": 12,
+                                    "x": 16,
+                                    "y": 20,
+                                    "isSolid": false,
+                                    "rotate": 0.0
+                                },
+                                {
+                                    "texId": 72,
+                                    "x": 30,
+                                    "y": 18,
+                                    "isSolid": false,
+                                    "rotate": 0.0
+                                },
+                                {
+                                    "texId": 64,
+                                    "x": 30,
+                                    "y": 19,
+                                    "isSolid": false,
+                                    "rotate": 0.0
+                                },
+                                {
+                                    "texId": 20,
+                                    "x": 30,
+                                    "y": 20,
+                                    "isSolid": false,
+                                    "rotate": 0.0
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

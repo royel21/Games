@@ -13,7 +13,7 @@ namespace Plutus
 
 		void setMaxFPS(float maxFPS);
 		float getFPS() { return mFps; };
-		void begin();
+		double begin();
 		//return the fps
 		float end();
 
@@ -25,8 +25,9 @@ namespace Plutus
 		float mFrameTime;
 		float mAcumulator;
 		float mFrameCounter = 0;
-		const int FRAMESAMPLES = 30;
+		const int FRAMESAMPLES = 100;
 		int mCurrentSample = 0;
+		unsigned int mLastTick = 0;
 
 		///New Timer
 	};

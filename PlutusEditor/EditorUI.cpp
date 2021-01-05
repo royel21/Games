@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "IconsFontAwesome5.h"
 #include <algorithm>
+#include <filesystem>
 
 #include "Graphics/DebugRenderer.h"
 #include "Graphics/Camera2D.h"
@@ -32,6 +33,7 @@ namespace Plutus
 	}
 	EditorUI::~EditorUI()
 	{
+		saveRecents();
 		destroy();
 	}
 
@@ -93,6 +95,8 @@ namespace Plutus
 		mImGui_IO->Fonts->AddFontFromFileTTF("assets/fonts/fa-solid-900.ttf", 16.0f, &icons_config, icons_ranges);
 		// use FONT_ICON_FILE_NAME_FAR if you want regular instead of solid
 		mImGui_IO->Fonts->AddFontDefault();
+
+		loadRecents();
 	}
 
 	void EditorUI::beginUI()
@@ -334,9 +338,13 @@ namespace Plutus
 
 	void EditorUI::addRecent(const std::string &path)
 	{
-		if (std::find(mRecents.begin(), mRecents.end(), path) == mRecents.end())
+		auto found = std::find(mRecents.begin(), mRecents.end(), path);
+		if (found != mRecents.end())
+			mRecents.erase(found);
+		mRecents.insert(mRecents.begin(), path);
+		if (mRecents.size() > 10)
 		{
-			mRecents.push_back(path);
+			mRecents.pop_back();
 		}
 	}
 
@@ -479,7 +487,53 @@ namespace Plutus
 		std::string filePath;
 		if (Plutus::Utils::windowDialog(SAVE_FILE, filePath))
 		{
-			Plutus::Utils::toJsonFile(filePath, sr.sb.GetString());
+			Plutus::Utils::toJsonFile(filePath, sr.getString());
+		}
+	}
+
+	void EditorUI::saveRecents()
+	{
+		Plutus::Serializer sr;
+		auto writer = sr.getWriter();
+		auto cells = mDebugRender->getCellCount();
+		writer->StartObject();
+		writer->String("gridwidth");
+		writer->Int(cells.x);
+		writer->String("gridheight");
+		writer->Int(cells.y);
+		writer->String("recents");
+		writer->StartArray();
+		for (auto r : mRecents)
+		{
+			writer->String(r.c_str());
+		}
+		writer->EndArray();
+		writer->EndObject();
+		std::string path = std::filesystem::absolute("./peconfig.json").string();
+		Plutus::Utils::toJsonFile(path, sr.getString());
+	}
+
+	void EditorUI::loadRecents()
+	{
+		rapidjson::Document doc;
+		if (Utils::loadJson("./peconfig.json", &doc))
+		{
+			mDebugRender->setCellCount(doc["gridwidth"].GetInt(), doc["gridheight"].GetInt());
+			if (doc["recents"].IsArray())
+			{
+				auto arr = doc["recents"].GetArray();
+				std::cout << "aar S:" << arr.Size() << std::endl;
+				for (int i = 0; i < arr.Size(); i++)
+				{
+					mRecents.push_back(arr[i].GetString());
+					std::cout << arr[i].GetString() << std::endl;
+				}
+				if (mRecents.size())
+				{
+					mEntityEditor.loadScene(mRecents[0]);
+					std::cout << "load recent" << std::endl;
+				}
+			}
 		}
 	}
 

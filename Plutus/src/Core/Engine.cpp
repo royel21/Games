@@ -44,27 +44,41 @@ namespace Plutus
 		mIsRunning = true;
 		FpsLimiter limiter;
 
-		limiter.setMaxFPS(60.0f);
-		uint32_t lastTick = SDL_GetTicks();
+		// limiter.setMaxFPS(60.0f);
+
+		std::chrono::system_clock::time_point startTime, endTime;
+		endTime = startTime = std::chrono::system_clock::now();
 
 		while (mIsRunning)
 		{
-			limiter.begin();
-			auto newTick = SDL_GetTicks();
-			auto elapsed = newTick - lastTick;
-			float dt = 16.6667 / elapsed;
 
+			endTime = std::chrono::system_clock::now();
+			std::chrono::duration<float> elapsedTime = endTime - startTime;
+			startTime = endTime;
+
+			float fElapsedTime = elapsedTime.count();
+			mLastElapsed = fElapsedTime;
+
+			// float dt = limiter.begin();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			checkEvent();
-			update(dt);
+			update(mLastElapsed);
 
 			draw();
 
 			mWindow.swapBuffer();
-			limiter.end();
-			mFps = limiter.getFPS();
-			lastTick = newTick;
+			// limiter.end();
+			// mFps = limiter.getFPS();
+			// std::cout << "dt: " << dt << std::endl;
+			mFrameTime += fElapsedTime;
+			mnFrameTime++;
+			if (mFrameTime >= 1.0f)
+			{
+				mFps = mnFrameTime;
+				mFrameTime -= 1.0f;
+				mnFrameTime = 0;
+			}
 		}
 
 		mCurrentScreen->onExit();

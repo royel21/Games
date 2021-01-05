@@ -110,6 +110,9 @@ namespace Plutus
 		void EntityList();
 		void saveScene();
 		void newScene();
+
+		void saveRecents();
+		void loadRecents();
 	};
 
 } // namespace Plutus
