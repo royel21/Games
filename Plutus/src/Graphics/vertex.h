@@ -24,21 +24,17 @@ namespace Plutus
 
 	struct ColorRGBA8
 	{
+		GLuint rgba;
 		//Empty Constructor
-		ColorRGBA8() : r(255), g(255), b(255), a(255) {}
+		ColorRGBA8() : rgba(0xffffffff) {}
 
-		ColorRGBA8(GLubyte m_r, GLubyte m_g, GLubyte m_b, GLubyte m_a)
+		ColorRGBA8(GLubyte r, GLubyte g, GLubyte b, GLubyte a)
 		{
-			r = m_r;
-			g = m_g;
-			b = m_b;
-			a = m_a;
+			rgba = a << 24 | b << 16 | g << 8 | r;
 		}
-
-		GLubyte r;
-		GLubyte g;
-		GLubyte b;
-		GLubyte a;
+		GLuint get() { return rgba; };
+		void setColor(GLuint c) { rgba = c; }
+		void setColor(GLubyte r, GLubyte g, GLubyte b, GLubyte a) { rgba = a << 24 | b << 16 | g << 8 | r; };
 	};
 
 	struct Vertex
@@ -63,10 +59,7 @@ namespace Plutus
 
 		void setColor(GLubyte r, GLubyte g, GLubyte b, GLubyte a)
 		{
-			color.r = r;
-			color.g = g;
-			color.b = b;
-			color.a = a;
+			color.setColor(r, g, b, a);
 		}
 	};
 } // namespace Plutus

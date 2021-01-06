@@ -100,7 +100,8 @@ namespace Plutus
                             }
                             if (compType == "Sprite")
                             {
-                                entity->addComponent<Sprite>(component["texture"].GetString());
+                                auto spr = entity->addComponent<Sprite>(component["texture"].GetString());
+                                spr.mColor.setColor(component["color"].GetInt());
                                 continue;
                             }
                             if (compType == "Animation")

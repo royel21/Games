@@ -26,6 +26,8 @@ namespace Plutus
             writer->String("Sprite");
             writer->String("texture");
             writer->String(mTextureId.c_str());
+            writer->String("color");
+            writer->Int(mColor.get());
         }
         writer->EndObject();
     }
