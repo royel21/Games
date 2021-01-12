@@ -130,9 +130,13 @@ namespace Plutus
             {
                 auto sprite = mEntity->getComponent<Sprite>();
                 auto tilesets = mAManager->getTilesets();
+                auto color = sprite->mColor.rgba;
+                if (ImGui::ColorInt("Color", color))
+                {
+                    sprite->mColor.setColor(color);
+                }
 
                 static std::string selected = sprite->mTextureId;
-
                 static int sc = 100;
                 static float scale = 1.0f;
                 ImGui::PushItemWidth(100);

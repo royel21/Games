@@ -18,7 +18,7 @@ namespace Plutus
         bool mFlipX = false;
         bool mFlipY = false;
         float mRotation = 0.0f;
-        GLuint mTexId;
+        GLuint mTexId = 0;
 
     public:
         Sprite();

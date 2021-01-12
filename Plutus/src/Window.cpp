@@ -3,10 +3,10 @@
 #include "Window.h"
 #include "Log/Logger.h"
 
-extern "C"
-{
-	_declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-}
+// extern "C"
+// {
+// 	_declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+// }
 
 namespace Plutus
 {

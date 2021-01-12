@@ -84,7 +84,7 @@ namespace Plutus
 			for (auto tile : tiles)
 			{
 
-				glm::vec4 uv = tileset->getUV(tile.texId);
+				glm::vec4 uv = tileset->getUV(tile.texcoord);
 				float x = tile.x * w;
 				float y = tile.y * h;
 				glm::vec2 botL(x, y);

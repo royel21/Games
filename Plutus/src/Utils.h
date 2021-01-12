@@ -3,6 +3,7 @@
 #include "rapidjson/document.h"
 #include "Assets/IOManager.h"
 #include "glm/glm.hpp"
+#include <iostream>
 
 #define SAVE_FILE 0
 #define OPEN_FILE 1
@@ -18,6 +19,19 @@ namespace Plutus
 
     namespace Utils
     {
+        inline std::string getFileName(const std::string &filePath)
+        {
+            auto index = filePath.find_last_of('\\');
+            std::cout << index << std::endl;
+            if (index < -1)
+            {
+                return filePath.substr(index + 1, filePath.size());
+            }
+            else
+            {
+                return std::string("no found");
+            }
+        }
         //Get file extenxion
         inline std::string getExtension(const std::string &fileName)
         {

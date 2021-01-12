@@ -48,6 +48,7 @@ namespace Plutus
 		FrameBuffer mFb;
 		ImVec2 mViewportSize;
 		glm::vec4 mVPColor;
+		glm::vec4 mGridColor;
 		//Panels
 		EntityEditor mEntityEditor;
 		EntityManager *mEntManager;

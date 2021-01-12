@@ -10,6 +10,8 @@
 #include "SDL.h"
 #include "IconsFontAwesome5.h"
 
+#define IM_F4_2_I32COLOR(color) static_cast<int>(color[3] * 255) << 24 | static_cast<int>(color[2] * 255) << 16 | static_cast<int>(color[1] * 255) << 8 | static_cast<int>(color[0] * 255)
+
 namespace Plutus
 {
     inline bool compare(const glm::ivec2 &a, const glm::ivec2 &b)
@@ -265,5 +267,22 @@ namespace ImGui
             }
             return isSelected;
         }
+    }
+
+    inline bool ColorInt(const char *label, unsigned int &color)
+    {
+        bool change = false;
+        int r = color & 255;
+        int g = (color >> 8) & 255;
+        int b = (color >> 16) & 255;
+        int a = (color >> 24) & 255;
+
+        float mcolor[] = {r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f};
+        if (ImGui::ColorEdit4(label, mcolor))
+        {
+            color = IM_F4_2_I32COLOR(mcolor);
+            change = true;
+        }
+        return change;
     }
 } // namespace ImGui

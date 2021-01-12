@@ -9,6 +9,7 @@
 #include "Graphics/SpriteBatch2D.h"
 #include "Log/Logger.h"
 #include "Utils.h"
+#include "Assets/AssetManager.h"
 
 #define MODE_PLACE 0
 #define MODE_EDIT 1
@@ -21,6 +22,111 @@ namespace Plutus
         mEntManager = entManager;
     }
 
+    void TileMapPanel::addTexture(const char *label, bool &open, TileMap *tMap)
+    {
+        auto assestM = AssetManager::getInstance();
+        if (open)
+        {
+            ImGui::SetNextWindowSize(ImVec2(300.0f, 270.0f));
+
+            ImGui::OpenPopup(label);
+            static char name[128];
+            static std::string path = "", filename = "";
+            static TileSet *tilesheet = nullptr;
+            static int columns, tileWidth, tileHeight;
+
+            ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize;
+            if (ImGui::BeginPopupModal(label, NULL, window_flags))
+            {
+                ImGui::PushItemWidth(100);
+                ImGui::InputText("Name##modal", name, IM_ARRAYSIZE(name));
+                ImGui::SameLine();
+                static int selectedType = 0;
+                const std::vector<std::string> type{"Texture", "Tilesheet"};
+                ImGui::ComboBox("Type", type, selectedType);
+                ImGui::PopItemWidth();
+                ImGui::Separator();
+                if (ImGui::Button("Load From File"))
+                {
+                    if (Utils::windowDialog(OPEN_FILE, path))
+                    {
+                        filename = Utils::getFileName(path);
+                        std::cout << "Name: " << filename << "\n";
+                        auto ex = Utils::getExtension(path);
+                        if (ex.compare("png") != 0)
+                        {
+                            path = "";
+                        }
+                        else
+                        {
+
+                            if (selectedType == 1)
+                            {
+                                assestM->addTexture(name, path);
+                            }
+                            else
+                            {
+                                assestM->addTexture(name, path, columns, tileWidth, tileHeight);
+                            }
+                        }
+                    }
+                }
+                ImGui::SameLine();
+                ImGui::Text(filename.c_str());
+                static bool fromList = false;
+                ImGui::Checkbox("From List", &fromList);
+                if (fromList)
+                {
+                    auto textures = assestM->getTilesets();
+
+                    if (textures.size())
+                    {
+                        ImGui::Separator();
+                        static auto selected = textures.begin()->first;
+                        ImGui::ComboBox("Textures", textures, selected);
+                        tilesheet = &textures[selected];
+                        columns = tilesheet->columns;
+                        tileWidth = tilesheet->tileWidth;
+                        tileHeight = tilesheet->tileHeight;
+                        ZeroMemory(name, 128);
+                        strncpy(name, tilesheet->name.c_str(), tilesheet->name.size());
+                    }
+                }
+                ImGui::Separator();
+                if (selectedType == 1)
+                {
+                    ImGui::PushItemWidth(100);
+                    ImGui::InputInt("Columns", &columns);
+                    ImGui::InputInt("Tile Width", &tileWidth);
+                    ImGui::InputInt("Tile Height", &tileHeight);
+                    ImGui::PopItemWidth();
+                    ImGui::Separator();
+                }
+                auto pos = ImGui::GetContentRegionAvail();
+                ImGui::SetCursorPos(ImVec2(195.0f, 240.0f));
+                if (ImGui::Button("save##modal"))
+                {
+                    std::string texName(name);
+                    if (!texName.empty())
+                    {
+                        mTileMap->mTextures.push_back(assestM->getTexture(name));
+                        open = false;
+                        filename = "";
+                        path = "";
+                        selectedType = 0;
+                        columns = 0;
+                        tileWidth = 0;
+                        tileHeight = 0;
+                    }
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Close##modal"))
+                    open = false;
+
+                ImGui::EndPopup();
+            }
+        }
+    }
     void TileMapPanel::draw(TileMap *tileMap)
     {
         mTileMap = tileMap;
@@ -49,22 +155,39 @@ namespace Plutus
             }
 
             ImGui::PopItemWidth();
-            auto assets = AssetManager::getInstance();
-            static std::string currentTS = mTileMap->mTileset != nullptr ? mTileMap->mTileset->name : "";
-            if (ImGui::ComboBox("TileSheet", assets->getTilesets(), currentTS))
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0.0f));
+            if (ImGui::Button(ICON_FA_PLUS_CIRCLE " ##add-tilesheet"))
             {
-                mTileMap->mTileset = assets->getTexture(currentTS);
+                mShowAddModal = true;
             }
-            ImGui::Separator();
+            ImGui::PopStyleColor();
+            if (mShowAddModal)
+            {
+                addTexture("Add Texture To TileMap", mShowAddModal, mTileMap);
+            }
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0.0f));
+            if (ImGui::Button(ICON_FA_TRASH_ALT " ##remove-tilesheet"))
+            {
+            }
+            ImGui::PopStyleColor();
+            ImGui::SameLine();
+            if (mTileMap->mTextures.size() > 0)
+            {
+                ImGui::PushItemWidth(110);
 
-            ImGui::RadioButton("Place", &mMode, MODE_PLACE);
-            ImGui::SameLine();
-            ImGui::RadioButton("Edit", &mMode, MODE_EDIT);
-            ImGui::SameLine();
-            ImGui::RadioButton("Remove", &mMode, MODE_REMOVE);
-            ImGui::Separator();
-            if (mTileMap->mTileset != nullptr)
-                ImGui::TileSet(mTileMap->mTileset, 1, mTempTiles);
+                ImGui::ComboBox<TileSet>("TileSheet##mttexture", mTileMap->mTextures, mCurrentTexture);
+                ImGui::PopItemWidth();
+                ImGui::Separator();
+
+                ImGui::RadioButton("Place", &mMode, MODE_PLACE);
+                ImGui::SameLine();
+                ImGui::RadioButton("Edit", &mMode, MODE_EDIT);
+                ImGui::SameLine();
+                ImGui::RadioButton("Remove", &mMode, MODE_REMOVE);
+                ImGui::Separator();
+                ImGui::TileSet(mTileMap->mTextures[mCurrentTexture], 1, mTempTiles);
+            }
         }
     }
 
@@ -75,7 +198,7 @@ namespace Plutus
             std::vector<Tile> tiles;
             for (auto tile : mTempTiles)
             {
-                tiles.emplace_back(mCoords.x + tile.x, mCoords.y + tile.y, tile.z, mRotation);
+                tiles.emplace_back(mCoords.x + tile.x, mCoords.y + tile.y, tile.z, mCurrentTexture, mRotation);
             }
             renderer->begin(1);
             renderer->submit(mTileMap->mTileWidth, mTileMap->mTileHeight, tiles, mTileMap->mTileset);
@@ -106,11 +229,11 @@ namespace Plutus
             rotation = LIMIT(rotation, 0.0f, 360.0f);
             mCurrentTile->rotate = rotation;
         }
-        int texId = mCurrentTile->texId;
-        if (ImGui::InputInt("Texture##ctile", &texId, 1))
+        int texcoord = mCurrentTile->texcoord;
+        if (ImGui::InputInt("Texture##ctile", &texcoord, 1))
         {
-            texId = LIMIT(texId, 0, mTileMap->mTileset->totalTiles - 1);
-            mCurrentTile->texId = texId;
+            texcoord = LIMIT(texcoord, 0, mTileMap->mTileset->totalTiles - 1);
+            mCurrentTile->texcoord = texcoord;
         }
     }
 
@@ -129,12 +252,12 @@ namespace Plutus
                 {
                     tiles->push_back(tile);
                 }
-                else if (mTileMap->mTiles[index].texId != tile.texId)
+                else if (mTileMap->mTiles[index].texcoord != tile.texcoord)
                 {
                     mTileMap->mTiles[index] = tile;
                 }
             }
-            LOG_I("tiles {0}", tiles->size());
+
             break;
         }
         case MODE_EDIT:

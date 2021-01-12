@@ -21,14 +21,21 @@ namespace Plutus
     }
     void loadTileMap(Entity *ent, rapidjson::Value::Object &value)
     {
+        auto assetManager = AssetManager::getInstance();
         int w = value["tilewidth"].GetInt();
         int h = value["tileheight"].GetInt();
         auto tileset = value["tileset"].GetString();
         auto &tmap = ent->addComponent<TileMap>(w, h);
-        tmap.mTileset = AssetManager::getInstance()->getTexture(tileset);
+        tmap.mTileset = assetManager->getTexture(tileset);
 
+        auto textures = value["textures"].GetArray();
+        for (size_t i = 0; i < textures.Size(); i++)
+        {
+            auto tex = textures[0].GetString();
+            tmap.mTextures.push_back(assetManager->getTexture(tex));
+        }
         auto tiles = value["tiles"].GetArray();
-        std::cout << tiles.Size() << std::endl;
+
         for (size_t i = 0; i < tiles.Size(); i++)
         {
             auto tile = tiles[i].GetJsonObject();

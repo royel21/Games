@@ -7,6 +7,8 @@
 #include "IGameScreen.h"
 #include "ScreenList.h"
 
+#define FPS_PER_SEC 1000.0f / 60.0f
+
 namespace Plutus
 {
 	Engine::Engine(const char *winName, int screenWidth, int screenHeight) : mWinName(winName), mScreenWidth(screenWidth), mScreenHeight(screenHeight)
@@ -42,9 +44,6 @@ namespace Plutus
 			return;
 
 		mIsRunning = true;
-		FpsLimiter limiter;
-
-		// limiter.setMaxFPS(60.0f);
 
 		std::chrono::system_clock::time_point startTime, endTime;
 		endTime = startTime = std::chrono::system_clock::now();
@@ -59,7 +58,11 @@ namespace Plutus
 			float fElapsedTime = elapsedTime.count();
 			mLastElapsed = fElapsedTime;
 
-			// float dt = limiter.begin();
+			int elapsed = (int)(FPS_PER_SEC - (fElapsedTime * 1000.0f));
+			if (elapsed > 0 && elapsed <= FPS_PER_SEC)
+			{
+				SDL_Delay(elapsed);
+			}
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			checkEvent();
@@ -68,9 +71,6 @@ namespace Plutus
 			draw();
 
 			mWindow.swapBuffer();
-			// limiter.end();
-			// mFps = limiter.getFPS();
-			// std::cout << "dt: " << dt << std::endl;
 			mFrameTime += fElapsedTime;
 			mnFrameTime++;
 			if (mFrameTime >= 1.0f)

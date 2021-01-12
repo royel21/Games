@@ -34,13 +34,13 @@ int EditorScreen::getPrevScreentIndex() const
 void EditorScreen::build()
 {
     mInputManager = Plutus::InputManager::getInstance();
-    mCamera.init(640, 320);
+    mCamera.init(810, 592);
     mCamera.update();
 
     mEntManager.setCamera(&mCamera);
     mEntManager.init();
 
-    mTextLayer.Init(mEngine->getWindow(), 640, 320, "./assets/fonts/Zoika.ttf", 28);
+    mTextLayer.Init(mEngine->getWindow(), 810, 592, "./assets/fonts/Zoika.ttf", 28);
 
     // auto amanager = Plutus::AssetManager::getInstance();
     // //"player", 12, 24, 32, "./assets/textures/link.png"
@@ -49,10 +49,10 @@ void EditorScreen::build()
 
     // auto bg1 = amanager->addTexture("bg1", "./assets/textures/forest-zelda.png");
 
-    auto ent = mEntManager.addEntity("bg1");
-    ent->addComponent<Plutus::Transform>(0.0f, 0.0f, 64.0f, 64.0f);
-    auto sprite = ent->addComponent<Plutus::Sprite>("");
-    sprite.mColor = Plutus::ColorRGBA8(255, 0, 0, 1);
+    // auto ent = mEntManager.addEntity("bg1");
+    // ent->addComponent<Plutus::Transform>(0.0f, 0.0f, 64.0f, 64.0f);
+    // auto sprite = ent->addComponent<Plutus::Sprite>("");
+    // sprite.mColor = Plutus::ColorRGBA8(255, 0, 0, 255);
 
     // auto ent2 = mEntManager.addEntity("tileMap1");
     // ent2->addComponent<Plutus::TileMap>();

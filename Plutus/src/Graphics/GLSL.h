@@ -32,8 +32,8 @@ void main() {
 const char *fragShader2 =
     R"END(#version 330 core
 in vec2 fragmentPosition;
-in vec4 fragmentColor;
 in vec2 fragmentUV;
+in vec4 fragmentColor;
 
 out vec4 color;
 uniform int hasTexture = 0;

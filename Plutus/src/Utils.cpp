@@ -12,9 +12,8 @@ namespace Plutus
     {
         bool windowDialog(int mode, std::string &path)
         {
-
             OPENFILENAME ofn;
-            char *FilterSpec = "Json Files(*.json)\0*.json\0All Files(*.*)\0*.*\0";
+            char *FilterSpec = "All Files(*.*)\0*.*\0";
             char *Title = "Open....";
             char szFileName[MAX_PATH];
             char szFileTitle[MAX_PATH];

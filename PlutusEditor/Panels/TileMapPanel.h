@@ -21,7 +21,9 @@ namespace Plutus
         std::vector<glm::ivec3> mTempTiles;
         TileMap *mTileMap = nullptr;
         Tile *mCurrentTile = nullptr;
+        int mCurrentTexture = 0;
         float mRotation = 0;
+        bool mShowAddModal = false;
 
     public:
         TileMapPanel() = default;
@@ -34,5 +36,6 @@ namespace Plutus
     private:
         static bool compare(const glm::ivec2 &a, const glm::ivec2 &b);
         void tileProps();
+        void addTexture(const char *label, bool &open, TileMap *tMap);
     };
 } // namespace Plutus

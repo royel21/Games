@@ -4,6 +4,15 @@
 
 namespace Plutus
 {
+
+    void TileMap::addTexture()
+    {
+    }
+
+    void TileMap::removeTexture()
+    {
+    }
+
     void TileMap::serialize(Serializer &serializer)
     {
         auto writer = serializer.getWriter();
@@ -18,6 +27,15 @@ namespace Plutus
             //Array of tileset name
             writer->String("tileset");
             writer->String(mTileset->name.c_str());
+
+            //Array of textures
+            writer->String("textures");
+            writer->StartArray();
+            for (auto tex : mTextures)
+            {
+                writer->String(tex->name.c_str());
+            }
+            writer->EndArray();
             //Tiles Array
             writer->String("tiles");
             writer->StartArray();
@@ -27,16 +45,20 @@ namespace Plutus
                     //Tile OBJ
                     writer->StartObject();
                     {
-                        writer->String("texId");
-                        writer->Int(tile.texId);
+                        writer->String("t");
+                        writer->Int(tile.texcoord);
+                        writer->String("tx");
+                        writer->Int(tile.texture);
                         writer->String("x");
                         writer->Int(tile.x);
                         writer->String("y");
                         writer->Int(tile.y);
-                        writer->String("isSolid");
+                        writer->String("s");
                         writer->Bool(tile.isSolid);
-                        writer->String("rotate");
+                        writer->String("r");
                         writer->Double(tile.rotate);
+                        writer->String("c");
+                        writer->Int(tile.color);
                     }
                     writer->EndObject();
                 }

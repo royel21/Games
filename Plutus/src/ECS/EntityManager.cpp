@@ -74,6 +74,15 @@ namespace Plutus
 		}
 	}
 
+	void EntityManager::startDraw()
+	{
+		mShader.enable();
+		glActiveTexture(GL_TEXTURE0);
+		mShader.setUniform1i("hasTexture", 0);
+		mShader.setUniform1i("mySampler", 0);
+		mShader.setUniformMat4("camera", mCamera->getCameraMatrix());
+	}
+
 	void EntityManager::draw()
 	{
 		for (auto &layer : mLayers)
@@ -84,11 +93,11 @@ namespace Plutus
 				mSpriteBath2D.begin(entCount);
 				for (auto &entity : layer.second.entities)
 				{
-					// auto tileMap = entity->getComponent<TileMap>();
-					// if (tileMap)
-					// {
-					// 	mSpriteBath2D.submit(tileMap->mTileWidth, tileMap->mTileHeight, tileMap->mTiles, tileMap->mTileset);
-					// }
+					auto tileMap = entity->getComponent<TileMap>();
+					if (tileMap)
+					{
+						mSpriteBath2D.submit(tileMap->mTileWidth, tileMap->mTileHeight, tileMap->mTiles, tileMap->mTileset);
+					}
 
 					auto sprite = entity->getComponent<Sprite>();
 					if (sprite)
@@ -242,14 +251,5 @@ namespace Plutus
 		writer->EndArray();
 
 		writer->EndObject();
-	}
-
-	void EntityManager::startDraw()
-	{
-		mShader.enable();
-		glActiveTexture(GL_TEXTURE0);
-		mShader.setUniform1i("hasTexture", 0);
-		mShader.setUniform1i("mySampler", 0);
-		mShader.setUniformMat4("camera", mCamera->getCameraMatrix());
 	}
 } // namespace Plutus

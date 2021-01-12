@@ -1,17 +1,17 @@
 {
     "textures": [
         {
-            "id": "cave",
-            "path": "./assets/textures/goblin_cave.png",
-            "columns": 8,
-            "width": 32,
-            "height": 32
-        },
-        {
             "id": "player",
             "path": "./assets/textures/link.png",
             "columns": 12,
             "width": 24,
+            "height": 32
+        },
+        {
+            "id": "cave",
+            "path": "./assets/textures/goblin_cave.png",
+            "columns": 8,
+            "width": 32,
             "height": 32
         },
         {
@@ -34,6 +34,7 @@
                             "tilewidth": 32,
                             "tileheight": 32,
                             "tileset": "cave",
+                            "textures": [],
                             "tiles": [
                                 {
                                     "texId": 92,

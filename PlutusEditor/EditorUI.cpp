@@ -180,7 +180,7 @@ namespace Plutus
 		ImGui::Begin("ViewPort Controls");
 		ImGui::Columns(3, NULL, true);
 		ImGui::Text("ViewPort Props");
-		ImGui::PushItemWidth(100);
+		ImGui::PushItemWidth(150);
 		static auto size = mFb.getSize();
 		if (ImGui::InputFloat("Zoom##vp", &mVPScale, 0.05))
 		{
@@ -188,12 +188,12 @@ namespace Plutus
 			// mCamera->setScale(scale);
 			// mFb.resize(size * scale);
 		}
-		// ImGui::SameLine();
-		// static int height = static_cast<int>(size.y);
-		// if (ImGui::InputInt("Height", &height))
-		// {
-		// 	mFb.resize(size.x, height);
-		// }
+
+		static float bg[] = {mVPColor.x, mVPColor.y, mVPColor.z, mVPColor.w};
+		if (ImGui::ColorEdit4("VP BG", bg, ImGuiColorEditFlags_AlphaBar))
+		{
+			mVPColor = glm::vec4(bg[0], bg[1], bg[2], bg[3]);
+		}
 		ImGui::PopItemWidth();
 		ImGui::NextColumn();
 		ImGui::Text("Camera Control");
@@ -209,12 +209,6 @@ namespace Plutus
 			if (ImGui::Button("Reset ##cam"))
 			{
 				mCamera->setPosition(glm::vec2(0, 0));
-			}
-
-			static float bg[] = {mVPColor.x, mVPColor.y, mVPColor.z, mVPColor.w};
-			if (ImGui::ColorEdit4("VP BG", bg, ImGuiColorEditFlags_AlphaBar))
-			{
-				mVPColor = glm::vec4(bg[0], bg[1], bg[2], bg[3]);
 			}
 		}
 		ImGui::NextColumn();
@@ -245,10 +239,14 @@ namespace Plutus
 			}
 			mDebugRender->setCellSize(cellS.x, cellS.y);
 
-			static float color[] = {0, 0, 0, 1.0f};
+			float color[] = {mGridColor.x, mGridColor.y, mGridColor.z, mGridColor.w};
 			if (ImGui::ColorEdit3("Grid Color", color))
 			{
 				mDebugRender->setColor(ColorRGBA8(color[0] * 255, color[1] * 255, color[1] * 255, 255));
+				mGridColor.x = color[0];
+				mGridColor.y = color[1];
+				mGridColor.z = color[2];
+				mGridColor.w = color[3];
 			}
 
 			ImGui::Separator();
@@ -490,18 +488,36 @@ namespace Plutus
 			Plutus::Utils::toJsonFile(filePath, sr.getString());
 		}
 	}
-
+	void addColor(Plutus::Serializer *sr, const char *label, const glm::vec4 &color)
+	{
+		auto writer = sr->getWriter();
+		writer->String(label);
+		writer->StartArray();
+		writer->Double(color.x);
+		writer->Double(color.y);
+		writer->Double(color.z);
+		writer->Double(color.w);
+		writer->EndArray();
+	}
 	void EditorUI::saveRecents()
 	{
 		Plutus::Serializer sr;
 		auto writer = sr.getWriter();
-		auto cells = mDebugRender->getCellCount();
+		auto cellsCount = mDebugRender->getCellCount();
+		auto cellSize = mDebugRender->getCellSize();
 		writer->StartObject();
 		writer->String("gridwidth");
-		writer->Int(cells.x);
+		writer->Int(cellsCount.x);
 		writer->String("gridheight");
-		writer->Int(cells.y);
+		writer->Int(cellsCount.y);
+		writer->String("CellCountX");
+		writer->Int(cellSize.x);
+		writer->String("CellCountY");
+		writer->Int(cellSize.y);
+		addColor(&sr, "vp-color", mVPColor);
+		addColor(&sr, "cell-color", mGridColor);
 		writer->String("recents");
+
 		writer->StartArray();
 		for (auto r : mRecents)
 		{
@@ -513,12 +529,34 @@ namespace Plutus
 		Plutus::Utils::toJsonFile(path, sr.getString());
 	}
 
+	void initColor(const rapidjson::Document &doc, const char *label, glm::vec4 &color)
+	{
+		if (doc.HasMember(label))
+		{
+			auto arr = doc[label].GetArray();
+			color.x = arr[0].GetDouble();
+			color.y = arr[1].GetDouble();
+			color.z = arr[2].GetDouble();
+			color.w = arr[3].GetDouble();
+		}
+	}
+
 	void EditorUI::loadRecents()
 	{
 		rapidjson::Document doc;
 		if (Utils::loadJson("./peconfig.json", &doc))
 		{
-			mDebugRender->setCellCount(doc["gridwidth"].GetInt(), doc["gridheight"].GetInt());
+			if (doc.HasMember("gridwidth"))
+			{
+				mDebugRender->setCellCount(doc["gridwidth"].GetInt(), doc["gridheight"].GetInt());
+			}
+			if (doc.HasMember("CellCountX"))
+			{
+				mDebugRender->setCellSize(doc["CellCountX"].GetInt(), doc["CellCountY"].GetInt());
+			}
+			initColor(doc, "vp-color", mVPColor);
+			initColor(doc, "cell-color", mGridColor);
+
 			if (doc["recents"].IsArray())
 			{
 				auto arr = doc["recents"].GetArray();
