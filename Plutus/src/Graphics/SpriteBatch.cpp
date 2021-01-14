@@ -15,8 +15,8 @@ namespace Plutus
 	{
 		if (angle == 0)
 		{
-			topLeft.setPosition(destRec.x, destRec.y + destRec.w);
 			bottomLeft.setPosition(destRec.x, destRec.y);
+			topLeft.setPosition(destRec.x, destRec.y + destRec.w);
 			bottomRight.setPosition(destRec.x + destRec.z, destRec.y);
 			topRight.setPosition(destRec.x + destRec.z, destRec.y + destRec.w);
 		}
@@ -34,8 +34,8 @@ namespace Plutus
 			br = rotatePoint(br, angle) + halfDim;
 			tr = rotatePoint(tr, angle) + halfDim;
 
-			topLeft.setPosition(destRec.x + tl.x, destRec.y + tl.y);
 			bottomLeft.setPosition(destRec.x + bl.x, destRec.y + bl.y);
+			topLeft.setPosition(destRec.x + tl.x, destRec.y + tl.y);
 			bottomRight.setPosition(destRec.x + br.x, destRec.y + br.y);
 			topRight.setPosition(destRec.x + tr.x, destRec.y + tr.y);
 		}
@@ -43,8 +43,8 @@ namespace Plutus
 		texture = m_texture;
 		depth = m_depth;
 
-		topLeft.color = color;
 		bottomLeft.color = color;
+		topLeft.color = color;
 		bottomRight.color = color;
 		topRight.color = color;
 
