@@ -22,7 +22,7 @@ namespace Plutus
         bool hasComponent();
 
         template <typename T, typename... Args>
-        T &addComponent(Args &&... args);
+        T &addComponent(Args &&...args);
 
         template <typename T>
         T &getComponent();
@@ -32,6 +32,7 @@ namespace Plutus
 
         entt::entity getEntityId() const { return mId; }
         operator bool() const { return mId != entt::null; }
+        operator entt::entity &() { return &mId }
 
     private:
         entt::entity mId{entt::null};
@@ -83,7 +84,7 @@ namespace Plutus
     }
 
     template <typename T, typename... Args>
-    T Entity::&addComponent(Args &&... args)
+    T Entity::&addComponent(Args &&...args)
     {
         assert(!hasComponent<T>() && "Entity already has component!");
         return mScene->mRegistry.emplace<T>(mId, std::forward<Args>(args)...);
