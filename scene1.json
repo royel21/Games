@@ -1,13 +1,6 @@
 {
     "textures": [
         {
-            "id": "player",
-            "path": "./assets/textures/link.png",
-            "columns": 12,
-            "width": 24,
-            "height": 32
-        },
-        {
             "id": "cave",
             "path": "./assets/textures/goblin_cave.png",
             "columns": 8,
@@ -15,11 +8,11 @@
             "height": 32
         },
         {
-            "id": "",
-            "path": "",
-            "columns": 0,
-            "width": 0,
-            "height": 0
+            "id": "player",
+            "path": "./assets/textures/link.png",
+            "columns": 12,
+            "width": 24,
+            "height": 32
         },
         {
             "id": "bg1",
@@ -48,7 +41,9 @@
                             "tilewidth": 54,
                             "tileheight": 37,
                             "tileset": "cave",
-                            "textures": [],
+                            "textures": [
+                                "cave"
+                            ],
                             "tiles": [
                                 {
                                     "t": 194,
@@ -957,8 +952,8 @@
                             "name": "Transform",
                             "x": 356,
                             "y": 36,
-                            "w": 100,
-                            "h": 25
+                            "w": 25,
+                            "h": 100
                         },
                         {
                             "name": "Sprite",

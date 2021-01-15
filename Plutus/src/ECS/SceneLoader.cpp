@@ -41,11 +41,13 @@ namespace Plutus
             auto tile = tiles[i].GetJsonObject();
             int x = tile["x"].GetInt();
             int y = tile["y"].GetInt();
-            int texId = tile["texId"].GetInt();
-            bool isSolid = tile["isSolid"].GetBool();
-            float rotate = tile["rotate"].GetFloat();
+            int t = tile["t"].GetInt();
+            int tx = tile["tx"].GetInt();
+            bool s = tile["s"].GetBool();
+            float rotate = tile["r"].GetFloat();
+            int color = tile["c"].GetInt();
 
-            tmap.mTiles.emplace_back(x, y, texId, rotate, isSolid);
+            tmap.mTiles.emplace_back(x, y, t, tx, rotate, s, color);
         }
     }
 

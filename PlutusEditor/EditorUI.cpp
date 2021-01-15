@@ -27,7 +27,7 @@ namespace Plutus
 {
 	EditorUI *EditorUI::mInstance = nullptr;
 
-	EditorUI::EditorUI() : mVPColor(1, 1, 1, 1)
+	EditorUI::EditorUI() : mVPColor(1, 1, 1, 1), mGridColor(0)
 	{
 		mInputManager = InputManager::getInstance();
 	}
@@ -525,7 +525,7 @@ namespace Plutus
 		}
 		writer->EndArray();
 		writer->EndObject();
-		std::string path = std::filesystem::absolute("./peconfig.json").string();
+		std::string path = std::filesystem::absolute("./pe-config.json").string();
 		Plutus::Utils::toJsonFile(path, sr.getString());
 	}
 
@@ -544,7 +544,7 @@ namespace Plutus
 	void EditorUI::loadRecents()
 	{
 		rapidjson::Document doc;
-		if (Utils::loadJson("./peconfig.json", &doc))
+		if (Utils::loadJson("./pe-config.json", &doc))
 		{
 			if (doc.HasMember("gridwidth"))
 			{

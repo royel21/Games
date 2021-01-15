@@ -1,0 +1,21 @@
+{
+    "gridwidth": 15,
+    "gridheight": 16,
+    "CellCountX": 54,
+    "CellCountY": 37,
+    "vp-color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "cell-color": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "recents": [
+        "C:\\vs-projects\\Games\\scene1.json"
+    ]
+}
