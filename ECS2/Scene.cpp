@@ -35,19 +35,7 @@ namespace Plutus
 
     void Scene::update()
     {
-        // auto view = mRegistry.view<Transform>();
-
-        // for (auto entity : view)
-        // {
-        //     // a  at a time ...
-        //     auto &trans = view.get<Transform>(entity);
-        //     trans.position += 2;
-        //     if (trans.position.x > mCamera.getScaleScreen().x / 2)
-        //     {
-        //         trans.position.x = mCamera.getScaleScreen().x / 2 * -1;
-        //         trans.position.y = mCamera.getScaleScreen().y / 2 * -1;
-        //     }
-        // }
+       
     }
 
     Entity Scene::createEntity(const std::string &name)
@@ -72,57 +60,7 @@ namespace Plutus
 
     void Scene::draw()
     {
-        mShader.enable();
-        glClearDepth(1.0f);
-        mShader.setUniform1i("hasTexture", 0);
-        mShader.setUniform1i("mySampler", 0);
-        mShader.setUniformMat4("camera", mCamera->getCameraMatrix());
-        // uint32_t start = SDL_GetTicks();
-        for (auto layer : mLayers)
-        {
-            if (layer.second.isVisible)
-            {
-                renderer.begin(layer.second.entities.size());
-                for (auto ent : layer.second.entities)
-                {
-                    auto trans = mRegistry.get<Transform>(ent.getEntityId());
-                    auto sprite = mRegistry.get<Sprite>(ent.getEntityId());
-                    sprite.mPosition = trans.position;
-                    sprite.mSize = trans.size;
-                    renderer.submit(&sprite);
-                }
-                renderer.end();
-            }
-        }
-        // LOG_I("time: {0}", SDL_GetTicks() - start);
-        // auto group = mRegistry.group<Transform, Sprite>();
-
-        // renderer.begin(group.size());
-
-        // uint32_t start = SDL_GetTicks();
-        // for (auto entity : group)
-        // {
-        //     auto &[trans, sprite] = group.get<Transform, Sprite>(entity);
-        //     sprite.mPosition = trans.position;
-        //     sprite.mSize = trans.size;
-        //     renderer.submit(&sprite);
-        // }
-        // renderer.end();
-        // LOG_I("time: {0}", SDL_GetTicks() - start);
-
-        // renderer2.begin();
-
-        // for (auto entity : group)
-        // {
-        //     auto &[trans, text] = group.get<Transform, Sprite>(entity);
-
-        //     auto pos = glm::vec4(trans.position.x, trans.position.y, trans.size.x, trans.size.y);
-
-        //     renderer2.draw(pos, text.mUVCoord, text.mColor, text.mTextureId);
-        // }
-        // renderer2.end();
-
-        mShader.disable();
+        
     }
 
     void Scene::Serialize(Serializer &ser)
@@ -173,10 +111,3 @@ namespace Plutus
         writer->EndObject();
     }
 } // namespace Plutus
-
-//
-// writer->String("texId");
-// writer->Int(tile.x);
-// writer->StartArray();
-// writer->EndArray();
-//
