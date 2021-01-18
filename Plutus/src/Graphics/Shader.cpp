@@ -99,9 +99,7 @@ namespace Plutus
 		GLuint location = glGetUniformLocation(m_progId, uName.c_str());
 		if (location == 0xFFFFFFFFu)
 		{
-#ifdef _DEBUG
 			LOG_E("Location {0} no found \n", uName);
-#endif
 			return -1;
 		}
 		uniformLocationsMap[uName] = location;

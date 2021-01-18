@@ -1,22 +1,22 @@
 #pragma once
 
-#include <unordered_map>
-#include <cstring>
 #include <memory>
-#include "entt.hpp"
-#include "Graphics/SpriteBatch2D.h"
-#include "Graphics/SpriteBatch.h"
-#include "Graphics/Shader.h"
-#include "Graphics/Camera2D.h"
+#include <cstring>
+#include <entt.hpp>
+#include <unordered_map>
 
 namespace Plutus
 {
     class Serializer;
+    class Scene;
+    class Camera2D;
+    class SpriteBatch2D;
+    class Shader;
 
-    class Entity
+    class Entity2
     {
     public:
-        Entity(entt::entity ent, Scene *scene) : mId(ent), mScene(scene) {}
+        Entity2(entt::entity ent, Scene *scene) : mId(ent), mScene(scene) {}
 
         template <typename T>
         bool hasComponent();
@@ -32,18 +32,18 @@ namespace Plutus
 
         entt::entity getEntityId() const { return mId; }
         operator bool() const { return mId != entt::null; }
-        operator entt::entity &() { return &mId }
+        operator entt::entity() const { return mId; }
 
     private:
         entt::entity mId{entt::null};
         Scene *mScene;
     };
 
-    struct Layer
+    struct Layer2
     {
         bool isVisible = true;
         std::string name;
-        std::vector<Entity> entities;
+        std::vector<Entity2> entities;
     };
 
     class Scene
@@ -52,55 +52,52 @@ namespace Plutus
         Scene();
         ~Scene();
         void Init(Camera2D *camera);
-        void update();
-        Entity createEntity(const std::string &name);
+        Entity2 createEntity(const std::string &name);
 
         void setCurrentLayer(const std::string &name) { mCurrentLayer = &mLayers[name]; };
-        std::unordered_map<std::string, Layer> &getLayers() { return mLayers; };
+        std::unordered_map<std::string, Layer2> &getLayers() { return mLayers; };
 
-        Layer *addLayer(const std::string name);
-        Layer *getLayer(const std::string &name);
-        Layer *getCurrentLayer() { return mCurrentLayer; }
+        Layer2 *addLayer(const std::string name);
+        Layer2 *getLayer(const std::string &name);
+        Layer2 *getCurrentLayer() { return mCurrentLayer; }
         const entt::registry *getRegistry() { return &mRegistry; }
 
-        void Serialize(Serializer &serializer);
         void draw();
 
     private:
-        std::unordered_map<std::string, Layer> mLayers;
-        Layer *mCurrentLayer;
+        std::unordered_map<std::string, Layer2> mLayers;
+        Layer2 *mCurrentLayer;
         entt::registry mRegistry;
-        SpriteBatch2D renderer;
-        SpriteBatch renderer2;
-        Shader mShader;
-        Camera2D *mCamera;
-        friend class Entity;
+        Shader *mShader = nullptr;
+        SpriteBatch2D *mRenderer = nullptr;
+        Camera2D *mCamera = nullptr;
+        friend class Entity2;
     };
 
     template <typename T>
-    bool Entity::hasComponent()
+    bool Entity2::hasComponent()
     {
         return mScene->mRegistry.has<T>(mId);
     }
 
     template <typename T, typename... Args>
-    T Entity::&addComponent(Args &&...args)
+    T &Entity2::addComponent(Args &&...args)
     {
-        assert(!hasComponent<T>() && "Entity already has component!");
+        assert(!hasComponent<T>() && "Entity2 already has component!");
         return mScene->mRegistry.emplace<T>(mId, std::forward<Args>(args)...);
     }
 
     template <typename T>
-    T Entity::&getComponent()
+    T &Entity2::getComponent()
     {
-        assert(hasComponent<T>() && "Entity does not has component!");
+        assert(hasComponent<T>() && "Entity2 does not has component!");
         return mScene->mRegistry.get<T>(mId);
     }
 
     template <typename T>
-    bool Entity::removeComponent()
+    bool Entity2::removeComponent()
     {
-        assert(hasComponent<T>() && "Entity does not has component!");
+        assert(hasComponent<T>() && "Entity2 does not has component!");
         return mScene->mRegistry.remove<T>(mEntityId);
     }
 } // namespace Plutus

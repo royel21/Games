@@ -15,5 +15,6 @@ public:
     ~App();
     void addScreen() override;
     void onInit() override;
+    void onEvent(SDL_Event &event) override;
     void onExit() override;
 };

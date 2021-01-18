@@ -80,6 +80,7 @@ namespace Plutus
 		glActiveTexture(GL_TEXTURE0);
 		mShader.setUniform1i("hasTexture", 0);
 		mShader.setUniform1i("mySampler", 0);
+		mShader.setUniform2f("offset", {0, 0});
 		mShader.setUniformMat4("camera", mCamera->getCameraMatrix());
 	}
 

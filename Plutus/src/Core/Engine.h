@@ -43,6 +43,7 @@ namespace Plutus
         //Called on a the start of the window creation use for initialization
         virtual void onInit() = 0;
         //Called on window exit used for release all allocate resource
+        virtual void onEvent(SDL_Event &event) = 0;
         virtual void onExit() = 0;
 
         const float getFPS() const { return mFps; }
@@ -60,14 +61,15 @@ namespace Plutus
         }
 
     private:
-        bool update(float dt);
         bool init();
-
+        bool update(float dt);
         void draw();
-
         void sysEvents(SDL_Event &event);
         void checkEvent();
         void exitGame();
+        void cleanup();
+
+    private:
         float mLastElapsed = 0.0f;
         float mFrameTime = 1.0f;
         int mnFrameTime = 0;

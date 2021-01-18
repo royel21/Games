@@ -24,14 +24,6 @@ namespace Plutus
 	struct Tile;
 	struct TileSet;
 
-	struct Glyph
-	{
-		Vertex BL;
-		Vertex TL;
-		Vertex BR;
-		Vertex TR;
-	};
-
 	class RenderBatch2D
 	{
 	public:
@@ -81,4 +73,3 @@ namespace Plutus
 
 } // namespace Plutus
 #endif // !_BATHRENDERER2D_H
-

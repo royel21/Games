@@ -4,18 +4,19 @@
     "CellCountX": 54,
     "CellCountY": 37,
     "vp-color": [
-        1.0,
-        1.0,
-        1.0,
+        0.9826839566230774,
+        0.9656677842140198,
+        0.9656677842140198,
         1.0
     ],
     "cell-color": [
         0.0,
-        0.0,
-        0.0,
+        0.4825509190559387,
+        0.7528957724571228,
         0.0
     ],
     "recents": [
+        "C:\\vscode-workspace\\Games\\scene1.json",
         "C:\\vs-projects\\Games\\scene1.json"
     ]
 }

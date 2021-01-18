@@ -17,7 +17,9 @@ App::~App()
 void App::onInit()
 {
 }
-
+void App::onEvent(SDL_Event &event)
+{
+}
 void App::onExit()
 {
 }

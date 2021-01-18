@@ -209,6 +209,7 @@ namespace Plutus
 		}
 
 		mCurrentScreen->onEvent(event);
+		onEvent(event);
 	}
 
 	bool Engine::init()
